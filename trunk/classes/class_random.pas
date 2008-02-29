@@ -67,6 +67,7 @@ type TRandom = class (TObject)
                u32Seed3 : unsigned32;
 
                //Samen für Signed Generatoren
+               //(Werden nicht von jedem Generator benötigt)
                s32Seed1 : Signed32;
                s32Seed2 : Signed32;
                s32Seed3 : Signed32;
@@ -87,6 +88,7 @@ type TRandom = class (TObject)
                 function  GetBit                ():Bit;
                 function  GetByte               ():unsigned8;
                 function  GetWord               ():unsigned16;
+                function  GetQuadWord           ():unsigned64;
                 function  GetLongWord           ():unsigned32;
                 function  GetFloat              ():longfloat;
 
@@ -114,6 +116,7 @@ function TRandom.GetSeed():unsigned32;
 begin
      //Da nur Windows ein Tickcount hat benutzen wir hier die StdRandomfunktion
      //result:=GetTickCount();
+     randomize();
      result:=unsigned32(random($ffffffff));
 end;
 
@@ -459,6 +462,12 @@ function  TRandom.GetFloat              ():longfloat;
 begin
      //Die Generatoren (sollten) LongWord (longword) liefern
      result:=Self.Get(High(unsigned32)) / High(Unsigned32) ;
+end;
+
+function  TRandom.GetQuadWord           ():unsigned64;
+begin
+     //Die Generatoren (sollten) LongWord (longword) liefern
+     result:=(Self.Get(High(unsigned32)) shl 32)  or  Self.Get(High(unsigned32));
 end;
 
 function  TRandom.GetLongWord           ():unsigned32;
