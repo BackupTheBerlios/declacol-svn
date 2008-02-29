@@ -1,24 +1,3 @@
-{
- ***************************************************************************
- *                                                                         *
- *   This source is free software; you can redistribute it and/or modify   *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This code is distributed in the hope that it will be useful, but      *
- *   WITHOUT ANY WARRANTY; without even the implied warranty of            *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU     *
- *   General Public License for more details.                              *
- *                                                                         *
- *   A copy of the GNU General Public License is available on the World    *
- *   Wide Web at <http://www.gnu.org/copyleft/gpl.html>. You can also      *
- *   obtain it by writing to the Free Software Foundation,                 *
- *   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.        *
- *                                                                         *
- ***************************************************************************
-Author: Sven Lorenz / Borg@Sven-of-Nine.de
-}
 {$IFDEF FPC}
         //Einstellungen für den GPC
         {$mode objfpc}{$H+}
@@ -28,45 +7,91 @@ unit Unit_TypeDefs;
 ///
 /// Einige zusätzliche Typendefinitionen
 ///
+/// (c) 2005 Borg@Sven-of-Nine.de
+///
 ////////////////////////////////////////////////////////////////////////////////
 interface
+
+//Breiten der einzelnen Typen
+const
+  WIDTH_OF_UNSIGNED1  = 1;
+  WIDTH_OF_UNSIGNED8  = 8;
+  WIDTH_OF_UNSIGNED16 = 16;
+  WIDTH_OF_UNSIGNED32 = 32;
+  WIDTH_OF_UNSIGNED64 = 64;
+
+  WIDTH_OF_BIT        = WIDTH_OF_UNSIGNED1;
+  WIDTH_OF_BYTE       = WIDTH_OF_UNSIGNED8;
+  WIDTH_OF_WORD       = WIDTH_OF_UNSIGNED16;
+  WIDTH_OF_LONGWORD   = WIDTH_OF_UNSIGNED32;
+  WIDTH_OF_QUADWORD   = WIDTH_OF_UNSIGNED64;
+
+  //Masken für die einzelnen Type
+  MASK_UNSIGNED1     = $01;
+  MASK_UNSIGNED8     = $ff;
+  MASK_UNSIGNED16    = $ffff;
+  MASK_UNSIGNED32    = $ffffffff;
+  MASK_UNSIGNED64    = $ffffffffffffffff;
+
+  MASK_BIT           = MASK_UNSIGNED1;
+  MASK_BYTE          = MASK_UNSIGNED8;
+  MASK_WORD          = MASK_UNSIGNED16;
+  MASK_LONGWORD      = MASK_UNSIGNED32;
+  MASK_QUADWORD      = MASK_UNSIGNED64;
+
+//Sonderwerte
+  //Teiler für KByte
+  KA                 = 1024;
+  WIDTH_OF_KA        = 10;
 
 ////////////////////////////////////////////////////////////////////////////////
 //Basis Unsigned Typen
 //Ein Bit
 {$IFNDEF bit}
-type Bit =               0..1;
+{$IFNDEF unsigned1}
+type unsigned1 =         0..1;
 {$ENDIF}
 
-{$IFNDEF unsigned1}
-type unsigned1 =         Bit;
+
+type Bit =               unsigned1;
 {$ENDIF}
 
 //Ein Byte
-{$IFNDEF byte}
-type byte =              0..$ff;
+{$IFNDEF unsigned8}
+type unsigned8 =         0..$ff;
 {$ENDIF}
 
-{$IFNDEF unsigned8}
-type unsigned8 =         Byte;
+{$IFNDEF byte}
+type byte =              unsigned8;
 {$ENDIF}
+
 
 //Ein Word
-{$IFNDEF word}
-type word =              0..$ffff;
+{$IFNDEF unsigned16}
+type unsigned16 =        0..$ffff;
 {$ENDIF}
 
-{$IFNDEF unsigned16}
-type unsigned16 =        Word;
+{$IFNDEF word}
+type word =              unsigned16; 
 {$ENDIF}
+
 
 //Ein LangWord
-{$IFNDEF longword}
-type longword =          0..$ffffffff;
+{$IFNDEF unsigned32}
+type unsigned32 =        0..$ffffffff;
 {$ENDIF}
 
-{$IFNDEF unsigned32}
-type unsigned32 =        longword;
+{$IFNDEF longword}
+type longword =          unsigned32;
+{$ENDIF}
+
+
+{$IFNDEF unsigned64}
+type unsigned64 =        0..9223372036854775807;
+{$ENDIF}
+
+{$IFNDEF longword}
+type quadword =          unsigned64;
 {$ENDIF}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,9 +108,6 @@ type signed16 =          -32768..32767;
 type signed32 =          -2147483647..2147483647;
 {$ENDIF}
 
-{$IFNDEF unsigned64}
-type unsigned64 =        0..9223372036854775807;
-{$ENDIF}
 
 {$IFNDEF signed64}
 type signed64 =          Int64;
@@ -159,6 +181,10 @@ end;
 type thnd = unsigned32;
 {$ENDIF}
 
+{$IFNDEF thandle}
+type thandle = unsigned32;
+{$ENDIF}
+
 {$IFNDEF tfilehandle}
 type tfilehandle = unsigned32;
 {$ENDIF}
@@ -198,6 +224,17 @@ type TStringTable = array of array of longstring;
 type TVariantTable = array of array of Variant;
 {$ENDIF}
 
+
+////////////////////////////////////////////////////////////////////////////////
+/// Netzwerktypen
+{$IFNDEF tip}
+type TIP = record
+     A   : unsigned8;
+     B   : unsigned8;
+     C   : unsigned8;
+     D   : unsigned8;
+end;
+{$ENDIF}
 
 implementation
 
