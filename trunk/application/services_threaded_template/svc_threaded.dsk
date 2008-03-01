@@ -26,7 +26,7 @@ ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
-[E:\units\libraries\ProjectGroup1.bpg]
+[E:\units\application\services_threaded_template\ProjectGroup1.bpg]
 FormState=0
 FormOnTop=0
 
@@ -61,14 +61,14 @@ BottomPanelData=00000400010000000B0000004D65737361676556696577000000000000000000
 Module=C:\Programme\Borland\Delphi5\Projects\!system\services\service_slowdown\slowdown.dpr
 CursorX=18
 CursorY=5
-TopLine=1
+TopLine=4
 LeftCol=1
 
 [View1]
 Module=C:\Programme\Borland\Delphi5\Projects\!system\services\service_slowdown\thread_service.pas
 CursorX=1
 CursorY=23
-TopLine=4
+TopLine=1
 LeftCol=1
 
 [Watches]

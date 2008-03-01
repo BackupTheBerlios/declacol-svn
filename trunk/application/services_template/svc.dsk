@@ -11,28 +11,28 @@ File_8=SourceModule,'C:\Programme\Borland\Delphi5\Projects\vdai_splitter\Unit_VD
 File_9=SourceModule,'C:\Programme\Borland\Delphi5\Projects\vdai_splitter\Unit_VDAI_Filter.pas',0,1,1,1,1,0,0
 
 [Modules]
-Module0=C:\Programme\Borland\Delphi5\Projects\services\include_service.pas
-Module1=C:\Programme\Borland\Delphi5\Projects\services\svc.dpr
+Module0=E:\units\application\services_template\svc.dpr
+Module1=E:\units\application\services_template\include_service.pas
 Count=2
 EditWindowCount=1
 
-[C:\Programme\Borland\Delphi5\Projects\services\include_service.pas]
+[E:\units\application\services_template\svc.dpr]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
-[C:\Programme\Borland\Delphi5\Projects\services\svc.dpr]
+[E:\units\application\services_template\include_service.pas]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
-[C:\Programme\Borland\Delphi5\Bin\ProjectGroup1.bpg]
+[E:\units\libraries\ProjectGroup1.bpg]
 FormState=0
 FormOnTop=0
 
 [EditWindow0]
 ViewCount=2
-CurrentView=1
+CurrentView=0
 View0=0
 View1=1
 MessageView=MessageView@EditWindow0
@@ -54,16 +54,16 @@ BottomPanelClients=MessageView@EditWindow0
 BottomPanelData=00000400010000000B0000004D657373616765566965770000000000000000000000000000000000FFFFFFFF
 
 [View0]
-Module=C:\Programme\Borland\Delphi5\Projects\services\svc.dpr
-CursorX=5
-CursorY=60
-TopLine=1
+Module=E:\units\application\services_template\svc.dpr
+CursorX=58
+CursorY=13
+TopLine=25
 LeftCol=1
 
 [View1]
-Module=C:\Programme\Borland\Delphi5\Projects\services\include_service.pas
-CursorX=5
-CursorY=297
+Module=E:\units\application\services_template\include_service.pas
+CursorX=1
+CursorY=1
 TopLine=1
 LeftCol=1
 
