@@ -76,9 +76,9 @@ const
      FSDB_FAT_FILE_EXISTS    = $fffffffe;
 
      //Eigene Fehler auf Windows-Codes gemappt
-     FSDB_ERROR_NONE               = ERROR_NONE;                  //Kein Fehler
+     FSDB_ERROR_NONE               = NO_ERROR;                    //Kein Fehler
      FSDB_ERROR_NO_ARCHIVE         = ERROR_UNRECOGNIZED_MEDIA;    //Die gewünschte Datei ist kein FSArchiv
-     FSDB_ERROR_WRITEPROTECTED     = ERROR_WRITE_PROTECTED;       //Kann nicht schreiben
+     FSDB_ERROR_WRITEPROTECTED     = ERROR_WRITE_PROTECT;       //Kann nicht schreiben
      FSDB_ERROR_NO_ARCHIVE_MOUNTED = ERROR_NOT_READY;             //Es ist kein Archiv gemounted
      FSDB_ERROR_FILE_NOT_FOUND     = ERROR_FILE_NOT_FOUND;        //Die Datei wurde nicht gefunden
      FSDB_ERROR_NO_ACCESS          = ERROR_ACCESS_DENIED;         //Zugriff auf die Datei verweigert
@@ -544,7 +544,8 @@ begin
              Self.LoadFat;
              Self.GetLock();
         end;
-
+        
+     result:=TRUE;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1458,9 +1459,6 @@ begin
      if ( (Source.Seek(SourceOffset,soFromBeginning) = SourceOffset) AND
           (Target.Seek(TargetOffset,soFromBeginning) = TargetOffset)) then
           begin
-               u32Loop:=Source.Position;
-
-
                //Anzahl der vollen Buffer
                u32Loop:=SourceSize div Length(aBuffer);
                u32Mod :=SourceSize mod Length(aBuffer);
