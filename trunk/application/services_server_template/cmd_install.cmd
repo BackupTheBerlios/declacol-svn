@@ -1,0 +1,1 @@
+entropyserver.exe /install
