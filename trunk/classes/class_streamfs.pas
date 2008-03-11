@@ -35,10 +35,12 @@ Author: Sven Lorenz / Borg@Sven-of-Nine.de
 /// überarbeitet werden
 /// FileCheck nicht mit Export machen sondern direkt aus der Datenbank prüfen
 /// Prüfung auf freien Speicher bei Export
+/// Defragmentierung kann auch im DB-File selbst geschehen. Sollte überarbeitet
+/// werden.
 ////////////////////////////////////////////////////////////////////////////////
 
 interface
-uses unit_typedefs,windows,sysutils,classes,class_random,class_binder;
+uses unit_typedefs,windows,sysutils,classes,class_binder;
 
 const
      //Maximale länge der Dateinamen
@@ -102,22 +104,25 @@ type pFSEntry = ^TFSEntry;
      u64FileSize : unsigned64;          //Größe der Datei
      u64Offset   : unsigned64;          //Sprungweite zum nächsten Dateibeginn (gerechnet ab dem Ende des Headers)
      u32Method   : unsigned32;          //Speichermethode (gepackt / verschlüsselt / etc)
-     u32Attrib   : unsigned32;          //Dateiattribute
-     u32Hash     : unsigned32;          //Prüfsumme
-     bEnabled    : Boolean;             //Ist der Eintrag aktiviert
-     u32Check    : unsigned32;          //Prüfsumme der Headers
+     u32Attrib   : unsigned32;          //Dateiattribute (werden im StreamFS nicht benutzt und stehen frei zur Verfügung)
+     u32Hash     : unsigned32;          //Prüfsumme (http://de.wikipedia.org/wiki/Adler-32)
+     bEnabled    : Boolean;             //Ist der Eintrag aktiviert (Zum einfachen Verabeitung bei Dateilöschen)
+     u32Check    : unsigned32;          //Prüfsumme der Headers (Generisch)
 end;
 
 
 type
     //CallBack on Progress
     TCallback = procedure(Data : unsigned32; Text : Longstring) of Object;
+
+    //Die eigentliche Klasse
     TStreamFS = Class(TObject)
      private
             tStream   : TStream;
             sStream   : Longstring;
             u32Stream : unsigned32;
 
+            //Dateiliste (einziger begrenzender Faktor der Dateizahl)
             tFAT      : TList;
 
             //Simples locking
@@ -126,10 +131,11 @@ type
             //Aktuelle Speichermethode
             u32Method : unsigned32;
             sPassword : longstring;
+
             //Sollen auch Header verschlüsselt werden ?
             bCryptHead: boolean;
 
-            //Letzter Fehler
+            //Letzter aufgetretener Fehler
             u32Error  : unsigned32;
 
             //Zugriffsmodus
@@ -137,12 +143,14 @@ type
             bWritable : boolean;
             bMounted  : boolean;
 
-            //Interner Zufallsgenerator für Verschlüsselungen
-            PRNG      : TRandom;
-
             //Callbackzeiger
             fOnProgress : TCallback;
             fOnLocked   : TCallback;
+
+            //Buffer für Zufallswerte
+            Scrambler   : array[0..High(unsigned8)] of unsigned8;
+            ScramblerX  : unsigned8;
+            ScramblerY  : unsigned8;
 
             //Streamfunktionen
             function  openfilestream  (DBFile : longstring):boolean;
@@ -192,6 +200,10 @@ type
             //Verschlüsselungsinterface
             procedure cryptinit(method:unsigned32);
             procedure cryptdo(Method:unsigned32; pBuffer :pointer; Size : unsigned32);
+
+            //Zufallsgenerator  (nach http://de.wikipedia.org/wiki/Rc4)
+            procedure rndinit(Key:longstring);
+            function  rndbyte():unsigned8;
 
             //Die Verschlüsselungsprovider für XOR-PseudeOneTimePad
             procedure init_enc_xor();
@@ -1610,26 +1622,66 @@ begin
         end;
 end;
 
+
+////////////////////////////////////////////////////////////////////////////////
+//Zufallsgenerator  (nach http://de.wikipedia.org/wiki/Rc4)
+procedure TStreamFS.rndinit(Key:longstring);
+var
+   u8Index  : unsigned8;
+   u8swap   : unsigned8;
+   u32Size  : unsigned8;
+   u8Temp   : unsigned8;
+begin
+     u32Size:=Length(Key);
+
+     //Scrambler initialisieren
+     for u8Index:=0 to High(unsigned8) do
+         begin
+              Self.Scrambler[u8Index]:=u8Index;
+         end;
+
+     //Schlüssel einkneten
+     u8Swap:=0;
+     for u8Index:=0 to High(unsigned8) do
+         begin
+              u8Swap:=( (u8Swap + Self.Scrambler[u8Index] + Ord(Key[u8Index mod u32Size])) mod 256);
+
+              u8Temp:=Self.Scrambler[u8Index];
+              Self.Scrambler[u8Index]:=Self.Scrambler[u8Swap];
+              Self.Scrambler[u8Swap]:=u8Temp;
+         end;
+
+     //Startvektoren initialisieren
+     Self.ScramblerX:=0;
+     Self.ScramblerY:=0;
+end;
+
+function  TStreamFS.rndbyte():unsigned8;
+var
+   u8Temp : unsigned8;
+begin
+     Self.ScramblerX:=( Self.ScramblerX + 1 ) mod 256;
+     Self.ScramblerY:=( Self.ScramblerY + Ord(Self.Scrambler[Self.ScramblerX]) ) mod 256;
+
+     u8Temp:=Self.Scrambler[Self.ScramblerX];
+     Self.Scrambler[Self.ScramblerX]:=Self.Scrambler[Self.ScramblerY];
+     Self.Scrambler[Self.ScramblerX]:=u8Temp;
+
+     result:=Self.Scrambler[ (Self.Scrambler[Self.ScramblerX] + Self.Scrambler[Self.ScramblerY]) mod 256 ] 
+end;
+
 ////////////////////////////////////////////////////////////////////////////////
 //XOR verschlüsselung mit einem Bytestrom aus dem Zufallsgenerator
 //Dabei wird jedes Byte mit seinem vorherigen Verknüpft wodurch eine Manipulation
 //an einem Byte den kpl. restlichen Datenstrom zerstört.
 procedure   TStreamFS.init_enc_xor();
 begin
-     if (Self.PRNG = nil) then
-        begin
-             Self.PRNG:=TRandom.Create();
-        end;
-     Self.PRNG.Seed(Self.sPassword);
+     Self.rndinit(Self.sPassword);
 end;
 
 procedure   TStreamFS.init_dec_xor();
 begin
-     if (Self.PRNG = nil) then
-        begin
-             Self.PRNG:=TRandom.Create();
-        end;
-     Self.PRNG.Seed(Self.sPassword);
+     Self.rndinit(Self.sPassword);
 end;
 
 procedure   TStreamFS.enc_xor(var pBuffer : Pointer; var Size : unsigned32);
@@ -1649,7 +1701,7 @@ begin
                 u8Temp:=pByte^;
 
                 //Verschlüsseln
-                pByte^:=pByte^ xor Self.PRNG.GetByte();
+                pByte^:=pByte^ xor Self.rndbyte();
                 pByte^:=pByte^ xor u8Buff;
 
                 //Das Klartext-Byte für die nächste Runde merken
@@ -1674,7 +1726,7 @@ begin
      while (Size > 0) do
            begin
                 //Byte dekodieren
-                pByte^:=pByte^ xor Self.PRNG.GetByte();
+                pByte^:=pByte^ xor self.rndbyte();
                 pByte^:=pByte^ xor u8Buff;
 
                 //Das dekodierte Byte für die nächste Runde merken
