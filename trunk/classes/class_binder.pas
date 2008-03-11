@@ -41,12 +41,8 @@ type
 
 type tbinderstream = class (TFileStream)
      private
-            hExe         : THandle;
             u32ExeOffset : unsigned32;
             sExeName     : longstring;
-
-            u64Position  : unsigned64;
-            u64Size      : unsigned64;
 
             bReadOnly    : Boolean;
 
@@ -74,8 +70,6 @@ implementation
 
 
 constructor tbinderstream.create();
-var
-   hProcess : THandle;
 begin
      Self.u32ExeOffset:=Self.getexesize(hInstance);
      Self.sExeName:=Self.getexename();
@@ -99,7 +93,7 @@ end;
 //Getter und Setter um vor dem Benutzer die waren Werte zu verstecken
 function tbinderstream.GetStreamPosition():unsigned64;
 begin
-     result:=inherited Position - Self.u32ExeOffset;
+     result:=unsigned32(inherited Position) - Self.u32ExeOffset;
 end;
 
 procedure tbinderstream.SetStreamPosition(Value:unsigned64);
@@ -109,7 +103,7 @@ end;
 
 function tbinderstream.GetStreamSize():unsigned64;
 begin
-     result:=inherited Size - Self.u32ExeOffset;
+     result:=unsigned32(inherited Size) - Self.u32ExeOffset;
 end;
 
 procedure tbinderstream.SetStreamSize(Value:unsigned64);
@@ -120,7 +114,7 @@ end;
 function TBinderStream.Seek(Offset: Longint; Origin: Word): Longint;
 begin
      result:=inherited Seek(Offset + Self.u32ExeOffset,Origin);
-     result:=result - u32ExeOffset;
+     result:=unsigned32(unsigned32(result) - u32ExeOffset);
 end;
 
 
