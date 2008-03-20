@@ -93,6 +93,7 @@ const
      FSDB_ERROR_READ               = ERROR_READ_FAULT;            //Es konnten nicht alle Daten gelesen werden
      FSDB_ERROR_FILEHASH           = ERROR_CRC;                   //Die Prüfsumme einer Datei ist falsch
      FSDB_ERROR_BUSY               = ERROR_BUSY_DRIVE;            //Es wird schon auf das System zugegriffen
+     FSDB_ERROR_LOCKED             = 1234;                        //System ist gelockt (Wiederholung erfolgt automatisch)      
 
 //Aufbau eines FAT-Eintrages
 type pFSEntry = ^TFSEntry;
@@ -213,6 +214,7 @@ type
 
             //Fortschritt ausgeben
             procedure DoProgress(Data:unsigned64; MaxData:unsigned64; Text : Longstring);
+            procedure DoLock(Text : Longstring);
      public
             constructor create();
             destructor  free();
@@ -1425,10 +1427,7 @@ procedure   TStreamFS.getlock();
 begin
      while (Self.bLocked) do
            begin
-                if (Assigned(Self.fOnLocked)) then
-                   begin
-                        Self.fOnLocked(0,'locked for 100ms');
-                   end;
+                Self.DoLock('locked for 100ms');
                 sleep(100);
            end;
      Self.bLocked:=TRUE;
@@ -1440,7 +1439,7 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
-//Eine Temporäre Datei erzeugen (löscht sich nach dem Schließen von selbst)
+//Einen Temporäre Dateiname erzeugen
 function TStreamFS.createtempfilename():Longstring;
 var
    aTemp : array[0..MAX_PATH] of Char;
@@ -1751,6 +1750,17 @@ begin
                 begin
                      Self.fOnProgress( (Data * 100) div MaxData,Text);
                 end;
+        end;
+end;
+
+
+////////////////////////////////////////////////////////////////////////////////
+//Lock-Zustand melden
+procedure TStreamFS.DoLock(Text:longstring);
+begin
+     if (Assigned(Self.fOnLocked)) then
+        begin
+            Self.fOnLocked(FSDB_ERROR_LOCKED,Text);
         end;
 end;
 
