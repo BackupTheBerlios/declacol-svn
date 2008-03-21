@@ -338,7 +338,7 @@ begin
      FillChar(BrowseInfo, sizeof(TBrowseInfo), #0);
      with BrowseInfo do
          begin
-          hwndOwner := null;
+          hwndOwner := 0;
           pszDisplayName := @DisplayName;
           lpszTitle := PChar(Title);
           ulFlags := BIF_RETURNONLYFSDIRS;
@@ -352,10 +352,10 @@ begin
      end;
 
      
-     Result:=ExcludeTrailingBackSlash(Result);
-     Result:=ExcludeTrailingBackSlash(Result);
+     Result:=ExcludeTrailingPathDelimiter(Result);
+     Result:=ExcludeTrailingPathDelimiter(Result);
 {$ENDIF}
-     Result:=IncludeTrailingBackSlash(Result);
+     Result:=IncludeTrailingPathDelimiter(Result);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -390,7 +390,7 @@ begin
                 //Verzeichnis ? dann Scannen
                 if ((SRF.Attr and faDirectory) = faDirectory) then
                    begin
-                        s:=IncludeTrailingBackSlash(Startpath+SRF.Name);
+                        s:=IncludeTrailingPathDelimiter(Startpath+SRF.Name);
                         DelTree(s);
                         Result:=Result and RemoveDirectory(PChar(s));
                    end
@@ -464,7 +464,7 @@ begin
      //Vorbereitungen
      Result:=TStringlist.Create;
      Result.Clear;
-     Startpath:=IncludeTrailingBackslash(Startpath);
+     Startpath:=IncludeTrailingPathDelimiter(Startpath);
 
      //Erstmal alle Dateien holen
      OK:=FindFirst(Startpath+Filter,faANYFILE,SRF);
@@ -501,7 +501,7 @@ begin
                                    begin
                                         if ((SRF.Attr and faDirectory) = faDirectory) then
                                            begin
-                                                s:=IncludeTrailingBackslash(Startpath+SRF.Name);
+                                                s:=IncludeTrailingPathDelimiter(Startpath+SRF.Name);
                                                 Result.AddStrings(FileScan(s,Filter,Hide,SubDir-1));
                                            end;
                                    end;
@@ -525,7 +525,7 @@ begin
      //Vorbereitungen
      Result:=TStringlist.Create;
      Result.Clear;
-     Startpath:=IncludeTrailingbackslash(Startpath);
+     Startpath:=IncludeTrailingPathDelimiter(Startpath);
 
      //Erstmal alle Verzeichnisse holen
      OK:=FindFirst(Startpath+Filter,faANYFILE,SRF);
@@ -541,7 +541,7 @@ begin
                                    end
                                 else
                                    begin
-                                        s:=IncludeTrailingbackslash(Startpath+SRF.Name);
+                                        s:=IncludeTrailingPathDelimiter(Startpath+SRF.Name);
                                         Result.Add(s);
                                    end;
                            end;
@@ -562,7 +562,7 @@ begin
                                    begin
                                         if ((SRF.Attr and faDirectory) = faDirectory) then
                                            begin
-                                                s:=IncludeTrailingbackslash(Startpath+SRF.Name);
+                                                s:=IncludeTrailingPathDelimiter(Startpath+SRF.Name);
                                                 Result.AddStrings(DirScan(s,Filter,Hide,SubDir-1));
                                            end;
                                    end;
@@ -622,7 +622,7 @@ begin
                 //Verzeichnis ? dann Scannen
                 if ((SRF.Attr and faDirectory) = faDirectory) then
                    begin
-                        s:=IncludeTrailingBackslash(Startpath+SRF.Name);
+                        s:=IncludeTrailingPathDelimiter(Startpath+SRF.Name);
                         DelTree(s);
                         Result:=Result and RemoveDirectory(PChar(s));
                    end
