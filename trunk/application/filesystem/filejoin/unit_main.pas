@@ -38,6 +38,11 @@ type
     procedure btSplitClick(Sender: TObject);
     procedure btBrowseSplitSourceClick(Sender: TObject);
     procedure btBrowseSplitTargetClick(Sender: TObject);
+    procedure lbFilesMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure lbFilesDragOver(Sender, Source: TObject; X, Y: Integer;
+      State: TDragState; var Accept: Boolean);
+    procedure lbFilesDragDrop(Sender, Source: TObject; X, Y: Integer);
   private
     { Private-Deklarationen }
   public
@@ -46,11 +51,13 @@ type
 
 var
   Form1: TForm1;
+  DragStart : TPoint;
 
 implementation
 
 {$R *.dfm}
 
+//Join Quelle suchen
 procedure TForm1.btBrowseJoinSourceClick(Sender: TObject);
 var
   slFiles : TStringList;
@@ -80,6 +87,7 @@ begin
     end;
 end;
 
+//Splitquelle suchen
 procedure TForm1.btBrowseSplitSourceClick(Sender: TObject);
 begin
   with (dgOpen) do
@@ -93,7 +101,7 @@ begin
 //
 end;
 
-
+//Join Ziel suchen
 procedure TForm1.btBrowseJoinTargetClick(Sender: TObject);
 begin
   with (dgSave) do
@@ -105,6 +113,7 @@ begin
     end;
 end;
 
+//Splitziel suchen
 procedure TForm1.btBrowseSplitTargetClick(Sender: TObject);
 begin
   with (dgSave) do
@@ -116,7 +125,7 @@ begin
     end;
 end;
 
-
+//Sicherheitsabfrage der Groﬂenbox
 procedure TForm1.cbSizeChange(Sender: TObject);
 begin
   if (StrToFloatDef(cbSize.Text,-1)<0) then
@@ -126,6 +135,7 @@ begin
     end;
 end;
 
+//Dateien joinen
 procedure TForm1.btJoinClick(Sender: TObject);
 var
   u32Index : unsigned32;
@@ -163,6 +173,7 @@ begin
   ShowMessage('done');
 end;
 
+//Datei splitten
 procedure TForm1.btSplitClick(Sender: TObject);
 var
   rTarget  : TFileStream;
@@ -209,4 +220,36 @@ begin
   end;
   ShowMessage('done');
 end;
+
+//Drag and Drop in der LIstbox verwalten
+procedure TForm1.lbFilesMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+   DragStart.X := X;
+   DragStart.Y := Y;
+end;
+
+procedure TForm1.lbFilesDragOver(Sender, Source: TObject; X, Y: Integer;
+  State: TDragState; var Accept: Boolean);
+begin
+  Accept := Source = lbFiles;
+end;
+
+procedure TForm1.lbFilesDragDrop(Sender, Source: TObject; X, Y: Integer);
+var
+   DropPosition : integer;
+   StartPosition: Integer;
+   DropPoint    : TPoint;
+begin
+   DropPoint.X := X;
+   DropPoint.Y := Y;
+   with Source as TCheckListBox do
+   begin
+     StartPosition := ItemAtPos(DragStart,True) ;
+     DropPosition  := ItemAtPos(DropPoint,True) ;
+
+     Items.Move(StartPosition, DropPosition) ;
+   end;
+end;
+
 end.

@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 353
     Height = 273
-    ActivePage = TabSheet2
+    ActivePage = TabSheet1
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Join'
@@ -34,8 +34,12 @@ object Form1: TForm1
           Top = 48
           Width = 329
           Height = 97
+          DragMode = dmAutomatic
           ItemHeight = 13
           TabOrder = 0
+          OnDragDrop = lbFilesDragDrop
+          OnDragOver = lbFilesDragOver
+          OnMouseDown = lbFilesMouseDown
         end
         object edJoinSource: TEdit
           Left = 8
