@@ -62,7 +62,7 @@ begin
      Self.Server:=TThreadedServer.Create();
      Self.Server.Port:=23;
      Self.Server.BufferSize:=4;
-     Self.Server.TimeOut:=5000;
+     Self.Server.TimeOut:=60000;
      Self.Server.Name:='entropyserver 1.0';
      Self.Server.OnData:=Self.ClientDispatcher;
 
