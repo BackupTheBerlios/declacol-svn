@@ -288,7 +288,7 @@ begin
      //Default ist immer verschlüsseln
      Self.sPassWord:='hasnabopf';
      Self.crypt:=CRYPT_XOR;
-     Self.cryptheader:=TRUE;
+     Self.cryptheader:=FALSE;
 
      //Default ist Dateistream 
      Self.StreamType:=STREAM_FILE;
