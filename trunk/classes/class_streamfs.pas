@@ -423,8 +423,7 @@ begin
 
              //Gemounted ?
              Self.bMounted:=Self.tStream <> nil;
-             result:=bMounted;
-
+             result:=Self.bMounted;
 
              //FAT laden
              if (bMounted) AND (bReadable) then
@@ -462,7 +461,7 @@ begin
              Self.bReadable:=TRUE;
              Self.bWritable:=TRUE;
              Self.bMounted :=TRUE;
-             result:=bMounted;
+             result:=Self.bMounted;
 
              //FAT laden
              if (bMounted) AND (bReadable) then
@@ -704,7 +703,6 @@ begin
                 begin
                      Self.SetError(FSDB_ERROR_READ);
                 end;
-
              Self.ReleaseLock();
         end
      else
@@ -712,6 +710,7 @@ begin
              Self.SetError(FSDB_ERROR_FILE_NOT_FOUND);
         end;
 
+     //Memorystream zurückspulen
      Result.Seek(0,soFromBeginning);
 end;
 
@@ -760,9 +759,9 @@ begin
         begin
              while (u32Index < unsigned32(Self.tFAT.Count)) do
                    begin
-                        if (pFSEntry(Self.tFAT[u32Index])^.benabled) then
+                        if (pFSEntry(Self.tFAT[u32Index])^.bEnabled) then
                            begin
-                                Result.Add( string( pFSEntry(Self.tFAT[u32Index])^.afilename ) );
+                                Result.Add( string( pFSEntry(Self.tFAT[u32Index])^.aFilename ) );
                            end;
                         inc(u32Index);
                    end;
@@ -771,7 +770,7 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
-//Infostruckt über eine Datei ziehen
+//Infostrukt für eine Datei ziehen
 function  TStreamFS.info(fsname:longstring):TFSEntry;
 var
    u32Index : unsigned32;
@@ -803,11 +802,18 @@ var
 begin
      result :=FALSE;
 
-     if (fileexists(filename) AND (Self.bWritable) ) then
+     if (fileexists(filename)) then
         begin
-             FileStr:=TFileStream.Create(filename,fmOPENRead OR fmShareDenyNone);
-             result:=Self.save(fsname,FileStr);
-             FileStr.Free();
+             if (Self.bWritable) then
+                begin
+                     FileStr:=TFileStream.Create(filename,fmOpenRead OR fmShareDenyNone);
+                     result:=Self.save(fsname,FileStr);
+                     FileStr.Free();
+                end
+             else
+                begin
+                     Self.SetError(FSDB_ERROR_WRITEPROTECTED);
+                end;
         end;
 end;
 
@@ -850,7 +856,11 @@ begin
                 FileStr.Free();
              except
              end;
-        end;
+        end
+     else
+        begin
+             Self.SetError(FSDB_ERROR_FILE_NOT_FOUND);
+        end; 
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -894,7 +904,6 @@ begin
                 begin
                      Self.SetError(FSDB_ERROR_NONE);
                 end;
-
 
              ReleaseLock();
         end
