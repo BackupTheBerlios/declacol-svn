@@ -19,6 +19,14 @@
  ***************************************************************************
 Author: Sven Lorenz / Borg@Sven-of-Nine.de
 }
+////////////////////////////////////////////////////////////////////////////////
+///
+/// Klasse um Streams zu komprimieren.
+/// In dieser Unit wird das RLE-Verfahren umgesetzt. Ist zwar schön schnell
+/// hat aber leider keinen hohen Kompressionsfaktor
+///
+////////////////////////////////////////////////////////////////////////////////
+
 unit class_tinyrle;
 
 interface
@@ -76,18 +84,12 @@ begin
                 Temp3.Position:=0;
                 Temp3.Size:=0;
 
-                if (size=4) then
-                   begin
-                        result:=TRUE;
-                   end;
-
                 Self.Compress(Temp1,Temp2);
                 Self.UnCompress(Temp2,Temp3);
 
                 //Und nun Stream 1 und Stream 2 vergleichen
                 Temp1.Position:=0;
                 Temp3.Position:=0;
-
 
                 while (Temp1.position < Temp1.Size) do
                       begin
@@ -119,6 +121,7 @@ end;
 //
 // aus aaabbcdegghhhhij wird aa#02bb#01cdefgg#01hh#03ij
 //
+////////////////////////////////////////////////////////////////////////////////
 
 procedure TTinyRLE.compress(input,output : TStream);
 var
