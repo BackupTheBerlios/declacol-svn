@@ -108,7 +108,7 @@ function String_Implode(slInput:TStringList;sLimiter:Longstring):Longstring;
 function String_ReplaceUmlaute(sInput:Longstring):Longstring;
 //Bestimmt den Levenshtein-Abstand zwischen zwei Strings
 //und gibt deren Übereinstimmung in Prozent zurück
-function String_LevenShtein(sInput1,sInput2:Longstring):Unsigned32;
+function String_LevenShtein(Input1 : longstring; Input2:Longstring):Unsigned32;
 
 
 //Dateifunktionen
@@ -662,142 +662,88 @@ end;
 
 //Zwei Strings vergleichen und in Prozent deren Übereinstimmung
 //zurückgeben
-function String_LevenShtein(sInput1,sInput2:Longstring):Unsigned32;
+function String_LevenShtein( Input1, Input2:Longstring):Unsigned32;
 var
-   aMatrix  : array of array of unsigned32;
-   u32Row   : unsigned32;
-   u32Col   : unsigned32;
-   u32X     : unsigned32;
-   u32Y     : unsigned32;
-   u32Input1: unsigned32;
-   u32Input2: unsigned32;
-   u32Cost  : unsigned32;
-
-//Liefert den kleinsten der Drei Werte zurück
-function Minimum(u32A,u32B,u32C:unsigned32):unsigned32;
+  aDiff     : array of unsigned32;
+  u32len1   : unsigned32;
+  u32len2   : unsigned32;
+  u32index1 : unsigned32;
+  u32index2 : unsigned32;
+  u32last   : unsigned32;
+  u32new    : unsigned32;
 begin
-     if (u32A<u32B) then
-        //A < B
+  //Zur Beschleunigung Längen nur einmal holen und puffern
+  u32len1 := unsigned32(Length(Input1));
+  u32len2 := unsigned32(Length(Input2));
+
+  //Triviale Fälle abfangen
+  if ( (u32len1 = 0) AND (u32len2 = 0)) then
+    begin
+      //Beide Strings sind leer
+      result := 0
+    end
+  else
+    begin
+      if ((u32len1 = 0) OR (u32len2 = 0)) then
         begin
-             //A < C
-             if (u32A<u32C) then
-                begin
-                     // A < B < C
-                     result:=u32A;
-                end
-             else
-                begin
-                     // C < A < B
-                     result:=u32C;
-                end;
+          //Ein String ist leer
+          result := 100
         end
-     else
-        //B < A
+      else
         begin
-             //B < C
-             if (u32B>u32C) then
+          //Differenzarray mit den Indizees initialisieren
+          SetLength(aDiff, u32len2 + 1);
+
+          for u32index2 := 0 to u32len2 do
+            begin
+              aDiff[u32index2] := signed32(u32Index2);
+            end;
+
+          //Nun vergleichen wir jedes Zeichen auf Veränderungen
+          for u32index1 := 1 to u32len1 do
+            begin
+              //Letzten Index merken
+              u32last := aDiff[0];
+
+              //Aktuellen neuen Index schreiben
+              aDiff[0] := u32Index1;
+
+              //Nun suchen wir nach einer Differenz
+              for u32index2 := 1 to u32len2 do
                 begin
-                     result:=u32C;
-                end
-             else
-                begin
-                     result:=u32B;
+                  //Die neue Wertigkeit ist die alte plus 1 wenn die Zeichen
+                  //an der aktuellen Stelle unterschiedlich sind
+                  u32new := u32last + unsigned32( Ord(Input1[u32index1] <> Input2[u32index2]) );
+
+                  if ( (aDiff[u32index2] + 1) < u32new) then
+                    begin
+                      u32new := aDiff[u32index2] + 1;
+                    end;
+
+                  if ( (aDiff[u32Index2 - 1] + 1) < u32new) then
+                    begin
+                      u32new := aDiff[u32index2 - 1] + 1;
+                    end;
+
+                  //Für die nächste Runde übernehmen
+                  u32last := aDiff[u32index2];
+
+                  //Neue Differenz speichern
+                  aDiff[u32index2] := u32new;
                 end;
-        end;
-
+            end;
+        //Der letzte Wert enthält nun den Abstand
+        if (u32len2 > u32len1) then
+          begin
+            Result := aDiff[u32Len2] * 100 div u32len2;
+          end
+        else
+          begin
+            Result := aDiff[u32Len2] * 100 div u32len1;
+          end;
+    end;
+  end;
 end;
-
-
-begin
-     //Fehler annehmen
-     result := 0;
-
-     //Fehler abfangen
-     if (string_length(sInput1) = 0) or
-        (string_length(sInput2) = 0) then
-        begin
-             exit;
-        end;
-
-     //Umlaute ersetzen
-     sInput1:=String_ReplaceUmlaute(sInput1);
-     sInput2:=String_ReplaceUmlaute(sInput2);
-
-     //Alles auf ALPHANUM
-     sInput1:=String_Filter(sInput1,sftALPHANUM);
-     sInput2:=String_Filter(sInput2,sftALPHANUM);
-
-     //Und noch trimmen
-     sInput1:=Trim(sInput1);
-     sInput2:=Trim(sInput2);
-
-     //Längen holen und merken
-     u32X:=String_Length(sInput1);
-     u32Y:=String_Length(sInput2);
-
-
-     //Berechnung der LevenShtein-Distanz
-     ////////////////////////////////////
-
-     //Arrays initialisieren
-     SetLength(aMatrix,u32X+1);
-     for u32Col:=0 to u32X do
-         begin
-              SetLength(aMatrix[u32Col],u32Y+1);
-         end;
-
-     //Oberste Zeile mit Wertigkeit füllen
-     for u32Col:=0 to u32X do
-         begin
-              aMatrix[u32Col][0]:=u32Col;
-         end;
-
-     //Linke Spalte mit Wertigkeit füllen
-     for u32Row:=0 to u32Y do
-         begin
-              aMatrix[0][u32Row]:=u32Row;
-         end;
-
-     //Nun Vergleichen wir Zeichen für Zeichen
-     //und speichern den "Änderungsaufwand" in der Matrix
-     for u32Input1:=1 to u32X do
-         begin
-              for u32Input2:=1 to u32Y do
-                  begin
-                       //Zeichen gleich ?
-                       if (sInput1[u32Input1]=sInput2[u32Input2]) then
-                          begin
-                               //Ja, dann kein Aufwand
-                               u32Cost:=0;
-                          end
-                       else
-                          begin
-                               //Aufwand
-                               u32Cost:=1;
-                          end;
-
-                       //Und nun den Aufwand merken
-                       aMatrix[u32Input1,u32Input2]:=Minimum ( aMatrix[u32Input1-1,u32Input2  ] + 1,       //Einfügen
-                                                               aMatrix[u32Input1  ,u32Input2-1] + 1,       //Entfernen
-                                                               aMatrix[u32Input1-1,u32Input2-1] + u32Cost  //Ersetzen
-                                                             );
-                  end;
-         end;
-     //Ergebnis holen
-     result:=aMatrix[u32X,u32Y];
-
-     //Und auf Prozent normieren
-     if (u32X>u32Y) then
-        begin
-             result:=100 - round(result div u32X * 100);
-        end
-     else
-        begin
-             result:=100 - round(result div u32Y * 100);
-        end;
-
-end;
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Filterfunktionen
@@ -949,6 +895,7 @@ begin
         end;
 end;
 
+//Die Levenshtein-Distanz zweier Strings bestimmen
 
 end.
 
