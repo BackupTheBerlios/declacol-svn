@@ -1,10 +1,44 @@
+{
+ ***************************************************************************
+ *                                                                         *
+ *   This source is free software; you can redistribute it and/or modify   *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This code is distributed in the hope that it will be useful, but      *
+ *   WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU     *
+ *   General Public License for more details.                              *
+ *                                                                         *
+ *   A copy of the GNU General Public License is available on the World    *
+ *   Wide Web at <http://www.gnu.org/copyleft/gpl.html>. You can also      *
+ *   obtain it by writing to the Free Software Foundation,                 *
+ *   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.        *
+ *                                                                         *
+ ***************************************************************************
+Author: Sven Lorenz / Borg@Sven-of-Nine.de
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// Tool zum direkten lesen und schreiben von Devices (USB-Stick, HDD, CF,SD)
+///
+////////////////////////////////////////////////////////////////////////////////
+
 unit DDMain;
 
 interface
 
 uses
-  Unit_typedefs,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs,class_diskio, StdCtrls,Spin, Grids, DBGrids, ComCtrls, ExtCtrls,class_checksum,class_random,
+  unit_compiler,
+//Delphi 7 Kompatibilität
+{$IfDef EXPLICIT_VARIANT}
+  Variants,
+{$EndIf}
+
+  Unit_typedefs,Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
+  Dialogs,class_diskio, StdCtrls,Spin, Grids, ComCtrls, ExtCtrls,class_checksum,class_random,
   unit_hddhelper, Menus;
 
 type
@@ -36,7 +70,7 @@ type
     tsWriter: TTabSheet;
     pnWrite: TPanel;
     dgLoad: TOpenDialog;
-    Label1: TLabel;
+    lbDumpfile: TLabel;
     edTargetFile: TEdit;
     btBrowseTarget: TButton;
     dgSave: TSaveDialog;
@@ -76,14 +110,14 @@ type
     seCHSHeads: TSpinEdit;
     seCHSSectors: TSpinEdit;
     edCHSSize: TEdit;
-    Label2: TLabel;
+    lbCHSSector: TLabel;
     edCHSSectorSize: TEdit;
     lbCHSStatusPre: TLabel;
     lbCHSStatus: TLabel;
     btCHSReset: TButton;
     tsDummyFiles: TTabSheet;
-    Panel1: TPanel;
-    Label3: TLabel;
+    pnDummy: TPanel;
+    lbCreateDummy: TLabel;
     lbDummySizePre: TLabel;
     pbDummy: TProgressBar;
     edDummyFile: TEdit;
@@ -94,7 +128,27 @@ type
     tiRememberRefresh: TTimer;
     btBreak: TButton;
     pmDevices: TPopupMenu;
-    Refresh1: TMenuItem;
+    miRefresh: TMenuItem;
+    tsWipe: TTabSheet;
+    pnWiper: TPanel;
+    lbWiper: TLabel;
+    pbWipe: TProgressBar;
+    btWipeDevice: TButton;
+    rbWipe00: TRadioButton;
+    rbWipeFF: TRadioButton;
+    rbWipeRandom: TRadioButton;
+    lbWipeLog: TListBox;
+    lbWipeSpeedPre: TLabel;
+    lbWipeSpeed: TLabel;
+    tsCRC: TTabSheet;
+    pnCRC: TPanel;
+    lbCRC: TLabel;
+    lbCRCSpeedPre: TLabel;
+    lbCRCSpeed: TLabel;
+    pbCRC: TProgressBar;
+    btCRC: TButton;
+    lbCRCLog: TListBox;
+    lbCRCLogpre: TListBox;
     procedure cbDrivesClick(Sender: TObject);
     procedure cbWriteprotectedClick(Sender: TObject);
     procedure cbRealSizeClick(Sender: TObject);
@@ -121,7 +175,9 @@ type
     procedure SettingChange(var Message: TMESSAGE); message WM_SETTINGCHANGE;
     procedure tiRememberRefreshTimer(Sender: TObject);
     procedure btBreakClick(Sender: TObject);
-    procedure Refresh1Click(Sender: TObject);
+    procedure miRefreshClick(Sender: TObject);
+    procedure btWipeDeviceClick(Sender: TObject);
+    procedure btCRCClick(Sender: TObject);
 
   private
     { Private-Deklarationen }
@@ -137,6 +193,10 @@ var
 implementation
 
 {$R *.dfm}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Hilfsfunktionen
+////////////////////////////////////////////////////////////////////////////////
 
 //Userzugriff ein oder ausschalten
 procedure TfmMain.DisableUser();
@@ -195,7 +255,7 @@ begin
       if (Disk.valid=TRUE) then
         begin
           //Zu jedem gefundenen Objekt die Klasse ablegen
-          cbDrives.AddItem('Device',Disk);
+          cbDrives.Items.AddObject('Device',Disk);
         end
       else
         begin
@@ -297,6 +357,9 @@ end;
 //Beim Start nach Devices Suchen
 procedure TfmMain.FormActivate(Sender: TObject);
 begin
+  //Zufall zur Sichreheit initialisieren   
+  randomize();
+
   if (bLoaded=FALSE) then
     begin
       Self.ScanDevices();
@@ -306,6 +369,9 @@ begin
 end;
 
 
+////////////////////////////////////////////////////////////////////////////////
+/// Funktionen des Sektorviewers
+////////////////////////////////////////////////////////////////////////////////
 procedure TfmMain.tsSectorViewerEnter(Sender: TObject);
 begin
     //Sectoransicht neu laden
@@ -322,42 +388,49 @@ var
   Row    : unsigned32;
   sRow   : String;
 begin
+  DisableUser();
   if (cbDrives.ItemIndex>=0) then
     begin
       with TDiskIO(cbDrives.Items.Objects[cbDrives.ItemIndex]) do
         begin
-          DisableUser();
           SetLength(Buffer,SectorSize);
-          Read(seSector.Value,Addr(Buffer[0]),1,Dummy);
-          //Grid an die Sektoren anpassen
-          sgHex.RowCount:=signed32(SectorSize) div sgHex.ColCount;
 
-          //Und den ganzen Sektor im Hexviewer ausgeben
-          Row:=0;
-          Col:=0;
-          sRow:=' ';
-          for Index:=0 to SectorSize - 1 do
-             begin
-               //Die Zelle
-               sgHex.Cells[Col,Row]:=IntToHex(Buffer[Index],2);
-               //Der Text
-               sRow:=sRow+Chr(Buffer[Index]);
+          //Nur einen Sektor lesen
+          Read(unsigned64(seSector.Value),Addr(Buffer[0]),1,Dummy);
 
-               inc (Col);
-               if (Col >= unsigned32(sgHex.ColCount - 1) ) then
-                 begin
-                   //Text darstellen
-                   sgHex.Cells[Col,Row]:=sRow;
-                   sRow:=' ';
-                   Col:=0;
-                   Inc(Row);
-                 end;
+         //Grid an die Sektoren anpassen
+         sgHex.RowCount:=signed32(SectorSize) div sgHex.ColCount;
+
+         //Und den ganzen Sektor im Hexviewer ausgeben
+         Row:=0;
+         Col:=0;
+         sRow:=' ';
+         for Index:=0 to SectorSize - 1 do
+            begin
+              //Die Zelle
+              sgHex.Cells[Col,Row]:=IntToHex(Buffer[Index],2);
+              //Der Text
+              sRow:=sRow+Chr(Buffer[Index]);
+              inc (Col);
+
+              //Am Ende der Zeile den Text einfügen
+              if (Col >= unsigned32(sgHex.ColCount - 1) ) then
+                begin
+                  //Text darstellen
+                  sgHex.Cells[Col,Row]:=sRow;
+                  sRow:=' ';
+                  Col:=0;
+                  Inc(Row);
+                end;
              end;
-          EnableUser();
-        end;
-    end;
+         end;
+     end;
+  EnableUser();
 end;
 
+////////////////////////////////////////////////////////////////////////////////
+/// Funktionen des Readers
+////////////////////////////////////////////////////////////////////////////////
 procedure TfmMain.btBrowseTargetClick(Sender: TObject);
 begin
   with (dgSave) do
@@ -369,26 +442,10 @@ begin
     end;
 end;
 
-procedure TfmMain.btBrowseSourceClick(Sender: TObject);
+procedure TfmMain.cbReadBurstModeClick(Sender: TObject);
 begin
-  with (dgLoad) do
-    begin
-      if (Execute) then
-        begin
-          edSourceFile.Text:=Filename;
-        end;
-    end;
-end;
-
-procedure TfmMain.btBrowseDummyClick(Sender: TObject);
-begin
-  with (dgSave) do
-    begin
-      if (Execute) then
-        begin
-          edDummyFile.Text:=Filename;
-        end;
-    end;
+  seReadBurstMode.Enabled:=cbReadBurstMode.Checked;
+  lbReadBurstMode.Enabled:=cbReadBurstMode.Checked;
 end;
 
 procedure TfmMain.btDumpClick(Sender: TObject);
@@ -399,16 +456,18 @@ var
   u32Burst : unsigned32;
   u64Sector: unsigned32;
   MD5      : TMD5;
+  sMD5     : longstring;
 begin
   DisableUser();
   btBreak.Show();
   lbReadLog.Clear();
   if (cbDrives.ItemIndex>=0) then
     begin
-      lbReadLog.Items.Add(Format('reading device%d',[cbDrives.ItemIndex]));
 
       with TDiskIO(cbDrives.Items.Objects[cbDrives.ItemIndex]) do
         begin
+          lbReadLog.Items.Add(Format('reading device%d',[Devicenumber]));
+
           //BurstMode
           if (cbReadBurstMode.Checked) then
             begin
@@ -466,9 +525,14 @@ begin
                   Application.ProcessMessages();
                 end;
 
+              sMD5:=MD5.Finalize().sChecksum;
+
               lbReadLog.Items.Add(Format('%d sectors read ',[u64Sector]));
-              lbReadLog.Items.Add(Format('MD5 : %s ',[MD5.Finalize().sChecksum]));
+              lbReadLog.Items.Add(Format('MD5 : %s ',[sMD5]));
               lbReadLog.Items.Add('done');
+
+              //Auf die CRC-Seite spiegeln um die Daten vorzuhalten
+              lbCRCLogPre.Items.Add(Format('Read File : %s => MD5 : %s ',[edTargetFile.Text,sMD5]));
 
               MD5.Free();
               CloseHandle(hFile);
@@ -488,6 +552,25 @@ begin
   EnableUser();
 end;
 
+////////////////////////////////////////////////////////////////////////////////
+/// Funktionen des Writers
+////////////////////////////////////////////////////////////////////////////////
+procedure TfmMain.btBrowseSourceClick(Sender: TObject);
+begin
+  with (dgLoad) do
+    begin
+      if (Execute) then
+        begin
+          edSourceFile.Text:=Filename;
+        end;
+    end;
+end;
+
+procedure TfmMain.cbWriteBurstModeClick(Sender: TObject);
+begin
+  seWriteBurstMode.Enabled:=cbWriteBurstMode.Checked;
+  lbWriteBurstMode.Enabled:=cbWriteBurstMode.Checked;
+end;
 
 procedure TfmMain.btWriteImageClick(Sender: TObject);
 var
@@ -497,6 +580,7 @@ var
   u32Burst : unsigned32;
   u64Sector: unsigned32;
   MD5      : TMD5;
+  sMD5     : longstring;
 begin
   DisableUser();
   btBreak.Show();
@@ -505,10 +589,11 @@ begin
 
   if (cbDrives.ItemIndex>=0) then
     begin
-      lbWriteLog.Items.Add(Format('writing device%d',[cbDrives.ItemIndex]));
 
       with TDiskIO(cbDrives.Items.Objects[cbDrives.ItemIndex]) do
         begin
+          lbWriteLog.Items.Add(Format('writing device%d',[DeviceNumber]));
+
           //Schreibschutz
           if (WriteProtected) then
             begin
@@ -542,9 +627,8 @@ begin
               lbWriteLog.Items.Add(Format('%d sectors found',[SectorCount]));
 
               //Ab die Post
-              u32Write :=1;
               u64Sector:=0;
-              while (u32Write > 0) and (bBusy) do
+              while (u64Sector < SectorCount) and (bBusy) do
                 begin
                   //Buffer flushen um den Sektor immer mit nullen aufzufüllen
                   FillChar(Buffer[0],Length(Buffer),#00);
@@ -559,7 +643,7 @@ begin
                       //Sektoren schreiben
                       if (Write(u64Sector,Addr(Buffer[0]),u32Burst,u32Write)=FALSE) then
                         begin
-                          lbReadLog.Items.Add(Format('unable to write sector %d - %d',[u64Sector,u64Sector+u32Burst]));
+                          lbWriteLog.Items.Add(Format('unable to write sector %d - %d',[u64Sector,u64Sector+u32Burst]));
                           inc(u64Sector,1);
                         end
                       else
@@ -574,10 +658,13 @@ begin
                     end;
                 end;
 
+              sMD5:=MD5.Finalize().sChecksum;
               lbWriteLog.Items.Add(Format('%d sectors written',[u64Sector]));
-              lbWriteLog.Items.Add(Format('MD5 : %s ',[MD5.Finalize().sChecksum]));
+              lbWriteLog.Items.Add(Format('MD5 : %s ',[sMD5]));
               lbWriteLog.Items.Add('done');
 
+              lbCRCLogPre.Items.Add(Format('Write File : %s => MD5 : %s ',[edTargetFile.Text,sMD5]));
+              
               MD5.Free();
               CloseHandle(hFile);
             end
@@ -596,18 +683,10 @@ begin
   EnableUser();
 end;
 
-procedure TfmMain.cbReadBurstModeClick(Sender: TObject);
-begin
-  seReadBurstMode.Enabled:=cbReadBurstMode.Checked;
-  lbReadBurstMode.Enabled:=cbReadBurstMode.Checked;
-end;
 
-procedure TfmMain.cbWriteBurstModeClick(Sender: TObject);
-begin
-  seWriteBurstMode.Enabled:=cbWriteBurstMode.Checked;
-  lbWriteBurstMode.Enabled:=cbWriteBurstMode.Checked;
-end;
-
+////////////////////////////////////////////////////////////////////////////////
+/// Funktionen der Properties
+////////////////////////////////////////////////////////////////////////////////
 procedure TfmMain.tsPropertiesShow(Sender: TObject);
 var
   sType : Longstring;
@@ -642,6 +721,10 @@ begin
         end;
     end;
 end;
+
+////////////////////////////////////////////////////////////////////////////////
+/// Funktionen des Benchmarks
+////////////////////////////////////////////////////////////////////////////////
 
 procedure TfmMain.btStartBenchmarkClick(Sender: TObject);
 var
@@ -771,6 +854,20 @@ begin
     EnableUser();
 end;
 
+////////////////////////////////////////////////////////////////////////////////
+/// Funktionen des Dummycreators
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TfmMain.btBrowseDummyClick(Sender: TObject);
+begin
+  with (dgSave) do
+    begin
+      if (Execute) then
+        begin
+          edDummyFile.Text:=Filename;
+        end;
+    end;
+end;
 
 procedure TfmMain.btCreateDummyFileClick(Sender: TObject);
 var
@@ -843,6 +940,131 @@ begin
   EnableUser();
 end;
 
+////////////////////////////////////////////////////////////////////////////////
+/// Funktionen des Wipers
+////////////////////////////////////////////////////////////////////////////////
+procedure TfmMain.btWipeDeviceClick(Sender: TObject);
+var
+  Buffer   : array of Byte;
+  u32Write : unsigned32;
+  u32Burst : unsigned32;
+  u64Sector: unsigned32;
+  MD5      : TMD5;
+  sMD5     : Longstring;
+begin
+  DisableUser();
+  btBreak.Show();
+
+  lbWipeLog.Clear();
+
+  if (cbDrives.ItemIndex>=0) then
+    begin
+      with TDiskIO(cbDrives.Items.Objects[cbDrives.ItemIndex]) do
+        begin
+          lbWipeLog.Items.Add(Format('writing device%d',[DeviceNumber]));
+
+          //Schreibschutz
+          if (WriteProtected) then
+            begin
+              lbWriteLog.Items.Add('device ist writeprotected');
+              EnableUser();
+              Exit;
+            end;
+
+          //BurstMode aus Write holen
+          if (cbWriteBurstMode.Checked) then
+            begin
+              u32Burst := seWriteBurstMode.Value;
+            end
+          else
+            begin
+              u32Burst := 1;
+            end;
+
+          //Checksummer initialisieren
+          MD5:=TMD5.create();
+          MD5.init();
+
+          //Buffer Setzen
+          SetLength(Buffer, (SectorSize * u32Burst) );
+          lbWipeLog.Items.Add(Format('sector buffer set to %d',[u32Burst]));
+          lbWipeLog.Items.Add(Format('%d sectors found',[SectorCount]));
+
+          //Buffer initialisieren
+          if (rbWipe00.Checked = TRUE) then
+             begin
+                  FillChar(Buffer[0],Length(Buffer),#00);
+             end;
+          if (rbWipeFF.Checked = TRUE) then
+             begin
+                  FillChar(Buffer[0],Length(Buffer),#255);
+             end;
+
+          //Ab die Post
+          u64Sector:=0;
+          while (u64Sector < SectorCount) and (bBusy) do
+            begin
+              //Buffer flushen (wenn random gewhält ist)
+              if (rbWipeRandom.Checked = TRUE) then
+                 begin
+                      for u32Write:=0 to Length(Buffer) - 1 do
+                          begin
+                               Buffer[u32Write]:=random(256);
+                          end;
+                 end;
+
+              //Sektoren schreiben
+              if (Write(u64Sector,Addr(Buffer[0]),u32Burst,u32Write)=FALSE) then
+                 begin
+                   lbWipeLog.Items.Add(Format('unable to write sector %d - %d',[u64Sector,u64Sector+u32Burst]));
+                   inc(u64Sector,1);
+                 end
+              else
+                 begin
+                   //Prüfsumme bauen
+                   MD5.add(Addr(Buffer[0]),SectorSize * u32Write);
+                   inc(u64Sector,u32Write);
+                 end;
+
+              lbWipeSpeed.Caption:=Format('%f',[Speed]);
+
+              //Fortschritt
+              pbWipe.Position:=signed32(trunc(u64Sector / SectorCount * 1024));
+              Application.ProcessMessages();
+            end;
+
+          sMD5:=MD5.Finalize().sChecksum;
+          lbWipeLog.Items.Add(Format('%d sectors written',[u64Sector]));
+          lbWipeLog.Items.Add(Format('MD5 : %s ',[sMD5]));
+          lbWipeLog.Items.Add('done');
+
+          lbCRCLogPre.Items.Add(Format('Wipe => MD5 : %s ',[sMD5]));
+
+          MD5.Free();
+        end;
+    end
+  else
+    begin
+      lbWipeLog.Items.Add('no device selected');
+    end;
+  //Speicher freigeben
+  SetLength(Buffer,0);
+  EnableUser();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+/// Funktionen des CHS-Kalkulators
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TfmMain.btCHSResetClick(Sender: TObject);
+begin
+  seCHSHeads.Value  :=32;
+  seCHSSectors.Value:=63;
+
+  //Und neu berechnen
+  edCHSSizeChange(Self);
+end;
+
 procedure TfmMain.edCHSSizeChange(Sender: TObject);
 var
   a : unsigned64;
@@ -873,14 +1095,86 @@ begin
       end;
 end;
 
-procedure TfmMain.btCHSResetClick(Sender: TObject);
-begin
-  seCHSHeads.Value  :=32;
-  seCHSSectors.Value:=63;
+////////////////////////////////////////////////////////////////////////////////
+/// Funktionen des CRC-Checkers
+////////////////////////////////////////////////////////////////////////////////
 
-  //Und neu berechnen
-  edCHSSizeChange(Self);
+procedure TfmMain.btCRCClick(Sender: TObject);
+var
+  Buffer   : array of Byte;
+  u32Read  : unsigned32;
+  u32Burst : unsigned32;
+  u64Sector: unsigned32;
+  MD5      : TMD5;
+  sMD5     : longstring;
+begin
+  DisableUser();
+  btBreak.Show();
+  lbReadLog.Clear();
+  if (cbDrives.ItemIndex>=0) then
+    begin
+      with TDiskIO(cbDrives.Items.Objects[cbDrives.ItemIndex]) do
+        begin
+          lbCRCLog.Items.Add(Format('reading device%d',[DeviceNumber]));
+          //BurstMode
+          if (cbReadBurstMode.Checked) then
+            begin
+              u32Burst := seReadBurstMode.Value;
+            end
+          else
+            begin
+              u32Burst := 1;
+            end;
+
+          MD5:=TMD5.create();
+          MD5.init();
+
+          //Buffer Setzen
+          SetLength(Buffer, (SectorSize * u32Burst) );
+          lbCRCLog.Items.Add(Format('sector buffer set to %d',[u32Burst]));
+          lbCRCLog.Items.Add(Format('%d sectors found',[SectorCount]));
+
+          //Und los
+          u64Sector:=0;
+          while (u64Sector < SectorCount) and (bBusy) do
+             begin
+               if (Read(u64Sector,Addr(Buffer[0]),u32Burst,u32Read)=TRUE) then
+                 begin
+                   pbCRC.Position:=signed32(trunc(u64Sector / SectorCount * 1024));
+
+                   //Prüfsumme bauen
+                   MD5.add(Addr(Buffer[0]),u32Read * SectorSize);
+
+                   //Um die gelesenen Sekotoren vorschieben
+                   inc(u64Sector,u32Read);
+                 end
+               else
+                 begin
+                   lbCRCLog.Items.Add(Format('error reading sector  %d',[u64Sector]));
+                   inc(u64Sector,1);
+                 end;
+
+               lbCRCSpeed.Caption:=Format('%f',[Speed]);
+               Application.ProcessMessages();
+             end;
+
+          sMD5:=MD5.Finalize().sChecksum;
+          lbCRCLog.Items.Add(Format('%d sectors read ',[u64Sector]));
+          lbCRCLog.Items.Add(Format('MD5 : %s ',[sMD5]));
+          lbCRCLog.Items.Add('done');
+
+          MD5.Free();
+        end;
+    end
+  else
+    begin
+      lbCRCLog.Items.Add('no device selected');
+    end;
+  //Speicher freigeben
+  SetLength(Buffer,0);
+  EnableUser();
 end;
+
 
 //Polling Timer um einen Devicewechsel nicht zu verpassen
 procedure TfmMain.tiRememberRefreshTimer(Sender: TObject);
@@ -896,11 +1190,13 @@ begin
   bBusy:=FALSE;
 end;
 
-procedure TfmMain.Refresh1Click(Sender: TObject);
+procedure TfmMain.miRefreshClick(Sender: TObject);
 var
   Dummy : TMESSAGE;
 begin
   Self.DeviceChange(Dummy);
 end;
+
+
 
 end.

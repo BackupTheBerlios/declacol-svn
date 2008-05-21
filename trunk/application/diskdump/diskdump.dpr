@@ -2,8 +2,7 @@ program DiskDump;
 
 uses
   Forms,
-  DDMain in 'DDMain.pas' {fmMain},
-  class_ramdisk in 'class_ramdisk.pas';
+  DDMain in 'DDMain.pas' {fmMain};
 
 {$R *.res}
 

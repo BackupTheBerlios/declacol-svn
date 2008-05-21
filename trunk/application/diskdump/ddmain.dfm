@@ -1,6 +1,6 @@
 object fmMain: TfmMain
-  Left = 304
-  Top = 301
+  Left = 312
+  Top = 288
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DiskDumper (c) 2007 Borg@Sven-of-Nine.de'
@@ -22,10 +22,10 @@ object fmMain: TfmMain
     Top = 0
     Width = 529
     Height = 369
-    ActivePage = tsDummyFiles
+    ActivePage = tsWriter
     TabOrder = 0
     object tsSectorViewer: TTabSheet
-      Caption = 'Sector Viewer'
+      Caption = 'Viewer'
       OnEnter = tsSectorViewerEnter
       object pnSectorViewer: TPanel
         Left = 0
@@ -89,7 +89,7 @@ object fmMain: TfmMain
       end
     end
     object tsReader: TTabSheet
-      Caption = 'Reader'
+      Caption = 'Read'
       ImageIndex = 1
       object pnReader: TPanel
         Left = 0
@@ -99,7 +99,7 @@ object fmMain: TfmMain
         BevelInner = bvRaised
         BevelOuter = bvLowered
         TabOrder = 0
-        object Label1: TLabel
+        object lbDumpfile: TLabel
           Left = 8
           Top = 8
           Width = 41
@@ -132,6 +132,7 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
+          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 5
@@ -196,7 +197,7 @@ object fmMain: TfmMain
       end
     end
     object tsWriter: TTabSheet
-      Caption = 'Writer'
+      Caption = 'Write'
       ImageIndex = 2
       object pnWrite: TPanel
         Left = 0
@@ -296,6 +297,7 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
+          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 6
@@ -407,7 +409,7 @@ object fmMain: TfmMain
           Height = 13
           Caption = 'Sectors'
         end
-        object Label2: TLabel
+        object lbCHSSector: TLabel
           Left = 8
           Top = 114
           Width = 49
@@ -499,7 +501,7 @@ object fmMain: TfmMain
     object tsDummyFiles: TTabSheet
       Caption = 'DummyFiles'
       ImageIndex = 6
-      object Panel1: TPanel
+      object pnDummy: TPanel
         Left = 0
         Top = 0
         Width = 521
@@ -507,7 +509,7 @@ object fmMain: TfmMain
         BevelInner = bvRaised
         BevelOuter = bvLowered
         TabOrder = 0
-        object Label3: TLabel
+        object lbCreateDummy: TLabel
           Left = 8
           Top = 8
           Width = 82
@@ -526,6 +528,7 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
+          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 3
@@ -571,6 +574,162 @@ object fmMain: TfmMain
           Enabled = False
           TabOrder = 5
           Text = '0'
+        end
+      end
+    end
+    object tsWipe: TTabSheet
+      Caption = 'Wipe'
+      ImageIndex = 7
+      object pnWiper: TPanel
+        Left = 0
+        Top = 0
+        Width = 521
+        Height = 337
+        BevelInner = bvRaised
+        BevelOuter = bvLowered
+        TabOrder = 0
+        object lbWiper: TLabel
+          Left = 8
+          Top = 8
+          Width = 79
+          Height = 13
+          Caption = 'wipe device with'
+        end
+        object lbWipeSpeedPre: TLabel
+          Left = 8
+          Top = 292
+          Width = 73
+          Height = 13
+          Caption = 'Speed [KB/s]  :'
+        end
+        object lbWipeSpeed: TLabel
+          Left = 88
+          Top = 292
+          Width = 45
+          Height = 13
+          Caption = '0             '
+        end
+        object pbWipe: TProgressBar
+          Left = 8
+          Top = 312
+          Width = 505
+          Height = 16
+          Min = 0
+          Max = 1024
+          Smooth = True
+          TabOrder = 1
+        end
+        object btWipeDevice: TButton
+          Left = 8
+          Top = 120
+          Width = 75
+          Height = 25
+          Caption = 'Wipe Device'
+          TabOrder = 0
+          OnClick = btWipeDeviceClick
+        end
+        object rbWipe00: TRadioButton
+          Left = 8
+          Top = 32
+          Width = 113
+          Height = 17
+          Caption = '#00'
+          Checked = True
+          TabOrder = 2
+          TabStop = True
+        end
+        object rbWipeFF: TRadioButton
+          Left = 8
+          Top = 48
+          Width = 113
+          Height = 17
+          Caption = '#FF'
+          TabOrder = 3
+        end
+        object rbWipeRandom: TRadioButton
+          Left = 8
+          Top = 64
+          Width = 113
+          Height = 17
+          Caption = 'random'
+          TabOrder = 4
+        end
+        object lbWipeLog: TListBox
+          Left = 8
+          Top = 152
+          Width = 505
+          Height = 137
+          ItemHeight = 13
+          TabOrder = 5
+        end
+      end
+    end
+    object tsCRC: TTabSheet
+      Caption = 'CRC'
+      ImageIndex = 8
+      object pnCRC: TPanel
+        Left = 0
+        Top = 0
+        Width = 521
+        Height = 337
+        BevelInner = bvRaised
+        BevelOuter = bvLowered
+        TabOrder = 0
+        object lbCRC: TLabel
+          Left = 8
+          Top = 8
+          Width = 22
+          Height = 13
+          Caption = 'CRC'
+        end
+        object lbCRCSpeedPre: TLabel
+          Left = 8
+          Top = 292
+          Width = 73
+          Height = 13
+          Caption = 'Speed [KB/s]  :'
+        end
+        object lbCRCSpeed: TLabel
+          Left = 88
+          Top = 292
+          Width = 45
+          Height = 13
+          Caption = '0             '
+        end
+        object pbCRC: TProgressBar
+          Left = 8
+          Top = 312
+          Width = 505
+          Height = 16
+          Min = 0
+          Max = 1024
+          Smooth = True
+          TabOrder = 1
+        end
+        object btCRC: TButton
+          Left = 8
+          Top = 120
+          Width = 75
+          Height = 25
+          Caption = 'Create CRC'
+          TabOrder = 0
+          OnClick = btCRCClick
+        end
+        object lbCRCLog: TListBox
+          Left = 8
+          Top = 152
+          Width = 505
+          Height = 137
+          ItemHeight = 13
+          TabOrder = 2
+        end
+        object lbCRCLogpre: TListBox
+          Left = 8
+          Top = 24
+          Width = 505
+          Height = 89
+          ItemHeight = 13
+          TabOrder = 3
         end
       end
     end
@@ -745,9 +904,9 @@ object fmMain: TfmMain
   object pmDevices: TPopupMenu
     Left = 300
     Top = 280
-    object Refresh1: TMenuItem
+    object miRefresh: TMenuItem
       Caption = 'Refresh'
-      OnClick = Refresh1Click
+      OnClick = miRefreshClick
     end
   end
 end
