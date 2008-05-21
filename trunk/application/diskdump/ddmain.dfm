@@ -882,7 +882,7 @@ object fmMain: TfmMain
     end
   end
   object btBreak: TButton
-    Left = 220
+    Left = 196
     Top = 144
     Width = 75
     Height = 25

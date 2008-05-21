@@ -76,3 +76,6 @@ OriginalFilename=DiskDump.exe
 ProductName=DiskDumper
 ProductVersion=1.0.0.0
 Comments=RawDump of SectorOrientatedDrives
+[HistoryLists\hlUnitAliases]
+Count=1
+Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
