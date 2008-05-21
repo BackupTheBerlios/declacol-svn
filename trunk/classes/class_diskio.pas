@@ -118,7 +118,8 @@ end;
 
 
 
-type TDiskIO = class(TObject)
+type pDiskIO = ^TDiskIO;
+  TDiskIO = class(TObject)
   private
     u8Drive       : Unsigned8;
     diskgeo       : TDISK_GEOMETRY;
@@ -277,7 +278,8 @@ begin
         TempSize:=Self.Size shl WIDTH_OF_KA;
       end;
 
-    Self.sSize:=Format('%f %sByte',[TempSize / KA ,SizePref[Index]]);
+    //Für Delphi5 (Kein 64Bit in Format) nochmal casten
+    Self.sSize:=Format('%f %sByte',[ (unsigned32(TempSize) / KA) ,SizePref[Index]]);
 end;
 
 
@@ -502,6 +504,7 @@ begin
     Result:=FALSE;
     Self.fSpeed:=0;
 
+    //Dummheit der User abfangen
     if (Self.WriteProtected=FALSE) then
       begin
       //Device Öffnen
