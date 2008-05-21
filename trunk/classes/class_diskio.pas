@@ -48,7 +48,7 @@ Author: Sven Lorenz / Borg@Sven-of-Nine.de
 ////////////////////////////////////////////////////////////////////////////////
 
 interface
-uses unit_typedefs,windows,sysutils;
+uses unit_typedefs,windows,sysutils,unit_errorcodes;
 
 
 //Leider ist die Deklaration von SetFilePointer falsch, daher hier der richtige Prototyp
@@ -100,10 +100,39 @@ const
 
   //Definitionen die in Delhpi leider fehlen
   FILE_DEVICE_DISK               = $00000007;
-  FILE_ANY_ACCESS                = 0;
+  FILE_DEVICE_DISK_FILE_SYSTEM   = $00000008;
+  FILE_DEVICE_FILE_SYSTEM         = $00000009;
+
+  FILE_ANY_ACCESS                = $0000;
+  FILE_READ_ACCESS               = $0001;
+  FILE_WRITE_ACCESS              = $0002;
+  FILE_ALL_ACCESS                = FILE_READ_ACCESS OR FILE_WRITE_ACCESS;
+
   METHOD_BUFFERED                = 0;
   IOCTL_DISK_BASE                = FILE_DEVICE_DISK;
-  IOCTL_DISK_GET_DRIVE_GEOMETRY  = ( ((IOCTL_DISK_BASE) SHL 16) OR ((FILE_ANY_ACCESS) SHL 14) OR (($0000) SHL 2) OR (METHOD_BUFFERED) );
+  IOCTL_DISK_GET_DRIVE_GEOMETRY  = ( ((IOCTL_DISK_BASE) SHL 16) OR ((FILE_ANY_ACCESS)  SHL 14) OR (($0000) SHL 2) OR (METHOD_BUFFERED) );
+
+  IOCTL_DISK_GET_DRIVE_LAYOUT    = ( ((IOCTL_DISK_BASE) SHL 16) OR ((FILE_READ_ACCESS) SHL 14) OR (($0040) SHL 2) OR (METHOD_BUFFERED) );
+  IOCTL_DISK_SET_DRIVE_LAYOUT    = ( ((IOCTL_DISK_BASE) SHL 16) OR ((FILE_ALL_ACCESS)  SHL 14) OR (($0004) SHL 2) OR (METHOD_BUFFERED) );
+  IOCTL_DISK_DELETE_DRIVE_LAYOUT = ( ((IOCTL_DISK_BASE) SHL 16) OR ((FILE_ALL_ACCESS)  SHL 14) OR (($0003) SHL 2) OR (METHOD_BUFFERED) );
+
+  IOCTL_DISK_CREATE_DISK         = ( ((IOCTL_DISK_BASE) SHL 16) OR ((FILE_ALL_ACCESS)  SHL 14) or (($0016) SHL 2) OR (METHOD_BUFFERED) );
+
+  FSCTL_DISMOUNT_VOLUME          = ( (FILE_DEVICE_FILE_SYSTEM shl 16) or (FILE_ANY_ACCESS shl 14) or (8 shl 2) or METHOD_BUFFERED);
+  FSCTL_LOCK_VOLUME              = ( (FILE_DEVICE_FILE_SYSTEM shl 16) or (FILE_ANY_ACCESS shl 14) or (6 shl 2) or METHOD_BUFFERED);
+  FSCTL_UNLOCK_VOLUME            = ( (FILE_DEVICE_FILE_SYSTEM shl 16) or (FILE_ANY_ACCESS shl 14) or (7 shl 2) or METHOD_BUFFERED);
+
+  //Partitionstypen
+  PARTITION_ENTRY_UNUSED         = $00;
+  PARTITION_EXTENDED             = $05;
+  PARTITION_FAT_12               = $01;
+  PARTITION_FAT_16               = $04;
+  PARTITION_FAT32                = $0B;
+  PARTITION_IFS                  = $07;
+  PARTITION_LDM                  = $42;
+  PARTITION_NTFT                 = $80;
+  VALID_NTFT                     = $C0;
+
 
 //Typ für die Laufwerksgeometry
 //aus Winioctl.h
@@ -116,7 +145,69 @@ type
     BytesPerSector    : unsigned32;
 end;
 
+//Typ für das Partitionslayout
+type
+  PPARTITION_INFORMATION = ^TPARTITION_INFORMATION;
+  TPARTITION_INFORMATION = record
+    StartingOffset      : unsigned64;
+    PartitionLength     : unsigned64;
+    HiddenSectors       : unsigned32;
+    PartitionNumber     : unsigned32;
+    PartitionType       : unsigned8;
+    BootIndicator       : ByteBool;
+    RecognizedPartition : ByteBool;
+    RewritePartition    : ByteBool;
+end;
 
+
+//MBR Layout
+type
+  PPARTITION_INFORMATION_MBR = ^TPARTITION_INFORMATION_MBR;
+  TPARTITION_INFORMATION_MBR = record
+    PartitionType       : unsigned8;
+    BootIndicator       : ByteBool;
+    RecognizedPartition : ByteBool;
+    HiddenSectors       : unsigned32;
+end;
+
+
+//Strukturen für die initialisierung von Devices
+type
+  TPARTITION_STYLE = (
+    PARTITION_STYLE_MBR,
+    PARTITION_STYLE_GPT,
+    PARTITION_STYLE_RAW);
+
+type
+  PCREATE_DISK_MBR = ^TCREATE_DISK_MBR;
+  TCREATE_DISK_MBR = record
+    Signature           : unsigned32;
+end;
+
+type
+  PCREATE_DISK_GPT = ^TCREATE_DISK_GPT;
+  TCREATE_DISK_GPT = record
+    DiskId              : TGUID;
+    MaxPartitionCount   : unsigned32;
+  end;
+
+type
+  PCREATE_DISK = ^TCREATE_DISK;
+  TCREATE_DISK = record
+    PartitionStyle: TPARTITION_STYLE;
+    case Integer of
+      0: (Mbr: TCREATE_DISK_MBR);
+      1: (Gpt: TCREATE_DISK_GPT);
+end;
+
+
+type
+  PDRIVE_LAYOUT_INFORMATION = ^TDRIVE_LAYOUT_INFORMATION;
+  TDRIVE_LAYOUT_INFORMATION = record
+    PartitionCount      : unsigned32;
+    Signature           : unsigned32;
+    PartitionEntry: array of TPARTITION_INFORMATION;
+end;
 
 type pDiskIO = ^TDiskIO;
   TDiskIO = class(TObject)
@@ -138,6 +229,9 @@ type pDiskIO = ^TDiskIO;
     procedure Refresh();
     function  RescanSize():unsigned64;
   public
+    //Konstruktor
+    constructor Create(Drive:Byte=0);
+
     function GetGeometry(var disk_geometry : TDISK_GEOMETRY): boolean;
     //Direkt auf das Gerät addressieren
     //Funktioniert aber nur in SektorenSchritten
@@ -148,8 +242,10 @@ type pDiskIO = ^TDiskIO;
     function Read(StartSector : unsigned64; Buffer : Pointer; SectorsToRead:unsigned32; var SectorsRead: unsigned32):Boolean;
     function Write(StartSector : unsigned64; Buffer : Pointer; SectorsToWrite:unsigned32; var SectorsWritten: unsigned32):Boolean;
 
-    //Konstruktor
-    constructor Create(Drive:Byte=0);
+    //Den kpl. Datenträger partitionieren und FAT32 formatieren
+    function CreatePartition():Boolean;
+
+
     //Laufwerksbezeichner (0-25)
     property Devicenumber: unsigned8 read u8Drive write SetDrive;
     //Struktur mit Geometry-Daten
@@ -432,6 +528,63 @@ begin
     SectorsWritten:=SectorsWritten div Self.diskgeo.BytesPerSector;
   end;
 end;
+
+////////////////////////////////////////////////////////////////////////////////
+//Den kpl. Datenträger partitionieren und FAT32 formatieren
+function TDiskIO.CreatePartition():Boolean;
+var
+  hDevice     : THandle;
+  Dummy       : Cardinal;
+  NewDisk     : TCREATE_DISK;
+begin
+    Result:=FALSE;
+
+    //Zugriff auf das Laufwerk holen
+    hDevice := CreateFile( pchar('\\.\PhysicalDrive'+IntToStr(Self.u8Drive)),
+                           GENERIC_READ OR GENERIC_WRITE,
+                           FILE_SHARE_READ OR FILE_SHARE_WRITE OR FILE_SHARE_DELETE,
+                           nil,
+                           OPEN_EXISTING,
+                           0,
+                           0);
+
+    //Kanal offen ?
+    if (hDevice <> INVALID_HANDLE_VALUE) AND (Self.WriteProtected = FALSE) then
+       begin
+            //Disk initialisieren
+            Result := DeviceIoControl( hDevice,
+                                       IOCTL_DISK_DELETE_DRIVE_LAYOUT,
+                                       nil,
+                                       0,
+                                       nil,
+                                       0,
+                                       Dummy,
+                                       nil);
+
+
+            MessageBox(0,PChar(LastErrorMessage()),'error',MB_OK);
+
+
+            NewDisk.PartitionStyle:=PARTITION_STYLE_MBR;
+            NewDisk.Mbr.Signature :=PARTITION_FAT32;
+
+            //Partition anlegen
+            Result := DeviceIoControl( hDevice,
+                                       IOCTL_DISK_CREATE_DISK,
+                                       @NewDisk,
+                                       SizeOf(NewDisk),
+                                       nil,
+                                       0,
+                                       Dummy,
+                                       nil);
+
+            MessageBox(0,PChar(LastErrorMessage()),'error',MB_OK);
+                                       
+
+            CloseHandle(hDevice);
+        end;
+end;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //LowLevel vom Laufwerk lesen
