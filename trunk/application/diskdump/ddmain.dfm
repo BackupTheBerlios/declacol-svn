@@ -22,7 +22,7 @@ object fmMain: TfmMain
     Top = 0
     Width = 529
     Height = 369
-    ActivePage = tsWriter
+    ActivePage = tsWipe
     TabOrder = 0
     object tsSectorViewer: TTabSheet
       Caption = 'Viewer'
@@ -326,8 +326,6 @@ object fmMain: TfmMain
           Font.Height = -12
           Font.Name = 'Fixedsys'
           Font.Style = []
-          Lines.Strings = (
-            'mmProperties')
           ParentFont = False
           ScrollBars = ssVertical
           TabOrder = 0
@@ -662,6 +660,14 @@ object fmMain: TfmMain
           ItemHeight = 13
           TabOrder = 5
         end
+        object cbCreatePartition: TCheckBox
+          Left = 8
+          Top = 88
+          Width = 249
+          Height = 17
+          Caption = 'create partition (changes checksum)'
+          TabOrder = 6
+        end
       end
     end
     object tsCRC: TTabSheet
@@ -876,7 +882,7 @@ object fmMain: TfmMain
     end
   end
   object btBreak: TButton
-    Left = 196
+    Left = 220
     Top = 144
     Width = 75
     Height = 25

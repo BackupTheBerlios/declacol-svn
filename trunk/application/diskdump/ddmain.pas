@@ -26,7 +26,7 @@ Author: Sven Lorenz / Borg@Sven-of-Nine.de
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-unit DDMain;
+unit ddmain;
 
 interface
 
@@ -149,6 +149,7 @@ type
     btCRC: TButton;
     lbCRCLog: TListBox;
     lbCRCLogpre: TListBox;
+    cbCreatePartition: TCheckBox;
     procedure cbDrivesClick(Sender: TObject);
     procedure cbWriteprotectedClick(Sender: TObject);
     procedure cbRealSizeClick(Sender: TObject);
@@ -1041,6 +1042,13 @@ begin
           lbCRCLogPre.Items.Add(Format('Wipe => MD5 : %s ',[sMD5]));
 
           MD5.Free();
+
+          //Soll auch Partitioniert werden ?
+          if (cbCreatePartition.Checked=TRUE) then
+            begin
+                 CreatePartition();
+            end;
+
         end;
     end
   else
@@ -1049,6 +1057,8 @@ begin
     end;
   //Speicher freigeben
   SetLength(Buffer,0);
+
+
   EnableUser();
 end;
 
