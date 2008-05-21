@@ -1044,7 +1044,7 @@ begin
           MD5.Free();
 
           //Soll auch Partitioniert werden ?
-          if (cbCreatePartition.Checked=TRUE) then
+          if (cbCreatePartition.Checked=TRUE) AND (bBusy) then
             begin
                  CreatePartition();
             end;

@@ -20,8 +20,8 @@ EditWindowCount=1
 
 [M:\berlios\application\diskdump\DDMain.pas]
 ModuleType=SourceModule
-FormState=0
-FormOnTop=0
+FormState=1
+FormOnTop=1
 
 [C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_diskio.pas]
 ModuleType=SourceModule
@@ -71,9 +71,9 @@ BottomPanelSize=0
 
 [View0]
 Module=M:\berlios\application\diskdump\DDMain.pas
-CursorX=9
-CursorY=29
-TopLine=1
+CursorX=58
+CursorY=1047
+TopLine=1016
 LeftCol=1
 
 [View1]
