@@ -91,7 +91,7 @@ begin
 
      //Ein paar Einstellungen
      StreamFS.crypt:=CRYPT_XOR;
-     StreamFS.cryptheader:=TRUE;
+     StreamFS.cryptheader:=FALSE;
      StreamFS.password:=extractfilename(ParamStr(0));
      StreamFS.streamtype:=STREAM_FILE;
 
