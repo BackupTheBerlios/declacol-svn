@@ -1,44 +1,38 @@
 [Closed Files]
-File_0=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\Unit_ErrorCodes.pas',0,1,16,1,49,0,0
-File_1=SourceModule,'M:\berlios\classes\class_activeports.pas',0,1,1,14,8,0,0
-File_2=SourceModule,'C:\Develop\delphi\Source\Rtl\Win\Windows.pas',0,1,29197,1,29219,0,0
-File_3=SourceModule,'C:\Develop\delphi\Projects\_SelfMade_Units\class_random.pas',0,1,1,61,70,0,0
-File_4=SourceModule,'C:\Develop\delphi\Projects\!System\DiskDump\class_diskio.pas',0,1,405,1,429,0,0
-File_5=SourceModule,'C:\Develop\delphi\Projects\!System\DiskDump\class_random.pas',0,1,32,1,32,0,0
-File_6=SourceModule,'C:\Develop\delphi\Projects\!System\DiskDump\class_checksum.pas',0,1,1,1,6,0,0
-File_7=SourceModule,'C:\Develop\delphi\Projects\!System\DiskDump\class_bufferedreader.pas',0,1,1,1,5,0,0
-File_8=SourceModule,'C:\Develop\delphi\Projects\_SelfMade_Units\Unit_Bits.pas',0,1,1,101,4,0,0
-File_9=SourceModule,'C:\Develop\delphi\Projects\!System\DiskDump\Unit_typedefs.pas',0,1,132,13,155,0,0
+File_0=SourceModule,'M:\berlios\libraries\unit_typedefs.pas',0,1,94,1,101,0,0
+File_1=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_compiler.pas',0,1,91,3,107,0,0
+File_2=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_hddhelper.pas',0,1,13,1,40,0,0
+File_3=SourceModule,'M:\berlios\classes\class_streamfs.pas',0,1,1727,1,1763,0,0
+File_4=SourceModule,'M:\berlios\classes\class_threadedsocket.pas',0,1,130,48,11,0,0
+File_5=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\Unit_ErrorCodes.pas',0,1,16,1,49,0,0
+File_6=SourceModule,'M:\berlios\classes\class_activeports.pas',0,1,1,14,8,0,0
+File_7=SourceModule,'C:\Develop\delphi\Source\Rtl\Win\Windows.pas',0,1,29197,1,29219,0,0
+File_8=SourceModule,'C:\Develop\delphi\Projects\_SelfMade_Units\class_random.pas',0,1,1,61,70,0,0
+File_9=SourceModule,'C:\Develop\delphi\Projects\!System\DiskDump\class_diskio.pas',0,1,405,1,429,0,0
 
 [Modules]
 Module0=M:\berlios\application\diskdump\DDMain.pas
 Module1=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_diskio.pas
-Module2=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_compiler.pas
-Module3=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_hddhelper.pas
-Count=4
+Module2=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_typedefs.pas
+Count=3
 EditWindowCount=1
 
 [M:\berlios\application\diskdump\DDMain.pas]
 ModuleType=SourceModule
 FormState=1
-FormOnTop=1
+FormOnTop=0
 
 [C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_diskio.pas]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
-[C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_compiler.pas]
+[C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_typedefs.pas]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
-[C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_hddhelper.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[M:\berlios\application\diskdump\ProjectGroup1.bpg]
+[C:\Programme\Borland\Delphi5\Bin\ProjectGroup1.bpg]
 FormState=0
 FormOnTop=0
 
@@ -47,12 +41,11 @@ FormState=0
 FormOnTop=0
 
 [EditWindow0]
-ViewCount=4
+ViewCount=3
 CurrentView=0
 View0=0
 View1=1
 View2=2
-View3=3
 MessageView=MessageView@EditWindow0
 Create=1
 Visible=1
@@ -71,30 +64,23 @@ BottomPanelSize=0
 
 [View0]
 Module=M:\berlios\application\diskdump\DDMain.pas
-CursorX=58
-CursorY=1047
-TopLine=1016
+CursorX=78
+CursorY=1144
+TopLine=1139
 LeftCol=1
 
 [View1]
-Module=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_hddhelper.pas
-CursorX=1
-CursorY=40
-TopLine=13
+Module=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_diskio.pas
+CursorX=19
+CursorY=185
+TopLine=230
 LeftCol=1
 
 [View2]
-Module=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_compiler.pas
-CursorX=3
-CursorY=107
-TopLine=91
-LeftCol=1
-
-[View3]
-Module=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_diskio.pas
-CursorX=1
-CursorY=552
-TopLine=544
+Module=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_typedefs.pas
+CursorX=91
+CursorY=149
+TopLine=144
 LeftCol=1
 
 [Watches]
@@ -182,7 +168,7 @@ LRDockWidth=190
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=Name
+SelectedItem=Visible
 ExpandedItems=
 HiddenCategories=
 ShowStatusBar=1
@@ -207,14 +193,14 @@ Dockable=1
 Create=1
 Visible=0
 State=0
-Left=107
-Top=843
+Left=7
+Top=186
 Width=999
-Height=123
+Height=346
 MaxLeft=-1
 MaxTop=-1
 ClientWidth=991
-ClientHeight=99
+ClientHeight=322
 TBDockHeight=57
 LRDockWidth=149
 Dockable=1

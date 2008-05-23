@@ -237,10 +237,21 @@ end;
 //Alle Devices enumerieren und als Objekt der Listbox zuordnen
 procedure TfmMain.ScanDevices();
 var
-  Disk    : TDiskIO;
-  Counter : Byte;
+  Disk      : TDiskIO;
+  Counter   : Byte;
+  OldDevice : signed16;
 begin
   Self.DisableUser();
+
+  //Alter device merken
+  if (cbDrives.ItemIndex >=0) then
+     begin
+          OldDevice:=TDiskIO(cbDrives.Items.Objects[cbDrives.ItemIndex]).DeviceNumber;
+     end
+  else
+     begin
+          OldDevice:=-1;
+     end; 
 
   //Alle evtl. schon bestehenden Objekte entladen
   while (cbDrives.Items.Count > 0) do
@@ -257,6 +268,13 @@ begin
         begin
           //Zu jedem gefundenen Objekt die Klasse ablegen
           cbDrives.Items.AddObject('Device',Disk);
+
+          //Markierung wieder herstellen
+          if (Disk.Devicenumber = OldDevice) then
+             begin
+                  cbDrives.ItemIndex:=cbDrives.Items.Count - 1;
+             end;
+
         end
       else
         begin
@@ -506,7 +524,7 @@ begin
                 begin
                   if (Read(u64Sector,Addr(Buffer[0]),u32Burst,u32Read)=TRUE) then
                     begin
-                      pbRead.Position:=signed32(trunc(u64Sector / SectorCount * 1024));
+                      pbRead.Position:=signed32(trunc(u64Sector / unsigned32(SectorCount) * 1024));
 
                       //Prüfsumme bauen
                       MD5.add(Addr(Buffer[0]),u32Read * SectorSize);
@@ -654,7 +672,7 @@ begin
 
                       lbWriteSpeed.Caption:=Format('%f',[Speed]);
                       //Fortschritt
-                      pbWrite.Position:=signed32(trunc(u64Sector / SectorCount * 1024));
+                      pbWrite.Position:=signed32(trunc(u64Sector / unsigned32(SectorCount) * 1024));
                       Application.ProcessMessages();
                     end;
                 end;
@@ -1030,7 +1048,7 @@ begin
               lbWipeSpeed.Caption:=Format('%f',[Speed]);
 
               //Fortschritt
-              pbWipe.Position:=signed32(trunc(u64Sector / SectorCount * 1024));
+              pbWipe.Position:=signed32(trunc(u64Sector / unsigned32(SectorCount) * 1024));
               Application.ProcessMessages();
             end;
 
@@ -1057,7 +1075,6 @@ begin
     end;
   //Speicher freigeben
   SetLength(Buffer,0);
-
 
   EnableUser();
 end;
@@ -1150,7 +1167,7 @@ begin
              begin
                if (Read(u64Sector,Addr(Buffer[0]),u32Burst,u32Read)=TRUE) then
                  begin
-                   pbCRC.Position:=signed32(trunc(u64Sector / SectorCount * 1024));
+                   pbCRC.Position:=signed32(trunc(u64Sector / unsigned32(SectorCount) * 1024));
 
                    //Prüfsumme bauen
                    MD5.add(Addr(Buffer[0]),u32Read * SectorSize);

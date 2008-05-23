@@ -22,7 +22,7 @@ object fmMain: TfmMain
     Top = 0
     Width = 529
     Height = 369
-    ActivePage = tsWipe
+    ActivePage = tsReader
     TabOrder = 0
     object tsSectorViewer: TTabSheet
       Caption = 'Viewer'
