@@ -44,6 +44,8 @@ const
   KA                 = 1024;
   WIDTH_OF_KA        = 10;
 
+  ID_NONE            = high(Cardinal);
+
 ////////////////////////////////////////////////////////////////////////////////
 //Basis Unsigned Typen
 //Ein Bit
@@ -85,12 +87,11 @@ type unsigned32 =        0..$ffffffff;
 type longword =          unsigned32;
 {$ENDIF}
 
-{$IFNDEF unsigned64}
-type unsigned64 =        0..$ffffffffffffffff;
-{$ENDIF}
 
 {$IFNDEF unsigned64}
-type unsigned128 =       0..$ffffffffffffffffffffffffffffffff;
+//Keine echte unsignde64 (da Delphi5 damit nicht umgehen kann)
+//aber zumindes ist die anzahl der Bits fast passend
+type unsigned64 =        0..$7fffffffffffffff;
 {$ENDIF}
 
 {$IFNDEF longword}
@@ -102,7 +103,6 @@ type quadword =          unsigned64;
 {$IFNDEF signed8}
 type signed8 =           -128..127;
 {$ENDIF}
-
 {$IFNDEF signed16}
 type signed16 =          -32768..32767;
 {$ENDIF}
@@ -110,7 +110,6 @@ type signed16 =          -32768..32767;
 {$IFNDEF signed32}
 type signed32 =          -2147483647..2147483647;
 {$ENDIF}
-
 
 {$IFNDEF signed64}
 type signed64 =          Int64;
@@ -177,6 +176,7 @@ type TPoint =record
      y : Signed32;
 end;
 {$ENDIF}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Handle Typen
