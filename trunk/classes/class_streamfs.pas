@@ -44,7 +44,7 @@ uses unit_typedefs,windows,sysutils,classes,class_binder;
 
 const
      //Maximale länge der Dateinamen
-     MAX_FILENAME = 64;
+     MAX_FILENAME = 256;
 
      //Standargröße der Schreib/Lese-Puffer
      MAX_BUFFER   = 8192 * 10;
