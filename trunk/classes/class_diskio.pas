@@ -216,7 +216,7 @@ type pDiskIO = ^TDiskIO;
     diskgeo       : TDISK_GEOMETRY;
     u64Size       : unsigned64;
     u64chssize    : unsigned64;
-    u32SectorCount: unsigned32;
+    u64SectorCount: unsigned64;
     sSize         : String;
     bRealSize     : Boolean;
     bValid        : Boolean;
@@ -252,7 +252,7 @@ type pDiskIO = ^TDiskIO;
     property Geometry   : TDISK_GEOMETRY read diskgeo;
     //Die Sektorengröße weisen wir einzeln aus, da sie seht häufig benutzt wird
     property SectorSize : unsigned32 read diskgeo.BytesPerSector;
-    property SectorCount: unsigned32 read u32SectorCount;
+    property SectorCount: unsigned64 read u64SectorCount;
 
     //Echte größe des Datenträgers bestimmen ?
     property RealSize   : Boolean read bRealSize write SetRealSize;
@@ -337,7 +337,7 @@ begin
             begin
               Self.u64Size:=Self.u64chssize;
             end;
-          Self.u32SectorCount:=Self.u64Size div Self.Diskgeo.BytesPerSector;
+          Self.u64SectorCount:=Self.u64Size div Self.Diskgeo.BytesPerSector;
 
           //Einige nützliche Flags setzen
           Self.bRemovable:=( (Geometry.MediaType and MEDIA_TYPE_REMOVABLE) = MEDIA_TYPE_REMOVABLE);
@@ -348,7 +348,7 @@ begin
     else
       begin
           Self.u64Size:=0;
-          Self.u32SectorCount:=0;
+          Self.u64SectorCount:=0;
       end;
 
     //Da sich Int64 nicht in Floats wandlen lassen,
