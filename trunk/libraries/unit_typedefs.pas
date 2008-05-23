@@ -85,9 +85,12 @@ type unsigned32 =        0..$ffffffff;
 type longword =          unsigned32;
 {$ENDIF}
 
+{$IFNDEF unsigned64}
+type unsigned64 =        0..$ffffffffffffffff;
+{$ENDIF}
 
 {$IFNDEF unsigned64}
-type unsigned64 =        0..9223372036854775807;
+type unsigned128 =       0..$ffffffffffffffffffffffffffffffff;
 {$ENDIF}
 
 {$IFNDEF longword}
