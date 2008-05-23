@@ -11,6 +11,7 @@ unit Unit_TypeDefs;
 ///
 ////////////////////////////////////////////////////////////////////////////////
 interface
+uses unit_compiler;
 
 //Breiten der einzelnen Typen
 const
@@ -49,49 +50,46 @@ const
 ////////////////////////////////////////////////////////////////////////////////
 //Basis Unsigned Typen
 //Ein Bit
-{$IFNDEF bit}
 {$IFNDEF unsigned1}
-type unsigned1 =         0..1;
+type unsigned1 =         0..MASK_UNSIGNED1;
 {$ENDIF}
 
-
+{$IFNDEF bit}
 type Bit =               unsigned1;
 {$ENDIF}
 
 //Ein Byte
 {$IFNDEF unsigned8}
-type unsigned8 =         0..$ff;
+type unsigned8 =         0..MASK_UNSIGNED8;
 {$ENDIF}
 
 {$IFNDEF byte}
 type byte =              unsigned8;
 {$ENDIF}
 
-
 //Ein Word
 {$IFNDEF unsigned16}
-type unsigned16 =        0..$ffff;
+type unsigned16 =        0..MASK_UNSIGNED16;
 {$ENDIF}
 
 {$IFNDEF word}
 type word =              unsigned16; 
 {$ENDIF}
 
-
 //Ein LangWord
 {$IFNDEF unsigned32}
-type unsigned32 =        0..$ffffffff;
+type unsigned32 =        0..MASK_UNSIGNED32;
 {$ENDIF}
 
 {$IFNDEF longword}
 type longword =          unsigned32;
 {$ENDIF}
 
-
 {$IFNDEF unsigned64}
 //Keine echte unsignde64 (da Delphi5 damit nicht umgehen kann)
-//aber zumindes ist die anzahl der Bits fast passend
-type unsigned64 =        0..$7fffffffffffffff;
+//aber zumindest ist die anzahl der Bits fast passend
+//type unsigned64 =        0..MASK_UNSIGNED64;
+type unsigned64 =        0..High(INT64);
 {$ENDIF}
 
 {$IFNDEF longword}
@@ -101,18 +99,18 @@ type quadword =          unsigned64;
 ////////////////////////////////////////////////////////////////////////////////
 //Basis Signed Typen
 {$IFNDEF signed8}
-type signed8 =           -128..127;
+type signed8 =           shortint;
 {$ENDIF}
 {$IFNDEF signed16}
-type signed16 =          -32768..32767;
+type signed16 =          smallint;
 {$ENDIF}
 
 {$IFNDEF signed32}
-type signed32 =          -2147483647..2147483647;
+type signed32 =          longint;
 {$ENDIF}
 
 {$IFNDEF signed64}
-type signed64 =          Int64;
+type signed64 =          int64;
 {$ENDIF}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -202,7 +200,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 // DateTime Typen
 {$IFNDEF timestamp}
-type timestamp = longword;
+type timestamp = unsigned32;
 {$ENDIF}
 
 {$IFNDEF daterecord}
