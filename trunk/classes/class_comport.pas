@@ -58,6 +58,12 @@ type pDataPack = ^TDatapack;
      //Flags     : TFlags;
 end;
 
+//Callback bei Empfang
+//Gibt den Index um Buffer an, der eingelesen wurde.
+//Es können aber auch mehrere Bytes eingelesen worden sein
+TComportCallback = procedure(BufferIndex : unsigned64) of Object;
+
+
 type TThreadedComPort = Class(TThread)
      private
            //Handle zum offenen Comport
@@ -71,8 +77,12 @@ type TThreadedComPort = Class(TThread)
            rTimeout : COMMTIMEOUTS;
            rConfig  : COMMCONFIG;
 
+           //Callback-Funktionen
+           fReceive : TComportCallback;
+
            bOnline  : Boolean;
            bDoIt    : Boolean;
+           bBusy    : Boolean;
 
            rTimer   : THighPerfTimer;
 
@@ -128,11 +138,13 @@ type TThreadedComPort = Class(TThread)
            //Comport-Konfiguration
            property Config      : TCommconfig read rConfig write rConfig;
            //Ist der Lesethread aktiv ?
-           property Busy        : boolean     read bDoIt   write bDoIt;
+           property Busy        : boolean     read bBusy;
            //Fehlerzustand
            property Error       : unsigned32 read u32Error;
            //Timerzugriff
            property Timer       : THighPerfTimer read rTimer;
+           //OnReceiveCallback
+           property OnReceive   : TComportCallback read fReceive write fReceive;
 
 end;
 
@@ -153,6 +165,7 @@ begin
 
      //MainThread anhalten
      Self.bDoIt:=FALSE;
+     Self.bBusy:=FALSE;
      Self.hComport:=INVALID_HANDLE_VALUE;
      Self.u64LastGet:=0;
 
@@ -164,8 +177,8 @@ begin
      Self.SetPortDefaults();
 
      //Defaulttimeouts
-     rTimeout.ReadIntervalTimeout:=1;
-     rTimeout.ReadTotalTimeoutMultiplier:=0;
+     rTimeout.ReadIntervalTimeout:=MAXDWORD;
+     rTimeout.ReadTotalTimeoutMultiplier:=MAXDWORD;
      rTimeout.ReadTotalTimeoutConstant:=1;
      rTimeout.ReadTotalTimeoutConstant:=1;
      rTimeout.WriteTotalTimeoutMultiplier:=1;
@@ -216,7 +229,7 @@ begin
 
      Self.Close();
      Self.hComport:=CreateFile ( PChar(Self.sComport),
-                                 GENERIC_READ,
+                                 GENERIC_READ or GENERIC_WRITE,
                                  0, //No Share
                                  nil,
                                  OPEN_EXISTING,
@@ -245,6 +258,7 @@ begin
      if (Self.hComport <> INVALID_HANDLE_VALUE) then
         begin
              CloseHandle(Self.hComport);
+             Self.hComport:=INVALID_HANDLE_VALUE;
         end;
      Self.u32Error:=GetLastError();
 end;
@@ -490,6 +504,7 @@ begin
              Self.clearinput();
              Self.clearoutput();
              Self.bDoIt:=TRUE;
+             Self.bBusy:=TRUE;
 
              if (Self.Suspended) then
                 begin
@@ -616,7 +631,7 @@ var
    u32Size  : unsigned32;
    u32Read  : unsigned32;
 begin
-     Self.Priority:=tpHighest;
+//     Self.Priority:=tpHighest;
 
      while (not Self.Terminated) do
            begin
@@ -627,11 +642,21 @@ begin
                         if (u32Read = u32Size) then
                            begin
                                 rData.Data.Timestamp:=Self.rTimer.Timestamp;
-                                Self.adddata(rData);
+
+                                //Mit Callback oder ohne
+                                if (assigned(Self.fReceive)) then
+                                   begin
+                                        Self.fReceive( Self.adddata(rData) );
+                                   end
+                                else
+                                   begin
+                                        Self.adddata(rData);
+                                   end;
                            end;
                    end
                 else
                    begin
+                        Self.bBusy:=FALSE;
                         Self.Suspend();
                    end;
            end;
