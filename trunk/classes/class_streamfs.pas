@@ -40,7 +40,7 @@ Author: Sven Lorenz / Borg@Sven-of-Nine.de
 ////////////////////////////////////////////////////////////////////////////////
 
 interface
-uses unit_typedefs,windows,sysutils,classes,class_binder;
+uses unit_typedefs,windows,sysutils,classes;
 
 const
      //Maximale länge der Dateinamen
@@ -61,7 +61,6 @@ const
      STREAM_FILE   = 1;
      STREAM_MEMORY = 2;
      STREAM_SOCKET = 3;
-     STREAM_BINDER = 4;
 
      //Header der Dateien kann beliebig aussehen
      FSDB_HEADER = '[$fsdb1$]';
@@ -136,6 +135,9 @@ type
             //Sollen auch Header verschlüsselt werden ?
             bCryptHead: boolean;
 
+            //Speicher oder Datei als Temp nutzen ?
+            bRAMTemp  : Boolean; 
+
             //Letzter aufgetretener Fehler
             u32Error  : unsigned32;
 
@@ -157,7 +159,6 @@ type
             function  openfilestream  (DBFile : longstring):boolean;
             function  openmemorystream():boolean;
             function  opensocketstream(DBFile : longstring):boolean;
-            function  openbinderstream():boolean;
             function  getstreamsize():unsigned64;
 
             //FAT-Funktionen
@@ -264,6 +265,9 @@ type
             property writable    : boolean    read bWritable;
             property readable    : boolean    read bReadable;
 
+            //Soll Speicher oder Dateisystem als Temp benutzt werden
+            property ramtemp     : boolean   read  bRAMTemp   write bRAMTemp;    
+
             //Was für ein Stream soll benutzt werden ?
             property streamtype  : unsigned32 read u32Stream write u32Stream;
             property streamsize  : unsigned64 read GetStreamSize;
@@ -289,8 +293,9 @@ begin
      Self.sPassWord:='hasnabopf';
      Self.crypt:=CRYPT_XOR;
      Self.cryptheader:=FALSE;
+     Self.ramtemp:=TRUE;
 
-     //Default ist Dateistream 
+     //Default ist Dateistream
      Self.StreamType:=STREAM_FILE;
 
      Self.bLocked:=FALSE;
@@ -326,7 +331,6 @@ begin
      case (Self.StreamType) of
           STREAM_FILE     : result:=Self.openfilestream(DBFile);
           STREAM_MEMORY   : result:=Self.openmemorystream();
-          STREAM_BINDER   : result:=Self.openbinderstream();
           STREAM_SOCKET   : result:=Self.openfilestream(DBFile);
      else
          begin
@@ -431,7 +435,7 @@ begin
                      //Name merken
                      Self.sStream:=DBFile;
                      Self.ReleaseLock();
-                     Self.LoadFat;
+                     Self.LoadFat();
                      Self.GetLock();
                 end;
         end
@@ -469,7 +473,7 @@ begin
                      //Name merken
                      Self.sStream:='memorystream';
                      Self.ReleaseLock();
-                     Self.LoadFat;
+                     Self.LoadFat();
                      Self.GetLock();
                 end;
         end
@@ -526,39 +530,6 @@ begin
      Self.ReleaseLock();
 }
  result:=FALSE;
-end;
-
-function  TStreamFS.openbinderstream():boolean;
-var
-   aHeader  : array[0..Length(FSDB_HEADER)-1] of char;
-begin
-     Self.tStream:=TBinderStream.Create();
-
-     //Header checken und evlt Zugriff killen
-     Self.tStream.Seek(0,soFromBeginning);
-     Self.tStream.Read(aHeader[0],Length(FSDB_HEADER));
-
-     aHeader[0]:=Char(Self.tStream.Position);
-
-     if (string(aHeader)<> FSDB_HEADER) then
-        begin
-             Self.tStream.Free();
-             Self.tStream:=nil;
-             Self.bReadable:=FALSE;
-             Self.bWritable:=FALSE;
-        end
-     else
-        begin
-             Self.bReadable:=TRUE;
-             Self.bWritable:=FALSE;
-             Self.bMounted :=TRUE;
-             Self.sStream:='binderstream';
-             Self.ReleaseLock();
-             Self.LoadFat;
-             Self.GetLock();
-        end;
-        
-     result:=TRUE;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -688,6 +659,10 @@ begin
              fsEntry:=pFSEntry(Self.tFAT[u32Index])^;
              Self.GetLock();
 
+             //Targetgröße schonmal setzem
+             Result.Size:=fsEntry.u64FileSize;
+
+             //Und reinkopieren
              if ( Self.copystream( Self.tStream,
                                    (fsEntry.u64Position + SizeOf(TFSEntry)),
                                    fsEntry.u64FileSize,
@@ -941,7 +916,7 @@ begin
                      //Und Änderungen auf die Platte schreiben
                      Self.GetLock();
                      Self.tStream.Seek(pEntry^.u64Position,soFROMBeginning);
-                     Self.writeheader(pEntry^,Self.tStream,pEntry.u32Method);
+                     Self.writeheader(pEntry^,Self.tStream,pEntry^.u32Method);
                      Self.ReleaseLock();
 
                      result:=TRUE;
@@ -1001,7 +976,7 @@ begin
      while (Self.tFat.Count > 0) do
            begin
                 //Speicher freigeben
-                Dispose(Self.tFAT[0]);
+                Dispose(pFSEntry(Self.tFAT[0]));
                 //Item entfernen
                 Self.tFAT.Delete(0);
            end;
@@ -1092,35 +1067,48 @@ end;
 //einen MemoryStream und prüfen dort.
 function TStreamFS.check(fsname:longstring):boolean;
 var
-   FileStr  : TFileStream;
-   sTemp    : longstring;
-   fsEntry  : TFSEntry;
+   sTemp      : longstring;
+   RAMStream  : TMemoryStream;
+   FileStream : TFileStream;
+   fsEntry    : TFSEntry;
+   u32Hash    : unsigned32;
 begin
      result:=FALSE;
 
      fsEntry:=Self.info(fsname);
      if (Self.Error = FSDB_ERROR_NONE) then
         begin
-             sTemp:=Self.createtempfilename();
-
-             if (Self.Restore(fsname,sTemp) ) then
+             if (Self.RAMTemp) then
                 begin
-                     FileStr:=TFileStream.Create(sTemp,fmOpenRead);
-                     FileStr.Position:=0;
-
-                     //Hash checken
-                     if (Self.Hash(FileStr) = fsEntry.u32Hash) then
-                        begin
-                             SetError(FSDB_ERROR_NONE);
-                             result:=TRUE;
-                        end
-                     else
-                        begin
-                             Self.SetError(FSDB_ERROR_FILEHASH);
-                        end;
-
-                     FileStr.Free();
+                     //Daten ins RAM laden
+                     RAMStream:=TMemoryStream(Self.load(fsName));
+                     RAMStream.Position:=0;
+                     u32Hash:=Self.Hash(RAMStream);
+                     RAMStream.Free();
+                end
+             else
+                begin
+                     //Datei als Temp-Datei abspeichern
+                     sTemp:=Self.createtempfilename();
+                     Self.Restore(fsname,sTemp);
+                     FileStream:=TFileStream.Create(sTemp,fmOpenRead);
+                     //Hashen
+                     FileStream.Position:=0;
+                     u32Hash:=Self.Hash(FileStream);
+                     //löschen
+                     FileStream.Free();
                      DeleteFile(sTemp);
+                end;
+
+             //Hash checken
+             if (u32Hash = fsEntry.u32Hash) then
+                begin
+                     SetError(FSDB_ERROR_NONE);
+                     result:=TRUE;
+                end
+             else
+                begin
+                     Self.SetError(FSDB_ERROR_FILEHASH);
                 end;
         end
 end;
@@ -1476,9 +1464,11 @@ var
    u32Size : unsigned32;
 begin
      result:=0;
+
      if ( (Source.Seek(SourceOffset,soFromBeginning) = SourceOffset) AND
           (Target.Seek(TargetOffset,soFromBeginning) = TargetOffset)) then
           begin
+
                //Anzahl der vollen Buffer
                u32Loop:=SourceSize div Length(aBuffer);
                u32Mod :=SourceSize mod Length(aBuffer);
