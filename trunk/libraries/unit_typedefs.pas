@@ -114,6 +114,17 @@ type signed64 =          int64;
 {$ENDIF}
 
 ////////////////////////////////////////////////////////////////////////////////
+//Sondefälle
+
+//In Delphi 7 ist die NULL in Variant definiert.
+//Um diese Unit nicht immer mitzuziehen definieren wir hier einfach die NULL
+{$IFNDEF NULL}
+const NULL : unsigned32 = 0;
+{$ENDIF}
+
+
+
+////////////////////////////////////////////////////////////////////////////////
 //Basis Float Typen
 {$IFNDEF longfloat}
 type longfloat =           double;
