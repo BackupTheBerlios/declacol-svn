@@ -57,7 +57,7 @@ unit Unit_ProcessFunctions;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 interface
 //uses Windows,SysUtils,Messages,TlHelp32,EliRT,psapi;
-uses Windows,SysUtils,Messages,TlHelp32,psapi,win32_additions;
+uses Unit_TypeDefs,Windows,SysUtils,Messages,TlHelp32,psapi,win32_additions;
 
 
 CONST
@@ -245,8 +245,8 @@ begin
      Result.ThreadHD:=0;
 
      //Thread starten
-     Result.ThreadHD:=CreateThread(nil,0,@SlowDownThread,nil,0,Result.ThreadID);
-     if (Result.ThreadHD<>NULL) then
+     Result.ThreadHD:=CreateThread(nil,0,@SlowDownThread,nil,0,Cardinal(Result.ThreadID));
+     if (Result.ThreadHD <> NULL) then
         begin
              //Warten bis der Thread gestartet ist
              z:=0;
