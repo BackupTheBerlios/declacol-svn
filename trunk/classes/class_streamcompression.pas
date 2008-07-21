@@ -22,32 +22,62 @@ Author: Sven Lorenz / Borg@Sven-of-Nine.de
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// Klasse um Streams zu komprimieren.
-/// In dieser Unit wird das RLE-Verfahren umgesetzt. Ist zwar schön schnell
-/// hat aber leider keinen hohen Kompressionsfaktor
 ///
+/// Alle Kompressionsmethoden werden extern eingebunden um den Wrapper
+/// möglichst allgemein zu halten
+///
+/// Da je nach Kompressionmethode Probleme durch die Streams entstehen können,
+/// Werden immer Blöcke ind "buffersize"-Größe komprimiert und einzeln geschrieben
+/// Vor jedem Block steht als 32BitZahl der Größendeskriptor des Paketes um
+/// bei der Dekompression das volle Paket ansprechen zu können
 ////////////////////////////////////////////////////////////////////////////////
 
-unit class_tinyrle;
+unit class_streamcompression;
 
 interface
-uses unit_typedefs,classes,sysutils;
+uses unit_typedefs,classes,class_rle;
 
-type TTinyRLE = class(TObject)
+type TStreamCompression = class(TObject)
      private
+            Packer    : TRLE;
+            u32buffer : unsigned32;
+            u32mode   : unsigned32;
      protected
      public
-           function test(Size : unsigned32):boolean;
-           procedure compress  (input,output : TStream);
-           procedure uncompress(input,output : TStream);
+
+           constructor create();
+           destructor  free();
+
+           function test  (Size : unsigned32):boolean;
+           function pack  (input,output : TStream):boolean;
+           function unpack(input,output : TStream):boolean;
+
+           property buffersize : unsigned32 read u32buffer write u32buffer;
+           property mode       : unsigned32 read u32mode   write u32mode;
 end;
 
 
 implementation
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Konstruktor / Destruktor
+////////////////////////////////////////////////////////////////////////////////
+constructor TStreamCompression.create();
+begin
+     self.buffersize:=81920;
+
+     Packer:=TRLE.Create();
+end;
+
+destructor  TStreamCompression.free();
+begin
+     Packer.Free();
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 //Interner Test der Kompression
 ////////////////////////////////////////////////////////////////////////////////
-function TTinyRLE.test(size : unsigned32):boolean;
+function TStreamCompression.test(size : unsigned32):boolean;
 var
    Temp1    : TMemoryStream;
    Temp2    : TMemoryStream;
@@ -55,12 +85,14 @@ var
    u32Count : unsigned32;
    u8Data   : unsigned8;
    u8Data1  : unsigned8;
+   sTemp    : longstring;
 begin
-     result:=TRUE;
-
      Temp1:=TMemoryStream.Create();
      Temp2:=TMemoryStream.Create();
      Temp3:=TMemoryStream.Create();
+
+     //Interne Testfunktion des Packers
+     Result:=Self.Packer.test(Size);
 
      while (Size > 0) do
            begin
@@ -73,19 +105,25 @@ begin
                 while (u32Count > 0) do
                       begin
                            u8Data:=random(255);
-                           u8Data:=65;
                            Temp1.Write(u8Data,SizeOf(u8Data));
                            dec (u32Count);
                       end;
 
+                //Komprimieren
                 Temp1.Position:=0;
                 Temp2.Position:=0;
                 Temp2.Size:=0;
                 Temp3.Position:=0;
                 Temp3.Size:=0;
 
-                Self.Compress(Temp1,Temp2);
-                Self.UnCompress(Temp2,Temp3);
+                Self.pack(Temp1,Temp2);
+
+                //Dekomprimieren
+                Temp2.Position:=0;
+                Temp3.Position:=0;
+                Temp3.Size:=0;
+
+                Self.unpack(Temp2,Temp3);
 
                 //Und nun Stream 1 und Stream 2 vergleichen
                 Temp1.Position:=0;
@@ -102,135 +140,116 @@ begin
                 size:=size shr 1;
            end;
 
+     //Cleanup
      Temp1.Free();
      Temp2.Free();
      Temp3.Free();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Einfache RLE-Kompression durchführen
-////////////////////////////////////////////////////////////////////////////////
-//Dabei wird auf ein Escape zeichen verzichtet sondern
-//Das zu komprimierende Zeichen selbst als Escape benutzt.
-//
-//
-//Kommt ein Zeichen mehrfach vor so wir es zweimal ausgegeben, gefolgt vom
-//Multiplikator wir oft das Zeichen wiederholt wird. Kommt ein Zeichen nur
-//einfach vor wird es durchgereicht
-//aus
-//
-// aus aaabbcdegghhhhij wird aa#02bb#01cdefgg#01hh#03ij
-//
-////////////////////////////////////////////////////////////////////////////////
-
-procedure TTinyRLE.compress(input,output : TStream);
+//Einen Stream komprimieren
+function TStreamCompression.pack(input,output : TStream):boolean;
 var
-   u8Counter  : unsigned8;
-   u8Current  : unsigned8;
-   u8Last     : unsigned8;
+   InBuffer  : Array of Byte;
+   pPacked   : ^Byte;
+   u32Packed : unsigned32;
+   u32Size   : unsigned32;
 begin
-     u8Counter:=0;
-     Input.Position:=0;
+     result:=TRUE;
 
-     if (input.size > 1) then
-        begin
-             //Beim zweiten Zeichen anfangen
-             input.Read(u8Last,SizeOf(u8Last));
+     //Packer initialisieren
+     Self.Packer.BufferSize:=Self.BufferSize;
+     Self.Packer.Mode:=Self.Mode;
+     Self.Packer.pack(nil,0,pointer(pPacked),u32Size);
 
-             while (Input.Position < Input.Size) do
-                   begin
-                   input.read(u8Current,SizeOf(u8Current));
+     //Und den ganzen eingabestream packen
+     SetLength(InBuffer,Self.BufferSize);
+     repeat
+       u32Size:=Input.Read(InBuffer[0],Length(InBuffer));
+       if (u32Size > 0) then
+          begin
+               //Daten packen
+               if (Self.Packer.pack(Addr(InBuffer[0]),u32Size,pointer(pPacked),u32Packed) = TRUE) then
+                  begin
+                       //Größe schreiben
+                       Output.Write(u32Packed,SizeOf(u32Packed));
 
-                   //Zeichenwiederholung ?
-                   //Oder der Counter läuft über ?
-                   if (u8Current = u8Last) AND (u8Counter < 255) then
-                      begin
-                           inc(u8Counter);
-                      end
-                   else
-                      begin
-                           //Zeichen schreiben
-                           Output.Write(u8Last,SizeOf(u8Last));
+                       //Und in Ausgabe schreiben
+                       Output.Write(pPacked^,u32Packed);
+                  end
+               else
+                  begin
+                       //Packen schiefgegangen
+                       u32Size:=0;
+                       result:=FALSE;
+                  end; 
+          end;
+     until (u32Size = 0);
 
-                           //Sequenz vorrüber ?
-                           if (u8Counter > 0) then
-                              begin
-                                   //Ja => Multiplikator anhängen
-                                   Output.Write(u8Last,SizeOf(u8Last));
-                                   Output.Write(u8Counter,SizeOf(u8Counter));
-                                   u8Counter:=0;
-                              end;
-                      end;
-
-                   //Für die nächste Runde merken
-                   u8Last:=u8Current;
-             end;
-
-             //Der Rest
-             Output.Write(u8Last,SizeOf(u8Last));
-             if (u8Counter > 0) then
-                begin
-                     Output.Write(u8Last,SizeOf(u8Last));
-                     Output.Write(u8Counter,SizeOf(u8Current));
-                end;
-        end
-     else
-        begin
-             //String lohnt nicht zu komprimieren
-             Output.CopyFrom(Input,Input.Size);
-        end; 
-
+     SetLength(InBuffer,0);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Einfache RLE-Dekompression durchführen
+/// Dekompression durchführen
 ////////////////////////////////////////////////////////////////////////////////
-//Sind zwei Identische Zeichen hintereinander im Datenstrom wird das erste Zeichen
-//direkt ausgegeben, daß zweite Zeichen aber so oft wiederholt wie hinter dem
-//zweiten Zeichen angegeben ist. Kommt ein Zeichen nur einmal vor, wird es
-//einfach durchgereicht.
-procedure TTinyRLE.uncompress(input,output : TStream);
+function TStreamCompression.unpack(input,output : TStream):boolean;
 var
-   u8Counter  : unsigned8;
-   u8Last     : unsigned8;
-   u8Current  : unsigned8;
-
+   InBuffer    : Array of Byte;
+   pUnPacked   : ^Byte;
+   u32UnPacked : unsigned32;
+   u32Size     : unsigned32;
+   sTemp       : longstring;
 begin
-     //Beim zweiten Zeichen anfangen
-     Input.Position:=0;
-     Input.Read(u8Current,SizeOf(u8Current));
+     result:=TRUE;
 
-     while (input.position < input.size) do
-        begin
-             //Für die nächste Runde merken
-             u8Last:=u8Current;
+     //Packer initialisieren
+     Self.Packer.BufferSize:=Self.BufferSize;
+     Self.Packer.Mode:=Self.Mode;
+     Self.Packer.unpack(nil,0,pointer(pUnPacked),u32Size);
 
-             //Erstes Zeichen können wir immer ausgeben
-             Output.Write(u8Last,SizeOf(u8Last));
+     //Und den ganzen eingabestream entpacken
+     repeat
+       //Größendeskriptor lesen    
+       if ( Input.Read(u32Size,SizeOf(u32Size)) = SizeOf(u32Size) ) then
+          begin
+               //Puffer richtig setzen
+               SetLength(InBuffer,u32Size);
 
-             //Kommen zwei identische Zeichen muß das nächste Zeichen ein
-             //Multiplikator sein
-             Input.Read(u8Current,SizeOf(u8Current));
-             if (u8Last = u8Current) then
-                begin
-                     //Multiplikator lesen und String auffüllen
-                     Input.Read(u8Counter,SizeOf(u8Counter));
-                     while (u8Counter > 0) do
-                           begin
-                                Output.Write(u8Last,SizeOf(u8Last));
-                                dec(u8Counter);
-                           end;
+               //Packet einlesen
+               u32Size:=Input.Read(InBuffer[0],u32Size);
 
-                     //Wieder mit dem Eingangsstrom synchronisieren
-                     Input.Read(u8Current,SizeOf(u8Current));
-                end;
-        end;
+               //OK ?
+               if (u32Size = unsigned32(Length(InBuffer))) then
+                  begin
+                       //Daten packen
+                       if (Self.Packer.unpack(Addr(InBuffer[0]),u32Size,pointer(pUnPacked),u32UnPacked) = TRUE) then
+                          begin
+                               //Und in Ausgabe schreiben
+                               Output.Write(pUnPacked^,u32UnPacked);
+                          end
+                       else
+                          begin
+                               //Packen schiefgegangen
+                               u32Size:=0;
+                               result:=FALSE;
+                          end;
+                  end
+               else
+                  begin
+                       //Defektes Datenpaket
+                       u32Size:=0;
+                       result:=FALSE;
+                  end;
+          end
+       else
+          begin
+               //Defektes Datenpaket
+               u32Size:=0;
+               result:=FALSE;
+          end;
+     until (u32Size = 0);
 
-     //Letztes Zeichen anhängen
-     if (u8Last <> u8Current) then
-        begin
-             Output.Write(u8Current,SizeOf(u8Current));
-        end;
+     SetLength(InBuffer,0);
 end;
 
 
