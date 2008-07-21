@@ -39,7 +39,7 @@ Author: Sven Lorenz / Borg@Sven-of-Nine.de
 unit Unit_StringFunctions;
 
 interface
-uses     SysUtils, Classes, Windows;
+uses     SysUtils, Classes, Windows,Variants;
 
 
 Const
