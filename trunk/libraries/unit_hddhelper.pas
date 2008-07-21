@@ -37,7 +37,7 @@ implementation
 
 function GetCHSParameter(Size : unsigned64;var cylinder : unsigned64; var heads : unsigned32; var sectors : unsigned32; SectorSize : unsigned32 ):Boolean;
 begin
-
+    Result:=TRUE;
 end;
 
 end.
