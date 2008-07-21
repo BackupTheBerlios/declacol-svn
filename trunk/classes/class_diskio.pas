@@ -531,6 +531,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 //Den kpl. Datenträger partitionieren und FAT32 formatieren
+//ToDo
 function TDiskIO.CreatePartition():Boolean;
 var
   hDevice     : THandle;
