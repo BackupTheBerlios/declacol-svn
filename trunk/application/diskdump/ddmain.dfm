@@ -1,6 +1,6 @@
 object fmMain: TfmMain
-  Left = 312
-  Top = 288
+  Left = 243
+  Top = 262
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DiskDumper (c) 2007 Borg@Sven-of-Nine.de'
@@ -22,7 +22,7 @@ object fmMain: TfmMain
     Top = 0
     Width = 529
     Height = 369
-    ActivePage = tsWriter
+    ActivePage = tsSectorViewer
     TabOrder = 0
     object tsSectorViewer: TTabSheet
       Caption = 'Viewer'
@@ -74,17 +74,24 @@ object fmMain: TfmMain
             20
             159)
         end
-        object seSector: TSpinEdit
+        object edSector: TEdit
           Left = 8
           Top = 8
           Width = 121
-          Height = 22
-          EditorEnabled = False
-          MaxValue = 0
-          MinValue = 0
+          Height = 21
           TabOrder = 1
-          Value = 0
-          OnChange = seSectorChange
+          Text = '0'
+        end
+        object sbSector: TScrollBar
+          Left = 128
+          Top = 8
+          Width = 16
+          Height = 21
+          Kind = sbVertical
+          LargeChange = 10
+          PageSize = 0
+          TabOrder = 2
+          OnChange = sbSectorChange
         end
       end
     end
@@ -125,7 +132,6 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
-          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 4
@@ -261,7 +267,6 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
-          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 5
@@ -332,134 +337,6 @@ object fmMain: TfmMain
         end
       end
     end
-    object tsCHSCalculator: TTabSheet
-      Caption = 'CHS-Calculator'
-      ImageIndex = 5
-      object pnCHSCalculator: TPanel
-        Left = 0
-        Top = 0
-        Width = 521
-        Height = 337
-        BevelInner = bvRaised
-        BevelOuter = bvLowered
-        TabOrder = 0
-        object lbCHSSIze: TLabel
-          Left = 8
-          Top = 18
-          Width = 20
-          Height = 13
-          Caption = 'Size'
-        end
-        object lbCylinder: TLabel
-          Left = 8
-          Top = 42
-          Width = 37
-          Height = 13
-          Caption = 'Cylinder'
-        end
-        object lbHeads: TLabel
-          Left = 8
-          Top = 66
-          Width = 31
-          Height = 13
-          Caption = 'Heads'
-        end
-        object lbSetors: TLabel
-          Left = 8
-          Top = 90
-          Width = 36
-          Height = 13
-          Caption = 'Sectors'
-        end
-        object lbCHSSector: TLabel
-          Left = 8
-          Top = 114
-          Width = 49
-          Height = 13
-          Caption = 'Sectorsize'
-        end
-        object lbCHSStatusPre: TLabel
-          Left = 8
-          Top = 144
-          Width = 30
-          Height = 13
-          Caption = 'Status'
-        end
-        object lbCHSStatus: TLabel
-          Left = 72
-          Top = 144
-          Width = 120
-          Height = 13
-          AutoSize = False
-          Caption = '                                        '
-        end
-        object seCHSCylinder: TSpinEdit
-          Left = 72
-          Top = 40
-          Width = 121
-          Height = 22
-          EditorEnabled = False
-          Enabled = False
-          MaxValue = 0
-          MinValue = 0
-          TabOrder = 0
-          Value = 512
-          OnChange = edCHSSizeChange
-        end
-        object seCHSHeads: TSpinEdit
-          Left = 72
-          Top = 64
-          Width = 121
-          Height = 22
-          EditorEnabled = False
-          MaxValue = 65535
-          MinValue = 1
-          TabOrder = 1
-          Value = 32
-          OnChange = edCHSSizeChange
-        end
-        object seCHSSectors: TSpinEdit
-          Left = 72
-          Top = 88
-          Width = 121
-          Height = 22
-          EditorEnabled = False
-          MaxValue = 65535
-          MinValue = 1
-          TabOrder = 2
-          Value = 63
-          OnChange = edCHSSizeChange
-        end
-        object edCHSSize: TEdit
-          Left = 72
-          Top = 16
-          Width = 121
-          Height = 21
-          ReadOnly = True
-          TabOrder = 3
-          Text = '0'
-          OnChange = edCHSSizeChange
-        end
-        object edCHSSectorSize: TEdit
-          Left = 72
-          Top = 112
-          Width = 121
-          Height = 21
-          ReadOnly = True
-          TabOrder = 4
-          Text = '0'
-        end
-        object btCHSReset: TButton
-          Left = 8
-          Top = 168
-          Width = 75
-          Height = 25
-          Caption = 'Reset'
-          TabOrder = 5
-          OnClick = btCHSResetClick
-        end
-      end
-    end
     object tsDummyFiles: TTabSheet
       Caption = 'DummyFiles'
       ImageIndex = 6
@@ -490,7 +367,6 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
-          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 3
@@ -576,7 +452,6 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
-          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 1
@@ -671,7 +546,6 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
-          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 1

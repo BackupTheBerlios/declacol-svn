@@ -41,7 +41,9 @@ uses
   Dialogs,class_diskio, StdCtrls,Spin, Grids, ComCtrls, ExtCtrls,class_checksum,class_random,
   unit_hddhelper, Menus,class_rle;
 
-const MAX_BURST = 2048;
+const MAX_BURST  = 2048;
+      EXT_PACKED = 'paw';
+      EXT_NORMAL = 'raw';
 
 type
   TfmMain = class(TForm)
@@ -50,7 +52,6 @@ type
     tsReader: TTabSheet;
     pnSectorViewer: TPanel;
     sgHex: TStringGrid;
-    seSector: TSpinEdit;
     gbDeviceControl: TGroupBox;
     gbMountedDevices: TGroupBox;
     cbDrives: TListBox;
@@ -98,21 +99,6 @@ type
     lbReadSpeed: TLabel;
     lbWriteSpeedPre: TLabel;
     lbWriteSpeed: TLabel;
-    tsCHSCalculator: TTabSheet;
-    pnCHSCalculator: TPanel;
-    lbCHSSIze: TLabel;
-    lbCylinder: TLabel;
-    lbHeads: TLabel;
-    lbSetors: TLabel;
-    seCHSCylinder: TSpinEdit;
-    seCHSHeads: TSpinEdit;
-    seCHSSectors: TSpinEdit;
-    edCHSSize: TEdit;
-    lbCHSSector: TLabel;
-    edCHSSectorSize: TEdit;
-    lbCHSStatusPre: TLabel;
-    lbCHSStatus: TLabel;
-    btCHSReset: TButton;
     tsDummyFiles: TTabSheet;
     pnDummy: TPanel;
     lbCreateDummy: TLabel;
@@ -148,6 +134,8 @@ type
     lbCRCLog: TListBox;
     lbCRCLogpre: TListBox;
     cbCreatePartition: TCheckBox;
+    edSector: TEdit;
+    sbSector: TScrollBar;
     procedure cbDrivesClick(Sender: TObject);
     procedure cbWriteprotectedClick(Sender: TObject);
     procedure cbRealSizeClick(Sender: TObject);
@@ -156,7 +144,7 @@ type
     procedure DisableUser();
     procedure EnableUser();
     procedure FormActivate(Sender: TObject);
-    procedure seSectorChange(Sender: TObject);
+    procedure sbSectorChange(Sender: TObject);
     procedure btBrowseTargetClick(Sender: TObject);
     procedure btDumpClick(Sender: TObject);
     procedure btBrowseSourceClick(Sender: TObject);
@@ -165,7 +153,6 @@ type
     procedure tsPropertiesShow(Sender: TObject);
     procedure btStartBenchmarkClick(Sender: TObject);
     procedure edCHSSizeChange(Sender: TObject);
-    procedure btCHSResetClick(Sender: TObject);
     procedure btBrowseDummyClick(Sender: TObject);
     procedure btCreateDummyFileClick(Sender: TObject);
     procedure DeviceChange(var Message: TMESSAGE); message WM_DEVICECHANGE;
@@ -325,18 +312,12 @@ begin
           cbRealSize.Checked      := RealSize;
 
           //Sectorviewer resetten
-          seSector.MaxValue       := SectorCount-1;
-          seSector.Value          := 0;
-          Self.seSectorChange(Self);
+          sbSector.Max            := SectorCount-1;
+          sbSector.Position       := 0;
+          Self.sbSectorChange(Self);
 
           //Properties ersetten
           tsPropertiesShow(Self);
-
-          //CHS-Rechner resetten
-          seCHSCylinder.Value :=Geometry.Cylinders;
-          edCHSSectorSize.Text:=IntToStr(SectorSize);
-          edCHSSize.Text:=IntToStr(Size);
-          edDummySize.Text:=IntToStr(Size);
         end;
     end;
 end;
@@ -394,11 +375,11 @@ end;
 procedure TfmMain.tsSectorViewerEnter(Sender: TObject);
 begin
     //Sectoransicht neu laden
-    seSectorChange(Self);
+    sbSectorChange(Self);
 end;
 
 //Sektorenansicht
-procedure TfmMain.seSectorChange(Sender: TObject);
+procedure TfmMain.sbSectorChange(Sender: TObject);
 var
   Buffer : array of byte;
   Dummy  : unsigned32;
@@ -412,10 +393,12 @@ begin
     begin
       with TDiskIO(cbDrives.Items.Objects[cbDrives.ItemIndex]) do
         begin
+          edSector.Text:=IntToStr(sbSector.Position);
+
           SetLength(Buffer,SectorSize);
 
           //Nur einen Sektor lesen
-          Read(unsigned64(seSector.Value),Addr(Buffer[0]),1,Dummy);
+          Read(unsigned64(sbSector.Position),Addr(Buffer[0]),1,Dummy);
 
          //Grid an die Sektoren anpassen
          sgHex.RowCount:=signed32(SectorSize) div sgHex.ColCount;
@@ -461,7 +444,7 @@ begin
           //Extension anpassen ?
           if (dgsave.FilterIndex<>0) then
              begin
-                  edTargetFile.Text:=ChangeFileExt(edTargetFile.Text,'.img.z');
+                  edTargetFile.Text:=ChangeFileExt(edTargetFile.Text,'.'+EXT_PACKED);
              end;
         end;
     end;
@@ -485,7 +468,7 @@ begin
   lbReadLog.Clear();
 
   //An der Endung erkennen wir, ob komprimiert wird
-  bCompress:=pos('.img.z',edTargetFile.Text) > 0;
+  bCompress:=pos('.'+EXT_PACKED,edTargetFile.Text) > 0;
 
   //Ein Laufwerk ausgewählt ?
   if (cbDrives.ItemIndex>=0) then
@@ -635,7 +618,7 @@ begin
   btBreak.Show();
 
   //An der Endung erkennen wir, ob komprimiert wird
-  bCompress:=pos('.img.z',edSourceFile.Text) > 0;
+  bCompress:=pos('.'+EXT_PACKED,edSourceFile.Text) > 0;
 
   lbWriteLog.Clear();
 
@@ -1140,43 +1123,8 @@ end;
 /// Funktionen des CHS-Kalkulators
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TfmMain.btCHSResetClick(Sender: TObject);
-begin
-  seCHSHeads.Value  :=32;
-  seCHSSectors.Value:=63;
-
-  //Und neu berechnen
-  edCHSSizeChange(Self);
-end;
-
 procedure TfmMain.edCHSSizeChange(Sender: TObject);
-var
-  a : unsigned64;
-  b : unsigned32;
-  c : unsigned32;
 begin
-  if (cbDrives.ItemIndex>=0) then
-    begin
-      with TDiskIO(cbDrives.Items.Objects[cbDrives.ItemIndex]) do
-        begin
-          a:=0;
-          b:=seCHSHeads.Value;
-          c:=seCHSSectors.Value;
-
-          if (GetCHSParameter(Size,a,b,c,SectorSize)=TRUE) then
-            begin
-              lbCHSStatus.Caption:='OK';
-            end
-          else
-            begin
-              lbCHSStatus.Caption:='inconsistent';
-            end;
-
-          if (unsigned32(seCHSCylinder.Value) <> a ) then seCHSCylinder.Value:=a;
-          if (unsigned32(seCHSHeads.Value)    <> b ) then seCHSHeads.Value:=b;
-          if (unsigned32(seCHSSectors.Value)  <> c ) then seCHSSectors.Value:=c;
-        end;
-      end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1280,6 +1228,7 @@ var
 begin
   Self.DeviceChange(Dummy);
 end;
+
 
 
 
