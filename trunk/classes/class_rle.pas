@@ -43,13 +43,13 @@ uses unit_compiler,unit_typedefs,classes;
 
 type TRLE = class(TObject)
      private
-            u32Mode   : unsigned32;
-            u32Buffer : unsigned32;
+           u32Mode   : unsigned32;
+           u32Buffer : unsigned32;
+           sID       : longstring;
 
-            //Zum Puffern benutzen wir einfach Memorystreams
-            PackBuffer   : TMemoryStream;
-            UnpackBuffer : TMemoryStream;    
-
+           //Zum Puffern benutzen wir einfach Memorystreams
+           PackBuffer   : TMemoryStream;
+           UnpackBuffer : TMemoryStream;
      protected
            function UnPackInit():Boolean;
            function PackInit():Boolean;
@@ -67,8 +67,9 @@ type TRLE = class(TObject)
            function unpack (input : Pointer; insize : unsigned32; var output : pointer; var outsize : unsigned32):boolean;
 
            //Eigenschaften
-           //Werden in dieser Klasse nicht benutzt
+           property id         : longstring read sID       write sID; 
            property buffersize : unsigned32 read u32Buffer write u32Buffer;
+           //Werden in dieser Klasse nicht benutzt
            property mode       : unsigned32 read u32Mode   write u32Mode;
 end;
 
@@ -80,6 +81,9 @@ constructor TRLE.Create();
 begin
      PackBuffer:=TMemoryStream.Create();
      UnpackBuffer:=TMemoryStream.Create();
+
+     //ID mit der eine Anwendung den Kompressionstyp merken kann
+     Self.sID:='RLE_V1';
 
      //Buffer setzen
      Self.BufferSize:=8192;
@@ -225,31 +229,29 @@ var
    u8Counter  : unsigned8;
    u8Current  : unsigned8;
    u8Last     : unsigned8;
-   u32Index   : unsigned32;
    pData      : ^Byte;
+   pEnd       : ^Byte;
 begin
      //Zähler für Sequenzen 
      u8Counter:=0;
-
-     //Zähler für Eingabe
-     u32Index:=1;
 
      //Den Pointer mappen wie einfach auf ein Byte,
      //damit wird der Zugriff viel einfacher und das iterieren
      //nit von Exceptions gestört.
      pData:=Input;
+     pEnd :=Input;
+     inc(pEnd,InSize);
 
      //Ausgabestream initialisieren
      PackBuffer.Size:=Self.BufferSize;
      PackBuffer.Position:=0;
-
 
      //Erstes Zeichen in den Schleifenpuffer laden
      u8Last:=pData^;
      inc(pData);
 
      //Und alle Weiteren verarbeiten
-     while (u32Index < InSize) do
+     while (unsigned64(pData) < unsigned64(pEnd)) do
            begin
                 //Zeichen laden
                 u8Current:=pData^;
@@ -278,8 +280,6 @@ begin
 
                    //Für die nächste Runde merken
                    u8Last:=u8Current;
-
-                   inc(u32Index);
              end;
 
      //Der Rest
@@ -289,7 +289,6 @@ begin
              PackBuffer.Write(u8Last,SizeOf(u8Last));
              PackBuffer.Write(u8Counter,SizeOf(u8Current));
         end;
-
 
      //Nun sollte alles gepackte im DeBuffer-Stream sein
      outsize:=unsigned32(PackBuffer.Position);
@@ -327,15 +326,14 @@ var
    u8Last     : unsigned8;
    u8Current  : unsigned8;
    pData      : ^Byte;
-   u32Index   : unsigned32;
+   pEnd       : ^Byte;
 begin
-     //Zähler für Eingabe
-     u32Index:=1;
-
      //Den Pointer mappen wie einfach auf ein Byte,
      //damit wird der Zugriff viel einfacher und das iterieren
-     //nit von Exceptions gestört.
+     //nicht von Exceptions gestört.
      pData:=Input;
+     pEnd :=Input;
+     inc(pEnd,InSize);
 
      //Ausgabestream initialisieren
      UnpackBuffer.Size:=Self.BufferSize;
@@ -345,26 +343,23 @@ begin
      u8Current:=pData^;
      inc(pData);
 
-     while (u32Index < insize) do
+     while (unsigned64(pData) < unsigned64(pEnd)) do
         begin
              //Für die nächste Runde merken
              u8Last:=u8Current;
-
-             //Erstes Zeichen können wir immer ausgeben
-             UnpackBuffer.Write(u8Last,SizeOf(u8Last));
 
              //Kommen zwei identische Zeichen muß das nächste Zeichen ein
              //Multiplikator sein
              u8Current:=pData^;
              inc(pData);
-             inc(u32Index);
 
              if (u8Last = u8Current) then
                 begin
+                     UnpackBuffer.Write(u8Last,SizeOf(u8Last));
+
                      //Multiplikator lesen und String auffüllen
                      u8Counter:=pData^;
                      inc(pData);
-                     inc(u32Index);
 
                      while (u8Counter > 0) do
                            begin
@@ -372,16 +367,19 @@ begin
                                 dec(u8Counter);
                            end;
 
-                     //Wieder mit dem Eingangsstrom synchronisieren
+                     //Wieder mit dem Strom synchronisieren
                      u8Current:=pData^;
                      inc(pData);
-                     inc(u32Index);
+                end
+             else
+                begin
+                     UnpackBuffer.Write(u8Last,SizeOf(u8Last));
                 end;
-
         end;
 
-     //Letztes Zeichen anhängen
-     if (u8Last <> u8Current) then
+     //Wenn beide Zeiger gleich sind,
+     //kommt noch ein weiteres Zeichen
+     if (unsigned64(pEnd) = unsigned64(pData)) then
         begin
              UnpackBuffer.Write(u8Current,SizeOf(u8Current));
         end;
