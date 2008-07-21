@@ -155,7 +155,6 @@ end;
 function EnumDisplayModes(var Modes:Array of TScreenMode):Boolean;
 var z :integer;
     D :TDevMode;
-    i : integer;
 begin
      Result:=TRUE;
      z:=0;
