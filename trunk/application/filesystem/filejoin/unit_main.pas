@@ -3,7 +3,7 @@ unit unit_main;
 interface
 
 uses
-  unit_typedefs,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  unit_typedefs,Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls,unit_filefunctions, CheckLst, ComCtrls;
 
 type
@@ -128,7 +128,7 @@ end;
 //Sicherheitsabfrage der Groﬂenbox
 procedure TForm1.cbSizeChange(Sender: TObject);
 begin
-  if (StrToFloatDef(cbSize.Text,-1)<0) then
+  if (StrToFloat(cbSize.Text)<0) then
     begin
       ShowMessage('enter a real size');
       cbSize.Text:=cbSize.Items[0];
@@ -148,7 +148,7 @@ begin
     rTarget:=TFileStream.Create(edJoinTarget.Text,fmOpenWrite or fmCreate);
 
     //Alle Datei zusammenf¸gen
-    while (u32Index < unsigned32(lbFiles.Count)) do
+    while (u32Index < unsigned32(lbFiles.items.Count)) do
       begin
         lbFiles.ItemIndex:=u32Index;
         //Nur angehakte Dateien zusammenf¸hren
@@ -188,7 +188,7 @@ begin
     rSource:=TFileStream.Create(edSplitSource.Text,fmOpenRead);
 
     //Anzahl der durchl‰ufe
-    u32Size:=trunc( StrToFloatDef(cbSize.Text,1.44) * 1024 * 1024 );
+    u32Size:=trunc( StrToFloat(cbSize.Text) * 1024 * 1024 );
     u32Loop:=rSource.Size div u32Size;
     u32Mod :=rSource.Size mod u32Size;
     u32Index:=0;

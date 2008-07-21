@@ -64,8 +64,8 @@ BottomPanelSize=0
 
 [View0]
 Module=M:\berlios\application\diskdump\DDMain.pas
-CursorX=78
-CursorY=1144
+CursorX=24
+CursorY=1141
 TopLine=1139
 LeftCol=1
 
