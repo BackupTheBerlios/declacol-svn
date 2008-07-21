@@ -39,7 +39,9 @@ uses
 
   Unit_typedefs,Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs,class_diskio, StdCtrls,Spin, Grids, ComCtrls, ExtCtrls,class_checksum,class_random,
-  unit_hddhelper, Menus;
+  unit_hddhelper, Menus,class_rle;
+
+const MAX_BURST = 2048;
 
 type
   TfmMain = class(TForm)
@@ -76,18 +78,14 @@ type
     dgSave: TSaveDialog;
     btDump: TButton;
     cbReadBurstMode: TCheckBox;
-    seReadBurstMode: TSpinEdit;
-    lbReadBurstMode: TLabel;
     pbRead: TProgressBar;
     lbReadLog: TListBox;
     lbImageFIle: TLabel;
     edSourceFile: TEdit;
     btBrowseSource: TButton;
     cbWriteBurstMode: TCheckBox;
-    seWriteBurstMode: TSpinEdit;
     btWriteImage: TButton;
     lbWriteLog: TListBox;
-    lbWriteBurstMode: TLabel;
     pbWrite: TProgressBar;
     tsProperties: TTabSheet;
     pnProperties: TPanel;
@@ -161,9 +159,7 @@ type
     procedure seSectorChange(Sender: TObject);
     procedure btBrowseTargetClick(Sender: TObject);
     procedure btDumpClick(Sender: TObject);
-    procedure cbReadBurstModeClick(Sender: TObject);
     procedure btBrowseSourceClick(Sender: TObject);
-    procedure cbWriteBurstModeClick(Sender: TObject);
     procedure btWriteImageClick(Sender: TObject);
     procedure tsSectorViewerEnter(Sender: TObject);
     procedure tsPropertiesShow(Sender: TObject);
@@ -180,8 +176,10 @@ type
     procedure btWipeDeviceClick(Sender: TObject);
     procedure btCRCClick(Sender: TObject);
 
+
   private
     { Private-Deklarationen }
+    Packer : TRLE;
   public
     { Public-Deklarationen }
   end;
@@ -384,6 +382,8 @@ begin
       Self.ScanDevices();
       bLoaded:=TRUE;
       pcMain.ActivePageIndex:=0;
+
+      Packer:=TRLE.Create();
     end;
 end;
 
@@ -457,14 +457,14 @@ begin
       if (Execute) then
         begin
           edTargetFile.Text:=Filename;
+
+          //Extension anpassen ?
+          if (dgsave.FilterIndex<>0) then
+             begin
+                  edTargetFile.Text:=ChangeFileExt(edTargetFile.Text,'.img.z');
+             end;
         end;
     end;
-end;
-
-procedure TfmMain.cbReadBurstModeClick(Sender: TObject);
-begin
-  seReadBurstMode.Enabled:=cbReadBurstMode.Checked;
-  lbReadBurstMode.Enabled:=cbReadBurstMode.Checked;
 end;
 
 procedure TfmMain.btDumpClick(Sender: TObject);
@@ -473,29 +473,46 @@ var
   Buffer   : array of Byte;
   u32Read  : unsigned32;
   u32Burst : unsigned32;
+  u32Packed: unsigned32;
   u64Sector: unsigned32;
   MD5      : TMD5;
   sMD5     : longstring;
+  bCompress: Boolean;
+  pData    : ^Byte;  
 begin
   DisableUser();
   btBreak.Show();
   lbReadLog.Clear();
+
+  //An der Endung erkennen wir, ob komprimiert wird
+  bCompress:=pos('.img.z',edTargetFile.Text) > 0;
+
+  //Ein Laufwerk ausgewählt ?
   if (cbDrives.ItemIndex>=0) then
     begin
-
+      //Und los geht der Spaß
       with TDiskIO(cbDrives.Items.Objects[cbDrives.ItemIndex]) do
         begin
+           //Packer vorsorglich initialisieren
+           Self.Packer.bufferSize:=MAX_BURST * SectorSize;
+           Self.Packer.Pack(nil,0,pointer(pData),u32Read);
+
+
           lbReadLog.Items.Add(Format('reading device%d',[Devicenumber]));
 
           //BurstMode
           if (cbReadBurstMode.Checked) then
             begin
-              u32Burst := seReadBurstMode.Value;
+              u32Burst := MAX_BURST;
             end
           else
             begin
               u32Burst := 1;
             end;
+
+          //Buffergröße des Packers anpassen, da dadurch der Zugriff auf den Memorystream schneller wird.
+          //Braucht allerdings auch mehr Speicher
+          Self.Packer.buffersize:=SectorSize * u32Burst;
 
           //Evtl. Existierende Datei löschen
           if (FileExists(edTargetFile.Text)) then
@@ -526,11 +543,27 @@ begin
                     begin
                       pbRead.Position:=signed32(trunc(u64Sector / unsigned32(SectorCount) * 1024));
 
-                      //Prüfsumme bauen
-                      MD5.add(Addr(Buffer[0]),u32Read * SectorSize);
+                      pData:=Addr(Buffer[0]);
 
-                      //In Datei speichern
-                      FileWrite(hFile,Buffer[0],u32Read * SectorSize);
+                      //Prüfsumme bauen
+                      MD5.add(Pointer(pData),u32Read * SectorSize);
+
+                      //Komprimieren ?
+                      if (bCompress = TRUE) then
+                         begin
+                              Packer.Pack(Addr(Buffer[0]),u32Read * SectorSize,pointer(pData),u32Packed);
+
+                              //Blockgröße schreiben
+                              FileWrite(hFile,u32Packed,SizeOf(u32Packed));
+                         end
+                      else
+                         begin
+                              //Unkomprimiert schreiben
+                              u32Packed:=u32Read * SectorSize;
+                         end; 
+
+                      //Daten speichern
+                      FileWrite(hFile,pData^,u32Packed);
                       lbReadSpeed.Caption:=Format('%f',[Speed]);
 
                       //Um die gelesenen Sekotoren vorschieben
@@ -585,32 +618,35 @@ begin
     end;
 end;
 
-procedure TfmMain.cbWriteBurstModeClick(Sender: TObject);
-begin
-  seWriteBurstMode.Enabled:=cbWriteBurstMode.Checked;
-  lbWriteBurstMode.Enabled:=cbWriteBurstMode.Checked;
-end;
-
 procedure TfmMain.btWriteImageClick(Sender: TObject);
 var
   hFile    : Signed32;
   Buffer   : array of Byte;
+  bCompress: boolean;
+  u32Packed: unsigned32;
   u32Write : unsigned32;
   u32Burst : unsigned32;
   u64Sector: unsigned32;
+  pData    : ^Byte;  
   MD5      : TMD5;
   sMD5     : longstring;
 begin
   DisableUser();
   btBreak.Show();
 
+  //An der Endung erkennen wir, ob komprimiert wird
+  bCompress:=pos('.img.z',edSourceFile.Text) > 0;
+
   lbWriteLog.Clear();
 
   if (cbDrives.ItemIndex>=0) then
     begin
-
       with TDiskIO(cbDrives.Items.Objects[cbDrives.ItemIndex]) do
         begin
+          //Packer vorsorglich initialisieren
+          Self.Packer.bufferSize:=MAX_BURST * SectorSize;
+          Self.Packer.Pack(nil,0,pointer(pData),u32Write);
+
           lbWriteLog.Items.Add(Format('writing device%d',[DeviceNumber]));
 
           //Schreibschutz
@@ -624,7 +660,7 @@ begin
           //BurstMode
           if (cbWriteBurstMode.Checked) then
             begin
-              u32Burst := seWriteBurstMode.Value;
+              u32Burst := MAX_BURST;
             end
           else
             begin
@@ -652,15 +688,36 @@ begin
                   //Buffer flushen um den Sektor immer mit nullen aufzufüllen
                   FillChar(Buffer[0],Length(Buffer),#00);
 
+                  //Komprimiert ?
+                  if (bCompress=TRUE) then
+                     begin
+                          //Die Packetgröße lesen
+                          FileRead(hFile,u32Packed,SizeOf(u32Packed));
+                     end
+                  else
+                     begin
+                          u32Packed:=SectorSize * u32Burst;
+                     end;
+
                   //Datei lesen
-                  u32Write:=unsigned32(FileRead(hFile,Buffer[0],SectorSize * u32Burst));
+                  u32Write:=unsigned32(FileRead(hFile,Buffer[0],u32Packed));
                   if (u32Write > 0) then
                     begin
+                      //Packet evtl. dekomprimieren
+                      if (bCompress=TRUE) then
+                         begin
+                              Self.Packer.unpack(Addr(Buffer[0]),u32Packed,Pointer(pData),u32Write);
+                         end
+                      else
+                         begin
+                              pData:=Addr(Buffer[0]);
+                         end; 
+
                       //Prüfsumme bauen
-                      MD5.add(Addr(Buffer[0]),u32Write);
+                      MD5.add(Pointer(pData),u32Write);
 
                       //Sektoren schreiben
-                      if (Write(u64Sector,Addr(Buffer[0]),u32Burst,u32Write)=FALSE) then
+                      if (Write(u64Sector,Pointer(pData),u32Burst,u32Write)=FALSE) then
                         begin
                           lbWriteLog.Items.Add(Format('unable to write sector %d - %d',[u64Sector,u64Sector+u32Burst]));
                           inc(u64Sector,1);
@@ -993,7 +1050,7 @@ begin
           //BurstMode aus Write holen
           if (cbWriteBurstMode.Checked) then
             begin
-              u32Burst := seWriteBurstMode.Value;
+              u32Burst := MAX_BURST;
             end
           else
             begin
@@ -1146,7 +1203,7 @@ begin
           //BurstMode
           if (cbReadBurstMode.Checked) then
             begin
-              u32Burst := seReadBurstMode.Value;
+              u32Burst := MAX_BURST;
             end
           else
             begin

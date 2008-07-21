@@ -22,7 +22,7 @@ object fmMain: TfmMain
     Top = 0
     Width = 529
     Height = 369
-    ActivePage = tsReader
+    ActivePage = tsWriter
     TabOrder = 0
     object tsSectorViewer: TTabSheet
       Caption = 'Viewer'
@@ -106,13 +106,6 @@ object fmMain: TfmMain
           Height = 13
           Caption = 'Dumpfile'
         end
-        object lbReadBurstMode: TLabel
-          Left = 104
-          Top = 82
-          Width = 36
-          Height = 13
-          Caption = 'Sectors'
-        end
         object lbReadSpeedPre: TLabel
           Left = 8
           Top = 292
@@ -135,7 +128,7 @@ object fmMain: TfmMain
           Min = 0
           Max = 1024
           Smooth = True
-          TabOrder = 5
+          TabOrder = 4
         end
         object edTargetFile: TEdit
           Left = 8
@@ -174,17 +167,6 @@ object fmMain: TfmMain
           ShowHint = True
           State = cbChecked
           TabOrder = 3
-          OnClick = cbReadBurstModeClick
-        end
-        object seReadBurstMode: TSpinEdit
-          Left = 32
-          Top = 80
-          Width = 65
-          Height = 22
-          MaxValue = 32768
-          MinValue = 1
-          TabOrder = 4
-          Value = 2048
         end
         object lbReadLog: TListBox
           Left = 8
@@ -192,7 +174,7 @@ object fmMain: TfmMain
           Width = 505
           Height = 137
           ItemHeight = 13
-          TabOrder = 6
+          TabOrder = 5
         end
       end
     end
@@ -213,13 +195,6 @@ object fmMain: TfmMain
           Width = 41
           Height = 13
           Caption = 'imagefile'
-        end
-        object lbWriteBurstMode: TLabel
-          Left = 104
-          Top = 82
-          Width = 36
-          Height = 13
-          Caption = 'Sectors'
         end
         object lbWriteSpeedPre: TLabel
           Left = 8
@@ -263,17 +238,6 @@ object fmMain: TfmMain
           ShowHint = True
           State = cbChecked
           TabOrder = 2
-          OnClick = cbWriteBurstModeClick
-        end
-        object seWriteBurstMode: TSpinEdit
-          Left = 32
-          Top = 80
-          Width = 65
-          Height = 22
-          MaxValue = 32768
-          MinValue = 1
-          TabOrder = 3
-          Value = 2048
         end
         object btWriteImage: TButton
           Left = 8
@@ -281,7 +245,7 @@ object fmMain: TfmMain
           Width = 75
           Height = 25
           Caption = 'Write from File'
-          TabOrder = 4
+          TabOrder = 3
           OnClick = btWriteImageClick
         end
         object lbWriteLog: TListBox
@@ -290,7 +254,7 @@ object fmMain: TfmMain
           Width = 505
           Height = 137
           ItemHeight = 13
-          TabOrder = 5
+          TabOrder = 4
         end
         object pbWrite: TProgressBar
           Left = 8
@@ -300,7 +264,7 @@ object fmMain: TfmMain
           Min = 0
           Max = 1024
           Smooth = True
-          TabOrder = 6
+          TabOrder = 5
         end
       end
     end
@@ -882,7 +846,7 @@ object fmMain: TfmMain
     end
   end
   object btBreak: TButton
-    Left = 196
+    Left = 212
     Top = 144
     Width = 75
     Height = 25
@@ -892,12 +856,12 @@ object fmMain: TfmMain
     OnClick = btBreakClick
   end
   object dgLoad: TOpenDialog
-    Filter = 'all files|*.*'
+    Filter = 'all files|*.*|compressed image|*.img.z'
     Left = 204
     Top = 280
   end
   object dgSave: TSaveDialog
-    Filter = 'all files|*.*'
+    Filter = 'all files|*.*|compressed image|*.img.z'
     Left = 236
     Top = 280
   end
