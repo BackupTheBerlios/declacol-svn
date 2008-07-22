@@ -39,7 +39,7 @@ uses
 
   Unit_typedefs,Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs,class_diskio, StdCtrls,Spin, Grids, ComCtrls, ExtCtrls,class_checksum,class_random,
-  unit_hddhelper, Menus,class_rle;
+  unit_hddhelper, Menus,class_blockio;
 
 const MAX_BURST  = 2048;
       EXT_PACKED = 'paw';
@@ -166,7 +166,8 @@ type
 
   private
     { Private-Deklarationen }
-    Packer : TRLE;
+    BlockWriter : TBlockWriter;
+    BlockReader : TBlockReader;
   public
     { Public-Deklarationen }
   end;
@@ -364,7 +365,8 @@ begin
       bLoaded:=TRUE;
       pcMain.ActivePageIndex:=0;
 
-      Packer:=TRLE.Create();
+      BlockReader:=TBlockReader.Create();
+      BlockWriter:=TBlockWriter.Create();
     end;
 end;
 
@@ -452,23 +454,19 @@ end;
 
 procedure TfmMain.btDumpClick(Sender: TObject);
 var
-  hFile    : Signed32;
   Buffer   : array of Byte;
   u32Read  : unsigned32;
   u32Burst : unsigned32;
-  u32Packed: unsigned32;
   u64Sector: unsigned32;
   MD5      : TMD5;
   sMD5     : longstring;
-  bCompress: Boolean;
-  pData    : ^Byte;  
 begin
   DisableUser();
   btBreak.Show();
   lbReadLog.Clear();
 
   //An der Endung erkennen wir, ob komprimiert wird
-  bCompress:=pos('.'+EXT_PACKED,edTargetFile.Text) > 0;
+  BlockWriter.compressed:=pos('.'+EXT_PACKED,edTargetFile.Text) > 0;
 
   //Ein Laufwerk ausgewählt ?
   if (cbDrives.ItemIndex>=0) then
@@ -476,11 +474,6 @@ begin
       //Und los geht der Spaß
       with TDiskIO(cbDrives.Items.Objects[cbDrives.ItemIndex]) do
         begin
-           //Packer vorsorglich initialisieren
-           Self.Packer.bufferSize:=MAX_BURST * SectorSize;
-           Self.Packer.Pack(nil,0,pointer(pData),u32Read);
-
-
           lbReadLog.Items.Add(Format('reading device%d',[Devicenumber]));
 
           //BurstMode
@@ -493,20 +486,8 @@ begin
               u32Burst := 1;
             end;
 
-          //Buffergröße des Packers anpassen, da dadurch der Zugriff auf den Memorystream schneller wird.
-          //Braucht allerdings auch mehr Speicher
-          Self.Packer.buffersize:=SectorSize * u32Burst;
-
-          //Evtl. Existierende Datei löschen
-          if (FileExists(edTargetFile.Text)) then
-            begin
-              lbReadLog.Items.Add(Format('removing old file %s',[edTargetFile.Text]));
-              deletefile(edTargetFile.Text);
-            end;
-
           //Datei erzeugen
-          hFile:=FileCreate(edTargetFile.Text);
-          if (hFile >= 0) then
+          if ( BlockWriter.open(edTargetFile.Text) = TRUE ) then
             begin
               lbReadLog.Items.Add(Format('creating file %s',[edTargetFile.Text]));
 
@@ -526,28 +507,17 @@ begin
                     begin
                       pbRead.Position:=signed32(trunc(u64Sector / unsigned32(SectorCount) * 1024));
 
-                      pData:=Addr(Buffer[0]);
+                      //Das ist die Geschwindigkeit der Karte
+                      lbReadSpeed.Caption:=Format('%f',[Speed]);
 
                       //Prüfsumme bauen
-                      MD5.add(Pointer(pData),u32Read * SectorSize);
+                      MD5.add(Addr(Buffer[0]),u32Read * SectorSize);
 
-                      //Komprimieren ?
-                      if (bCompress = TRUE) then
+                      //Datenblock speichern
+                      if (BlockWriter.write(Addr(Buffer[0]),u32Read * SectorSize)<>TRUE) then
                          begin
-                              Packer.Pack(Addr(Buffer[0]),u32Read * SectorSize,pointer(pData),u32Packed);
-
-                              //Blockgröße schreiben
-                              FileWrite(hFile,u32Packed,SizeOf(u32Packed));
-                         end
-                      else
-                         begin
-                              //Unkomprimiert schreiben
-                              u32Packed:=u32Read * SectorSize;
-                         end; 
-
-                      //Daten speichern
-                      FileWrite(hFile,pData^,u32Packed);
-                      lbReadSpeed.Caption:=Format('%f',[Speed]);
+                              lbReadLog.Items.Add(Format('error dumping sector  %d',[u64Sector]));
+                         end;
 
                       //Um die gelesenen Sekotoren vorschieben
                       inc(u64Sector,u32Read);
@@ -570,7 +540,7 @@ begin
               lbCRCLogPre.Items.Add(Format('Read File : %s => MD5 : %s ',[edTargetFile.Text,sMD5]));
 
               MD5.Free();
-              CloseHandle(hFile);
+              BlockWriter.close();
             end
           else
             begin
@@ -603,10 +573,7 @@ end;
 
 procedure TfmMain.btWriteImageClick(Sender: TObject);
 var
-  hFile    : Signed32;
   Buffer   : array of Byte;
-  bCompress: boolean;
-  u32Packed: unsigned32;
   u32Write : unsigned32;
   u32Burst : unsigned32;
   u64Sector: unsigned32;
@@ -618,18 +585,13 @@ begin
   btBreak.Show();
 
   //An der Endung erkennen wir, ob komprimiert wird
-  bCompress:=pos('.'+EXT_PACKED,edSourceFile.Text) > 0;
-
+  BlockReader.compressed:=pos('.'+EXT_PACKED,edSourceFile.Text) > 0;
   lbWriteLog.Clear();
 
   if (cbDrives.ItemIndex>=0) then
     begin
       with TDiskIO(cbDrives.Items.Objects[cbDrives.ItemIndex]) do
         begin
-          //Packer vorsorglich initialisieren
-          Self.Packer.bufferSize:=MAX_BURST * SectorSize;
-          Self.Packer.Pack(nil,0,pointer(pData),u32Write);
-
           lbWriteLog.Items.Add(Format('writing device%d',[DeviceNumber]));
 
           //Schreibschutz
@@ -652,15 +614,14 @@ begin
 
           //Datei erzeugen
           lbWriteLog.Items.Add(Format('opening file %s',[edSourceFile.Text]));
-          hFile:=FileOpen(edSourceFile.Text,fmOPENREAD);
-          if (hFile >= 0) then
+          if (BlockReader.open(edSourceFile.Text)=TRUE) then
             begin
               //Checksummer initialisieren
               MD5:=TMD5.create();
               MD5.init();
 
               //Buffer Setzen
-              SetLength(Buffer, (SectorSize * u32Burst) );
+              BlockReader.blocksize:=u32Burst * SectorSize;
               lbWriteLog.Items.Add(Format('sector buffer set to %d',[u32Burst]));
               lbWriteLog.Items.Add(Format('%d sectors found',[SectorCount]));
 
@@ -668,34 +629,11 @@ begin
               u64Sector:=0;
               while (u64Sector < SectorCount) and (bBusy) do
                 begin
-                  //Buffer flushen um den Sektor immer mit nullen aufzufüllen
-                  FillChar(Buffer[0],Length(Buffer),#00);
+                  //Daten lesen
+                  BlockReader.read(pointer(pData),u32Write);
 
-                  //Komprimiert ?
-                  if (bCompress=TRUE) then
-                     begin
-                          //Die Packetgröße lesen
-                          FileRead(hFile,u32Packed,SizeOf(u32Packed));
-                     end
-                  else
-                     begin
-                          u32Packed:=SectorSize * u32Burst;
-                     end;
-
-                  //Datei lesen
-                  u32Write:=unsigned32(FileRead(hFile,Buffer[0],u32Packed));
                   if (u32Write > 0) then
                     begin
-                      //Packet evtl. dekomprimieren
-                      if (bCompress=TRUE) then
-                         begin
-                              Self.Packer.unpack(Addr(Buffer[0]),u32Packed,Pointer(pData),u32Write);
-                         end
-                      else
-                         begin
-                              pData:=Addr(Buffer[0]);
-                         end; 
-
                       //Prüfsumme bauen
                       MD5.add(Pointer(pData),u32Write);
 
@@ -707,6 +645,7 @@ begin
                         end
                       else
                         begin
+                          //Um die geschriebenen Sectoren vorschieben
                           inc(u64Sector,u32Write);
                         end;
 
@@ -725,7 +664,7 @@ begin
               lbCRCLogPre.Items.Add(Format('Write File : %s => MD5 : %s ',[edTargetFile.Text,sMD5]));
               
               MD5.Free();
-              CloseHandle(hFile);
+              BlockReader.close();
             end
           else
             begin

@@ -79,6 +79,7 @@ object fmMain: TfmMain
           Top = 8
           Width = 121
           Height = 21
+          ReadOnly = True
           TabOrder = 1
           Text = '0'
         end
@@ -132,6 +133,7 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
+          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 4
@@ -267,6 +269,7 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
+          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 5
@@ -367,6 +370,7 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
+          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 3
@@ -452,6 +456,7 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
+          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 1
@@ -546,6 +551,7 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
+          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 1
@@ -673,9 +679,9 @@ object fmMain: TfmMain
       object lbSectorSizePre: TLabel
         Left = 16
         Top = 80
-        Width = 54
+        Width = 49
         Height = 13
-        Caption = 'Sectorssize'
+        Caption = 'Sectorsize'
       end
       object lbSectorSize: TLabel
         Left = 75
@@ -720,7 +726,7 @@ object fmMain: TfmMain
     end
   end
   object btBreak: TButton
-    Left = 212
+    Left = 196
     Top = 144
     Width = 75
     Height = 25
@@ -730,12 +736,12 @@ object fmMain: TfmMain
     OnClick = btBreakClick
   end
   object dgLoad: TOpenDialog
-    Filter = 'all files|*.*|compressed image|*.img.z'
+    Filter = 'raw image|*.raw|packed raw image|*.paw|all files|*.*'
     Left = 204
     Top = 280
   end
   object dgSave: TSaveDialog
-    Filter = 'all files|*.*|compressed image|*.img.z'
+    Filter = 'raw image|*.raw|packed raw image|*.paw|all files|*.*'
     Left = 236
     Top = 280
   end
