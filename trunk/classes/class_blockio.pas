@@ -133,10 +133,15 @@ function TBlockReader.read (var output : pointer; var outsize : unsigned32):Bool
 var
    u32Buffer : unsigned32;
 begin
-     result:=FALSE;
-
+     // Los gehts
      if (Self.hFile <> INVALID_HANDLE_VALUE) then
         begin
+             //Da auch gemischter Betrieb möglich wäre initialisieren wir die Kompression vor
+             //jedem Packvorgang neu. Erzeugt zwar keine solid-archive ist aber robuster
+             Self.Packer.unpack(nil,0,Self.pDummy,Self.u32Dummy);
+             Self.Packer.buffersize:=Self.BlockSize;
+
+
              //Komprimiert müssen wir erst die Paketgröße holen
              if (Self.bCompressed=TRUE) then
                 begin
@@ -147,7 +152,6 @@ begin
                         begin
                              //PackHeader invalid
                              u32Buffer:=0;
-                             result:=FALSE;
                         end;
                 end
              else
@@ -159,6 +163,8 @@ begin
              //dynamisch anpassen möchte oder die Kompression dies erzwingt
              //dadurch halten wir den Speicherverbrauch schön niedrig
              SetLength(Self.aBuffer,u32Buffer);
+             //Buffer immer cleanen um saubere Daten zu bekommen
+             FillChar(Self.aBuffer[0],Length(Self.aBuffer),0);
 
              //Einmal den Buffer füllen
              ReadFile(Self.hFile,Self.aBuffer[0],Length(Self.aBuffer),Cardinal(outsize),nil);
@@ -168,10 +174,6 @@ begin
                      //Entpacken ?
                      if (Self.bcompressed=TRUE) then
                         begin
-                             //Da auch gemischter Betrieb möglich wäre initialisieren wir die Kompression vor
-                             //jedem Packvorgang neu
-                             Self.Packer.unpack(nil,0,Self.pDummy,Self.u32Dummy);
-
                              //Entpacken
                              if (Self.Packer.unpack(Addr(Self.aBuffer[0]),outsize,output,outsize)<>TRUE) then
                                 begin
