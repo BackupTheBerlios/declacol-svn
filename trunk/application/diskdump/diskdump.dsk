@@ -1,27 +1,22 @@
 [Closed Files]
-File_0=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_streamfs.pas',0,1,34,15,55,0,0
-File_1=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_fileio.pas',0,1,62,26,87,0,0
-File_2=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_typedefs.pas',0,1,144,91,149,0,0
-File_3=SourceModule,'c:\programme\borland\delphi5\Projects\_selfmade_units\unit_hddhelper.pas',0,1,21,8,40,0,0
-File_4=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_rle.pas',0,1,33,1,75,0,0
-File_5=SourceModule,'M:\berlios\libraries\unit_typedefs.pas',0,1,94,1,101,0,0
-File_6=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_compiler.pas',0,1,91,3,107,0,0
-File_7=SourceModule,'M:\berlios\classes\class_streamfs.pas',0,1,1727,1,1763,0,0
-File_8=SourceModule,'M:\berlios\classes\class_threadedsocket.pas',0,1,130,48,11,0,0
+File_0=SourceModule,'M:\berlios\classes\class_rle.pas',0,1,265,1,1,0,0
+File_1=SourceModule,'M:\berlios\classes\class_packedstream.pas',0,1,160,1,1,0,0
+File_2=SourceModule,'M:\berlios\classes\class_lzw.pas',0,1,79,18,94,0,0
+File_3=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_compression.pas',0,1,427,63,369,0,0
+File_4=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_blockio.pas',0,1,1,89,140,0,0
+File_5=SourceModule,'c:\programme\borland\delphi5\Projects\_selfmade_units\class_diskio.pas',0,1,194,1,216,0,0
+File_6=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_streamfs.pas',0,1,34,15,55,0,0
+File_7=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_fileio.pas',0,1,62,26,87,0,0
+File_8=SourceModule,'C:\Programme\Borland\Delphi5\Projects\_selfmade_units\unit_typedefs.pas',0,1,144,91,149,0,0
+File_9=SourceModule,'c:\programme\borland\delphi5\Projects\_selfmade_units\unit_hddhelper.pas',0,1,21,8,40,0,0
 
 [Modules]
-Module0=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_fileio.pas
-Module1=c:\programme\borland\delphi5\Projects\_selfmade_units\class_diskio.pas
-Module2=M:\berlios\application\diskdump\DDMain.pas
-Count=3
+Module0=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_lzw.pas
+Module1=M:\berlios\application\diskdump\DDMain.pas
+Count=2
 EditWindowCount=1
 
-[C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_fileio.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[c:\programme\borland\delphi5\Projects\_selfmade_units\class_diskio.pas]
+[C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_lzw.pas]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
@@ -40,11 +35,10 @@ FormState=0
 FormOnTop=0
 
 [EditWindow0]
-ViewCount=3
-CurrentView=2
+ViewCount=2
+CurrentView=1
 View0=0
 View1=1
-View2=2
 MessageView=MessageView@EditWindow0
 Create=1
 Visible=1
@@ -65,32 +59,23 @@ BottomPanelData=0000040000000000000000000000000000000000000000000001000000000000
 
 [View0]
 Module=M:\berlios\application\diskdump\DDMain.pas
-CursorX=1
-CursorY=703
-TopLine=677
+CursorX=39
+CursorY=42
+TopLine=22
 LeftCol=1
 
 [View1]
-Module=c:\programme\borland\delphi5\Projects\_selfmade_units\class_diskio.pas
-CursorX=1
-CursorY=216
-TopLine=194
-LeftCol=1
-
-[View2]
-Module=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_fileio.pas
-CursorX=88
-CursorY=129
-TopLine=130
+Module=C:\Programme\Borland\Delphi5\Projects\_selfmade_units\class_lzw.pas
+CursorX=22
+CursorY=304
+TopLine=269
 LeftCol=1
 
 [Watches]
 Count=0
 
 [Breakpoints]
-Count=2
-Breakpoint0='M:\berlios\application\diskdump\DDMain.pas',621,'',0,1,'',1,0,0,'',1,'','',''
-Breakpoint1='M:\berlios\application\diskdump\DDMain.pas',703,'',0,1,'',1,0,0,'',1,'','',''
+Count=0
 
 [AddressBreakpoints]
 Count=0
@@ -171,7 +156,7 @@ LRDockWidth=190
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=Caption
+SelectedItem=ReadOnly
 ExpandedItems=
 HiddenCategories=
 ShowStatusBar=1

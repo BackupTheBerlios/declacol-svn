@@ -39,7 +39,7 @@ uses
 
   Unit_typedefs,Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs,class_diskio, StdCtrls,Spin, Grids, ComCtrls, ExtCtrls,class_checksum,class_random,
-  unit_hddhelper, Menus,class_blockio;
+  Menus,class_blockio;
 
 const MAX_BURST  = 2048;
       EXT_PACKED = 'paw';
@@ -189,6 +189,8 @@ implementation
 procedure TfmMain.DisableUser();
 begin
   Screen.Cursor:=crHourGlass;
+  pcMain.Enabled:=FALSE;
+  gbDeviceControl.Enabled:=FALSE;
   bBusy:=TRUE;
 end;
 
@@ -197,6 +199,8 @@ begin
   Screen.Cursor:=crDefault;
   btBreak.Hide();
   bBusy:=FALSE;
+  pcMain.Enabled:=TRUE;
+  gbDeviceControl.Enabled:=TRUE;
 end;
 
 //Bei Devicewechsel neu enumerieren
