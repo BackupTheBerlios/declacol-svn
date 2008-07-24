@@ -55,6 +55,7 @@ type TLZWPack = class(TObject)
      private
            //Wörterbücher
            Dictionary : TDictionary;
+           u32maxdic  : unsigned32;
 
            //Zum Puffern benutzen wir einfach Memorystreams
            Buffer     : TMemoryStream;
@@ -77,6 +78,7 @@ type TLZWPack = class(TObject)
            constructor Free();
 
            function pack   (input : Pointer; insize : unsigned32; var output : pointer; var outsize : unsigned32):boolean;
+           property maxdic : unsigned32 read u32maxdic write u32maxdic;
 end;
 
 //Entpacken erhält eine eigene Klasse
@@ -84,6 +86,8 @@ type TLZWUnPack = class(TObject)
      private
            //Wörterbücher
            Dictionary : TDictionary;
+           u32maxdic  : unsigned32;
+
 
            //Zum Puffern benutzen wir einfach Memorystreams
            Buffer     : TMemoryStream;
@@ -107,6 +111,7 @@ type TLZWUnPack = class(TObject)
            constructor Free();
 
            function unpack   (input : Pointer; insize : unsigned32; var output : pointer; var outsize : unsigned32):boolean;
+           property maxdic : unsigned32 read u32maxdic write u32maxdic;
 end;
 
 
@@ -132,7 +137,7 @@ type TLZW = class(TObject)
                       
            property id         : longstring read sID       write sID;
            //Steuert die Kompressionstiefe
-           property mode       : unsigned32 read u32mode   write u32mode;
+           property mode       : unsigned32 read getmode   write setmode;
            //Wird hier nicht benutzt
            property buffersize : unsigned32 read u32buffer write u32buffer;
 end;
@@ -144,7 +149,13 @@ implementation
 const LZW_PACK   = 1;
       LZW_UNPACK = 2;
 
-      //Maximale Wörterbuchgröße
+      //Vorgaben der Wörterbuchgröße
+      LZW_STORE   = 1024;
+      LZW_NORMAL  = 4096;
+      LZW_EXTREME = 16384;
+
+      //Min/Max Wörterbuchgröße
+      LZW_MIN_DIC= High(unsigned8); 
       LZW_MAX_DIC= High(TWide); 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -165,18 +176,27 @@ begin
      Self.RLE.Free();
 end;
 
+////////////////////////////////////////////////////////////////////////////////
 function  TLZW.getmode():unsigned32;
 begin
      result:=Self.u32Mode;
 end;
 
+////////////////////////////////////////////////////////////////////////////////
 procedure TLZW.setmode(value : unsigned32);
 begin
+     if (value > LZW_MIN_DIC) AND (value < LZW_MAX_DIC) then
+        begin
+             Self.u32mode:=value;
+        end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 function TLZW.pack   (input : Pointer; insize : unsigned32; var output : pointer; var outsize : unsigned32):boolean;
 begin
+     //Wörterbuchgröße einstellen
+     Self.Packer.maxdic:=Self.BufferSize;
+
      if (Self.RLE.Pack(input,insize,input,insize)=TRUE) then
         begin
              result:=Self.Packer.Pack(input,insize,output,outsize);
@@ -193,6 +213,9 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 function TLZW.unpack (input : Pointer; insize : unsigned32; var output : pointer; var outsize : unsigned32):boolean;
 begin
+     //Wörterbuchgröße einstellen
+     Self.UnPacker.maxdic:=Self.BufferSize;
+
      if ( Self.UnPacker.UnPack(input,insize,input,insize) = TRUE ) then
         begin
              result:=Self.RLE.Unpack(input,insize,output,outsize);
@@ -213,7 +236,6 @@ function TLZW.test    (size : unsigned32):Boolean;
 var
    u32Index : unsigned32;
    aTemp    : Array of Byte;
-   sTemp    : longstring;
 begin
      result:=TRUE;
 
@@ -317,7 +339,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 constructor TLZWPack.Create();
 begin
-     Buffer:=TMemoryStream.Create();
+     Self.Buffer:=TMemoryStream.Create();
 
      //Buffer setzen
      Self._Init();
@@ -490,34 +512,35 @@ end;
 //Einen Eintrag zum Wörterbuch zufügen.
 //Ist das Wörterbuch voll wird ein Fehler gemeldet.
 //Als Reaktion darauf könnte man das Wörterbuch kpl. leeren
-//oder die Breite von TWide erhöhen 
-function TLZWUnPack.AddToDictionary (entry : longstring):Boolean;
+//oder die Breite von TWide erhöhen
+function TLZWPack.AddToDictionary (entry : longstring; var index : TWide):Boolean;
 var
    u32Size  : unsigned32;
-   u32Index : unsigned32;
 begin
      u32Size := Length(entry);
-     u32index:= Length(Self.Dictionary);
+     index:= Length(Self.Dictionary);
 
-     if (u32Size > 0) AND (u32index < LZW_MAX_DIC) then
+     if (u32Size > 0) AND (index < Self.maxdic) then
         begin
              //Wörterbuch erweitern
-             SetLength(Self.Dictionary,u32index + 1);
+             SetLength(Self.Dictionary,index + 1);
 
              //Eintrag einkopieren (Leider LowLevel aber sonst sehr langsam)
-             SetLength( Self.Dictionary[u32index], u32Size );
-             CopyMemory(Addr(Self.Dictionary[u32index][0]),Addr(entry[1]), u32Size );
+             SetLength( Self.Dictionary[index], u32Size );
+             CopyMemory(Addr(Self.Dictionary[index][0]),Addr(entry[1]), u32Size );
+
              Result:=TRUE;
         end
      else
         begin
              //ToDO
-             result:=FALSE;
-        end; 
+             Self.InitDictionary();
+             Result:=FALSE;
+        end;
 end;
 
-//Das Wörterbuch mit ASCII initialisieren
-function TLZWUnPack.InitDictionary  ():Boolean;
+////////////////////////////////////////////////////////////////////////////////
+function TLZWPack.InitDictionary  ():Boolean;
 var
    u32Index : unsigned32;
 begin
@@ -544,6 +567,7 @@ begin
      //ToDo : Fehlerfälle ?
      result:=TRUE;
 end;
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -724,37 +748,41 @@ begin
      result:=entry < TWide(Length(Self.Dictionary));
 end;
 
+
 ////////////////////////////////////////////////////////////////////////////////
 //Einen Eintrag zum Wörterbuch zufügen.
 //Ist das Wörterbuch voll wird ein Fehler gemeldet.
 //Als Reaktion darauf könnte man das Wörterbuch kpl. leeren
-//oder die Breite von TWide erhöhen 
-function TLZWPack.AddToDictionary (entry : longstring; var index : TWide):Boolean;
+//oder die Breite von TWide erhöhen
+function TLZWUnPack.AddToDictionary (entry : longstring):Boolean;
 var
    u32Size  : unsigned32;
+   u32Index : unsigned32;
 begin
      u32Size := Length(entry);
-     index:= Length(Self.Dictionary);
+     u32index:= Length(Self.Dictionary);
 
-     if (u32Size > 0) AND (index < LZW_MAX_DIC) then
+     if (u32Size > 0) AND (u32index < self.maxdic) then
         begin
              //Wörterbuch erweitern
-             SetLength(Self.Dictionary,index + 1);
+             SetLength(Self.Dictionary,u32index + 1);
 
              //Eintrag einkopieren (Leider LowLevel aber sonst sehr langsam)
-             SetLength( Self.Dictionary[index], u32Size );
-             CopyMemory(Addr(Self.Dictionary[index][0]),Addr(entry[1]), u32Size );
-
+             SetLength( Self.Dictionary[u32index], u32Size );
+             CopyMemory(Addr(Self.Dictionary[u32index][0]),Addr(entry[1]), u32Size );
              Result:=TRUE;
         end
      else
         begin
              //ToDO
-             Result:=FALSE;
+             Self.InitDictionary();
+             result:=FALSE;
         end;
 end;
 
-function TLZWPack.InitDictionary  ():Boolean;
+////////////////////////////////////////////////////////////////////////////////
+//Das Wörterbuch mit ASCII initialisieren
+function TLZWUnPack.InitDictionary  ():Boolean;
 var
    u32Index : unsigned32;
 begin
@@ -781,6 +809,5 @@ begin
      //ToDo : Fehlerfälle ?
      result:=TRUE;
 end;
-
 
 end.
