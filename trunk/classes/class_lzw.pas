@@ -41,13 +41,22 @@ interface
 
 uses unit_compiler,unit_typedefs,classes,windows,sysutils,class_rle;
 
-
 //Aufbau des Wörtebuches
 type TDicEntry   = array of byte;
 type TDictionary = array of TDicEntry;
 //Unseren eigenen Type für die Datenbreite benutzen
 type TWide       = unsigned16;
 
+
+//Ein paar Flags
+const //Vorgaben der Wörterbuchgröße
+      LZW_STORE   = 512;
+      LZW_NORMAL  = 2048;
+      LZW_EXTREME = 8192;
+
+      //Min/Max Wörterbuchgröße
+      LZW_MIN_DIC= High(unsigned8);
+      LZW_MAX_DIC= High(TWide);
 
 
 //Packen erhält eine eigene Klasse
@@ -145,24 +154,14 @@ end;
 
 implementation
 
-//Ein paar Flags
-const LZW_PACK   = 1;
-      LZW_UNPACK = 2;
-
-      //Vorgaben der Wörterbuchgröße
-      LZW_STORE   = 1024;
-      LZW_NORMAL  = 4096;
-      LZW_EXTREME = 16384;
-
-      //Min/Max Wörterbuchgröße
-      LZW_MIN_DIC= High(unsigned8); 
-      LZW_MAX_DIC= High(TWide); 
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Die Wrapper-Klasse
 ////////////////////////////////////////////////////////////////////////////////
 Constructor TLZW.Create();
 begin
+     Self.mode:=LZW_NORMAL;
+
      Self.Packer  :=TLZWPack.Create();
      Self.UnPacker:=TLZWUnPack.Create();
      Self.RLE:=TRLE.Create();
@@ -195,7 +194,7 @@ end;
 function TLZW.pack   (input : Pointer; insize : unsigned32; var output : pointer; var outsize : unsigned32):boolean;
 begin
      //Wörterbuchgröße einstellen
-     Self.Packer.maxdic:=Self.BufferSize;
+     Self.Packer.maxdic:=Self.mode;
 
      if (Self.RLE.Pack(input,insize,input,insize)=TRUE) then
         begin
@@ -214,7 +213,7 @@ end;
 function TLZW.unpack (input : Pointer; insize : unsigned32; var output : pointer; var outsize : unsigned32):boolean;
 begin
      //Wörterbuchgröße einstellen
-     Self.UnPacker.maxdic:=Self.BufferSize;
+     Self.UnPacker.maxdic:=Self.mode;
 
      if ( Self.UnPacker.UnPack(input,insize,input,insize) = TRUE ) then
         begin
