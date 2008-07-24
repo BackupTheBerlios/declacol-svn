@@ -20,6 +20,10 @@ unit class_rle;
  ***************************************************************************
 Author: Sven Lorenz / Borg@Sven-of-Nine.de
 }
+{$IFDEF FPC}
+        //Einstellungen für den GPC
+        {$mode objfpc}{$H+}
+{$ENDIF}
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// Klasse um Speicherbereiche mit REL zu komprimieren
@@ -195,6 +199,10 @@ begin
                                         inc(u32Index);
                                    end;
 
+                        end
+                     else
+                        begin
+                             result:=FALSE;
                         end;
                 end;
         end;
