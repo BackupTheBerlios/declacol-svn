@@ -35,11 +35,11 @@ Author: Sven Lorenz / Borg@Sven-of-Nine.de
 unit class_streamcompression;
 
 interface
-uses unit_typedefs,classes,class_rle;
+uses unit_typedefs,classes,class_lzw;
 
 type TStreamCompression = class(TObject)
      private
-            Packer    : TRLE;
+            Packer    : TLZW;
             u32buffer : unsigned32;
             u32mode   : unsigned32;
      protected
@@ -66,7 +66,7 @@ constructor TStreamCompression.create();
 begin
      self.buffersize:=81920;
 
-     Packer:=TRLE.Create();
+     Packer:=TLZW.Create();
 end;
 
 destructor  TStreamCompression.free();
