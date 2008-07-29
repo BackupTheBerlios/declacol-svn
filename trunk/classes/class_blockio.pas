@@ -36,11 +36,11 @@ Author: Sven Lorenz / Borg@Sven-of-Nine.de
 ////////////////////////////////////////////////////////////////////////////////
 
 interface
-uses unit_typedefs,class_rle,windows;
+uses unit_typedefs,class_lzw,windows;
 
 type  TBlockReader = class(TObject)
       private
-             Packer       : TRLE;
+             Packer       : TLZW;
              hFile        : THandle;
              u32blocksize : unsigned32;
              bcompressed  : boolean;
@@ -64,7 +64,7 @@ end;
 
 type  TBlockWriter = class(TObject)
       private
-             Packer       : TRLE;
+             Packer       : TLZW;
              hFile        : THandle;
              bcompressed  : boolean;
              //Dummies für die Initialisierung
@@ -91,8 +91,10 @@ implementation
 ////////////////////////////////////////////////////////////////////////////////
 constructor TBlockReader.create();
 begin
-     Self.Packer:=TRLE.Create();
+     Self.Packer:=TLZW.Create();
      Self.BlockSize:=8192;
+
+     Self.Packer.mode:=LZW_NORMAL;
 
      //Handle auf jeden Fall initialisieren
      Self.Close();
@@ -203,7 +205,10 @@ begin
         begin
              //Datei nicht geöffnet
              result:=FALSE;
-        end; 
+        end;
+
+     //Alles freigebn
+     Self.Packer.pack(nil,0,Self.pDummy,Self.u32Dummy);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -231,7 +236,11 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 constructor TBlockWriter.create();
 begin
-     Self.Packer:=TRLE.Create();
+     Self.Packer:=TLZW.Create();
+     Self.Packer.buffersize:=8129;
+
+     Self.Packer.mode:=LZW_NORMAL;
+     
 
      //Handle auf jeden Fall initialisieren
      Self.Close();
@@ -308,7 +317,9 @@ begin
                      WriteFile(Self.hFile,pData^,outsize,cardinal(u32write),nil);
                      result:=outsize = u32write;
                 end;
-        end; 
+        end;
+     //Alles freigebn
+     Self.Packer.pack(nil,0,Self.pDummy,Self.u32Dummy);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
