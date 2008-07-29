@@ -39,11 +39,10 @@ Author: Sven Lorenz / Borg@Sven-of-Nine.de
 
 interface
 
-uses unit_compiler,unit_typedefs,classes,windows,sysutils,class_rle;
+uses unit_compiler,unit_typedefs,classes,windows,sysutils,class_rle,class_btree;
 
 //Aufbau des Wörtebuches
 type TDicEntry   = array of byte;
-type TDictionary = array of TDicEntry;
 //Unseren eigenen Type für die Datenbreite benutzen
 type TWide       = unsigned16;
 
@@ -51,8 +50,10 @@ type TWide       = unsigned16;
 //Ein paar Flags
 const //Vorgaben der Wörterbuchgröße
       LZW_STORE   = 512;
-      LZW_NORMAL  = 2048;
-      LZW_EXTREME = 8192;
+      LZW_FAST    = 1024;
+      LZW_NORMAL  = 16384;
+      LZW_HIGH    = 32768;
+      LZW_EXTREME = HIGH(TWide);
 
       //Min/Max Wörterbuchgröße
       LZW_MIN_DIC= High(unsigned8);
@@ -63,7 +64,7 @@ const //Vorgaben der Wörterbuchgröße
 type TLZWPack = class(TObject)
      private
            //Wörterbücher
-           Dictionary : TDictionary;
+           Dictionary : TBTree;
            u32maxdic  : unsigned32;
 
            //Zum Puffern benutzen wir einfach Memorystreams
@@ -79,9 +80,8 @@ type TLZWPack = class(TObject)
            function WideOut(data : TWide):boolean;
 
            //Wörterbuchfunktionen
-           function FindInDictionary(entry : longstring; var index : TWide):Boolean;
-           function AddToDictionary (entry : longstring; var index : TWide):Boolean;
-           function InitDictionary  ():Boolean;
+           procedure HandleOverflow   ();
+           function  InitDictionary  ():Boolean;
      public
            constructor Create();
            constructor Free();
@@ -94,7 +94,7 @@ end;
 type TLZWUnPack = class(TObject)
      private
            //Wörterbücher
-           Dictionary : TDictionary;
+           Dictionary : TBTree;
            u32maxdic  : unsigned32;
 
 
@@ -112,8 +112,7 @@ type TLZWUnPack = class(TObject)
            function WideIn (var data : pointer):TWide;
 
            //Wörterbuchfunktionen
-           function FindInDictionary(entry : TWide):Boolean;
-           function AddToDictionary (entry : longstring):Boolean;
+           procedure HandleOverflow   ();
            function InitDictionary  ():Boolean;
      public
            constructor Create();
@@ -184,7 +183,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 procedure TLZW.setmode(value : unsigned32);
 begin
-     if (value > LZW_MIN_DIC) AND (value < LZW_MAX_DIC) then
+     if (value >= LZW_MIN_DIC) AND (value <= LZW_MAX_DIC) then
         begin
              Self.u32mode:=value;
         end;
@@ -238,6 +237,11 @@ var
 begin
      result:=TRUE;
 
+     //Interner Test des Wörterbuches
+//     result:=result AND Self.Packer.Dictionary.test(8192);
+//     result:=result AND Self.UnPacker.Dictionary.test(8129);
+
+     //Test der Packermodule
      SetLength(aTemp,Size);
 
      //Speicher mit Zufallsdaten füllen
@@ -339,25 +343,24 @@ end;
 constructor TLZWPack.Create();
 begin
      Self.Buffer:=TMemoryStream.Create();
-
-     //Buffer setzen
+     Self.Dictionary:=TBTree.Create();
+     Self.Dictionary.readonly:=FALSE;
      Self._Init();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 constructor TLZWPack.Free();
 begin
-     Buffer.Free();
+     Self.Buffer.Free();
+     Self.Dictionary.Free();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 //Initialisieren des Packens
 function TLZWPack._Init():Boolean;
 begin
-     Buffer.Clear();
-
      Self.InitDictionary();
-
+     Self.Buffer.Clear();
      result:=TRUE;
 end;
 
@@ -391,18 +394,21 @@ var
    pData   : ^Byte;
    pEnd    : ^Byte;
    cData   : Char;
-   wToken  : TWide;
+   pToken  : pLeaf;
    //Zum einfachen Handling nehmen wir Strings, da diese binarysafe sind
    sData   : longstring;
 begin
      //Um mit Zeigern zu arbeiten müssen wir unter Delphi leider etwas tricksen
      pData := Input;
      pEnd  := Input;
+
      inc(pEnd,InSize);
+
+     //Ausgabestrom vordimmen
+     Self.Buffer.SetSize(Insize shl 1);
 
      //Erstes Zeichen wird plain gelesen
      sData:=chr(pData^);
-     wToken:=Self.SmallToWide( pData^ );
      inc(pData);
 
      while ( unsigned64(pData) < unsigned64(pEnd) ) do
@@ -410,38 +416,36 @@ begin
            cData:=Chr(pData^);
            inc(pData);
 
-           //Ist diese Sequenz im Wörterbuch ?
-           if ( Self.FindInDictionary(sData + cData,wToken) = TRUE) then
+           //Token suchen und gleichzeitig zufügen
+           if ( Self.Dictionary.add( sData + cData, pToken ) = FALSE ) then
               begin
+                   //Ist diese Sequenz im Wörterbuch ?
                    //Ja, dann brauchen wir sie nicht zu speichern
                    //sondern verlängern die Kompressionssequenz um eins
                    sData:=sData + cData;
               end
            else
               begin
-                   //Nein, dann müssen wir in den Ausgangsstrom die repräsentation
+                   //Nein, dann müssen wir in den Ausgangsstrom die Repräsentation
                    //des Tokens schreiben um diese Sequenz abzuschließen
-                   Self.FindInDictionary(sData,wToken);
-                   Self.WideOut(wToken);
-
-                   //Neue Sequenz auf das nächste Token legen.
-                   //evtl wird hier ein Dic-Full gemeldet.
-                   //ToDo : Verhalten bei vollem Wörterbuch
-                   //       Bei u32 eher kein Problem verschlechter aber die
-                   //       Kompressionsrate
-                   Self.AddToDictionary(sData + cData,wToken);
+                   pToken:=Self.Dictionary.find(sData);
+                   Self.WideOut(pToken^.ID);
 
                    sData:=cData;
               end;
+
+           //Überlauf im Wörterbuch behandeln
+           Self.HandleOverflow();
      end;
 
      //Den letzen Code müssen wir leider gesondert verarbeiten
-     Self.FindInDictionary(sData,wToken);
-     Self.WideOut(wToken);
+     pToken:=Self.Dictionary.find(sData);
+     Self.WideOut(pToken^.ID);
 
      //Den Buffer behalten wir in der Klassen und geben
      //nur den Pointer raus, damit erspare ich dem Aufrufer
      //das Streamhandling
+     Self.Buffer.SetSize(Self.Buffer.Position + 1);
      Output:=Self.Buffer.Memory;
      OutSize:=unsigned32(Self.Buffer.Position);
 
@@ -473,7 +477,7 @@ end;
 function TLZWPack.WideOut(data : TWide):boolean;
 begin
      //Valide ?
-     if (data < unsigned32(Length(Self.Dictionary))) then
+     if (data < Self.Dictionary.size) then
         begin
              result:=Self.Buffer.Write(data,SizeOf(data)) = SizeOf(data);
         end
@@ -484,57 +488,16 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
-//Checken, ob ein String im Wörterbuch schon vorhanden ist
-function TLZWPack.FindInDictionary(entry : longstring; var index : TWide):Boolean;
-var
-   u32Index : unsigned32;
-begin
-     result:=FALSE;
-
-     //Eigentlich sollte diese Schleife schöner sein,
-     //aber bei 30.000 Aufrufen die Sekunde stört jedes IF
-     for u32Index:=0 to unsigned32(length(Self.Dictionary)-1) do
-         begin
-              if (entry[1] = Chr(Self.Dictionary[u32Index][0])) then
-                 begin
-                      if ( entry = string(Self.Dictionary[u32Index]) ) then
-                         begin
-                              result:=TRUE;
-                              index:=u32index;
-                              exit;
-                           end;
-                 end;
-        end;
-end;
-
-////////////////////////////////////////////////////////////////////////////////
-//Einen Eintrag zum Wörterbuch zufügen.
 //Ist das Wörterbuch voll wird ein Fehler gemeldet.
 //Als Reaktion darauf könnte man das Wörterbuch kpl. leeren
 //oder die Breite von TWide erhöhen
-function TLZWPack.AddToDictionary (entry : longstring; var index : TWide):Boolean;
-var
-   u32Size  : unsigned32;
+//ToDo
+procedure TLZWPack.HandleOverflow ();
 begin
-     u32Size := Length(entry);
-     index:= Length(Self.Dictionary);
-
-     if (u32Size > 0) AND (index < Self.maxdic) then
-        begin
-             //Wörterbuch erweitern
-             SetLength(Self.Dictionary,index + 1);
-
-             //Eintrag einkopieren (Leider LowLevel aber sonst sehr langsam)
-             SetLength( Self.Dictionary[index], u32Size );
-             CopyMemory(Addr(Self.Dictionary[index][0]),Addr(entry[1]), u32Size );
-
-             Result:=TRUE;
-        end
-     else
+     if (Self.Dictionary.Size >= Self.maxdic) then
         begin
              //ToDO
              Self.InitDictionary();
-             Result:=FALSE;
         end;
 end;
 
@@ -542,26 +505,13 @@ end;
 function TLZWPack.InitDictionary  ():Boolean;
 var
    u32Index : unsigned32;
+   pTemp    : pLeaf;
 begin
-     //Aller ASCII-Einträge sind nicht dynamisch und können  daher immer im
-     //Wörterbuch bleiben
-     if (Length(Self.Dictionary) > High(unsigned8) + 1) then
-        begin
-             for u32Index := High(unsigned8) + 1 to unsigned32(Length(Self.Dictionary) - 1) do
-                 begin
-                      SetLength(Self.Dictionary[u32Index],0);
-                 end;
-             SetLength(Self.Dictionary,High(unsigned8) + 1);
-        end
-     else
-        begin
-             //ASCII füllen
-             SetLength(Self.Dictionary,High(unsigned8) + 1);
-             for u32Index := 0 to unsigned32(Length(Self.Dictionary) - 1) do
-                 begin
-                      SetLength(Self.Dictionary[u32Index],1);
-                      Self.Dictionary[u32Index][0]:=u32Index AND $ff;
-                 end;
+     Self.Dictionary.clear();
+
+     for u32Index := 0 to High(unsigned8) do
+         begin
+              Self.dictionary.add(chr(u32Index),pTemp);
         end;
      //ToDo : Fehlerfälle ?
      result:=TRUE;
@@ -575,24 +525,24 @@ end;
 constructor TLZWUnPack.Create();
 begin
      Buffer:=TMemoryStream.Create();
-
+     Self.Dictionary:=TBTree.Create();
+     Self.Dictionary.readonly:=FALSE;
      Self._Init();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 constructor TLZWUnPack.Free();
 begin
-     Buffer.Free();
+     Self.Dictionary.Free();
+     Self.Buffer.Free();
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 //Initialisieren des Packens
 function TLZWUnPack._Init():Boolean;
 begin
-     Buffer.Clear();
-
+     Self.Buffer.Clear();
      Self.InitDictionary();
-
      result:=TRUE;
 end;
 
@@ -629,6 +579,7 @@ var
    sData   : longstring;
    cData   : Char;
    u32limit: unsigned32;
+   pTemp   : pLeaf;  
 begin
      //Um mit Zeigern zu arbeiten müssen wir unter Delphi leider etwas tricksen
      pData := Input;
@@ -651,13 +602,18 @@ begin
            begin
            wNew:=Self.WideIn(pointer(pData));
 
-           if ( Self.FindInDictionary(wNew) = TRUE) then
+           //Ist der Eintrag im Dictionär
+           pTemp:=Self.Dictionary.find(wNew);
+           if ( pTemp <> nil ) then
               begin
-                   sData:=string(Self.Dictionary[wNew]);
+                   //Yo!
+                   sData:=string(pTemp^.Data);
               end
            else
               begin
-                   sData:=string(Self.Dictionary[wOld]);
+                   //Nope!
+                   pTemp:=Self.Dictionary.find(wOld);
+                   sData:=string( pTemp^.Data );
 
                    sData:=sData +  cData;
               end;
@@ -668,7 +624,8 @@ begin
            //Tabelle aufbauen
            cData:=sData[1];
 
-           Self.AddToDictionary( string( Self.Dictionary[wOld]) + cData );
+           Self.Dictionary.add( string( Self.Dictionary.find( wOld )^.Data) + cData,pTemp);
+           Self.HandleOverFlow();
 
            //Outbuffer nachtrimmen, da Einzelwrites sehr langsam sind
            if ( unsigned32(Self.Buffer.Position) > u32Limit ) then
@@ -714,15 +671,16 @@ end;
 function TLZWUnPack.WideOut(data : TWide):boolean;
 var
    u32Size : unsigned32;
+   pTemp   : pLeaf;
 begin
-     //Valide ?
-     if (data < unsigned32(Length(Self.Dictionary))) then
+     //Einfach das Bytearray in den Stream kopieren
+     //Positionierung im Stream selbst ist egal, da der Vorschub
+     //von der Streamklasse verwaltet wird
+     pTemp:=Self.Dictionary.find(Data);
+     if (pTemp <> nil ) then
         begin
-             //Einfach das Bytearray in den Stream kopieren
-             //Positionierung im Stream selbst ist egal, da der Vorschub
-             //von der Streamklasse verwaltet wird
-             u32Size:=Self.Buffer.Write( Self.Dictionary[data][0] , Length( Self.Dictionary[data] ) );
-             result:=u32Size = unsigned32(Length( Self.Dictionary[data] ) );
+             u32Size:=Self.Buffer.Write( pTemp^.Data[0] , Length( pTemp^.Data ) );
+             result:=u32Size = unsigned32( Length( pTemp^.Data ) );
         end
      else
         begin
@@ -740,42 +698,17 @@ begin
      inc(pByte(data),SizeOf(TWide));
 end;
 
-////////////////////////////////////////////////////////////////////////////////
-//Checken, ob ein Token im Wörterbuch schon vorhanden ist
-function TLZWUnPack.FindInDictionary(entry : TWide):Boolean;
-begin
-     result:=entry < TWide(Length(Self.Dictionary));
-end;
-
 
 ////////////////////////////////////////////////////////////////////////////////
-//Einen Eintrag zum Wörterbuch zufügen.
 //Ist das Wörterbuch voll wird ein Fehler gemeldet.
 //Als Reaktion darauf könnte man das Wörterbuch kpl. leeren
 //oder die Breite von TWide erhöhen
-function TLZWUnPack.AddToDictionary (entry : longstring):Boolean;
-var
-   u32Size  : unsigned32;
-   u32Index : unsigned32;
+procedure TLZWUnPack.HandleOverflow();
 begin
-     u32Size := Length(entry);
-     u32index:= Length(Self.Dictionary);
-
-     if (u32Size > 0) AND (u32index < self.maxdic) then
-        begin
-             //Wörterbuch erweitern
-             SetLength(Self.Dictionary,u32index + 1);
-
-             //Eintrag einkopieren (Leider LowLevel aber sonst sehr langsam)
-             SetLength( Self.Dictionary[u32index], u32Size );
-             CopyMemory(Addr(Self.Dictionary[u32index][0]),Addr(entry[1]), u32Size );
-             Result:=TRUE;
-        end
-     else
+     if (Self.Dictionary.Size >= self.maxdic) then
         begin
              //ToDO
              Self.InitDictionary();
-             result:=FALSE;
         end;
 end;
 
@@ -784,26 +717,13 @@ end;
 function TLZWUnPack.InitDictionary  ():Boolean;
 var
    u32Index : unsigned32;
+   pTemp    : pLeaf;
 begin
-     //Aller ASCII-Einträge sind nicht dynamisch und können  daher immer im
-     //Wörterbuch bleiben
-     if (Length(Self.Dictionary) > High(unsigned8) + 1) then
-        begin
-             for u32Index := High(unsigned8) + 1 to unsigned32(Length(Self.Dictionary) - 1) do
-                 begin
-                      SetLength(Self.Dictionary[u32Index],0);
-                 end;
-             SetLength(Self.Dictionary,High(unsigned8) + 1);
-        end
-     else
-        begin
-             //ASCII füllen
-             SetLength(Self.Dictionary,High(unsigned8) + 1);
-             for u32Index := 0 to unsigned32(Length(Self.Dictionary) - 1) do
-                 begin
-                      SetLength(Self.Dictionary[u32Index],1);
-                      Self.Dictionary[u32Index][0]:=u32Index AND $ff;
-                 end;
+     Self.Dictionary.clear();
+
+     for u32Index := 0 to High(unsigned8) do
+         begin
+              Self.dictionary.add( chr(u32Index),pTemp);
         end;
      //ToDo : Fehlerfälle ?
      result:=TRUE;
