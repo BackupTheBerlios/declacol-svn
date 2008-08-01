@@ -3,7 +3,7 @@ object fmMain: TfmMain
   Top = 262
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'DiskDumper (c) 2007 Borg@Sven-of-Nine.de'
+  Caption = 'DiskDumper (c) 2008 Borg@Sven-of-Nine.de'
   ClientHeight = 369
   ClientWidth = 713
   Color = clBtnFace

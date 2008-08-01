@@ -56,7 +56,7 @@ IncludeVerInfo=1
 AutoIncBuild=1
 MajorVer=0
 MinorVer=3
-Release=0
+Release=1
 Build=6
 Debug=0
 PreRelease=0
@@ -68,7 +68,7 @@ CodePage=1252
 [Version Info Keys]
 CompanyName=Borg@Sven-of-Nine.de
 FileDescription=DiskDumper
-FileVersion=0.3.0.6
+FileVersion=0.3.1.6
 InternalName=DiskDumper
 LegalCopyright=Borg@Sven-of-Nine.de
 LegalTrademarks=
