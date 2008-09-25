@@ -50,6 +50,7 @@ begin
                           end
                        else
                           begin
+                               sInput:=Filename;
                                sOutput:=string_replace(Filename,'-flat.vmdk','.vmdk');
                           end;  
 
