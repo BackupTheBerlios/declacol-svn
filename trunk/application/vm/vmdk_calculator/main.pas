@@ -74,10 +74,10 @@ begin
                        Log_Add(sOutput,'#DDB',FALSE);
 
                        Log_Add(sOutput,'ddb.virtualHWVersion = "4"',FALSE);
-                       Log_Add(sOutput,Format('ddb.geometry.cylinders = "%d"',[u64CylCount]));
-                       Log_Add(sOutput,Format('ddb.geometry.heads = "%d"',[u32HeadCount]));
-                       Log_Add(sOutput,Format('ddb.geometry.sectors = "%d"',[u32SectorCount]));
-                       Log_Add(sOutput,'ddb.adapterType = "ide"');
+                       Log_Add(sOutput,Format('ddb.geometry.cylinders = "%d"',[u64CylCount]),FALSE);
+                       Log_Add(sOutput,Format('ddb.geometry.heads = "%d"',[u32HeadCount]),FALSE);
+                       Log_Add(sOutput,Format('ddb.geometry.sectors = "%d"',[u32SectorCount]),FALSE);
+                       Log_Add(sOutput,'ddb.adapterType = "ide"',FALSE);
 
                        MessageBox(Self.Handle,'Done','info',MB_OK);
                   end;
