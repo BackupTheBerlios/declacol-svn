@@ -44,7 +44,7 @@ object Form1: TForm1
     OnClick = btExitClick
   end
   object dgOpen: TOpenDialog
-    Filter = 'Raw Files|*.bin,*.raw,*.img,*,dsk|All Files|*.*'
+    Filter = 'Raw Files|*.bin;*.raw;*.img;*,dsk;*.vmdk|All Files|*.*'
     Left = 88
     Top = 32
   end
