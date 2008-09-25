@@ -4,7 +4,7 @@ interface
 
 uses
   unit_typedefs,Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls,unit_log,unit_filefunctions,unit_hddhelper;
+  StdCtrls,unit_log,unit_filefunctions,unit_hddhelper,unit_strings;
 
 type
   TForm1 = class(TForm)
@@ -41,8 +41,17 @@ begin
           begin
                if (execute()=TRUE) then
                   begin
-                       sInput :=Filename;
-                       sOutput:=ChangeFileExt(sInput,'.vmdk');;
+                       //Datei evtl. konform umbenennen
+                       if (pos ('-flat.vmdk',Filename)=0) then
+                          begin
+                               sInput :=ChangeFileExt(Filename,'-flat.vmdk');
+                               sOutput:=ChangeFileExt(Filename,'.vmdk');
+                               renamefile(filename,sinput);
+                          end
+                       else
+                          begin
+                               sOutput:=string_replace(Filename,'-flat.vmdk','.vmdk');
+                          end;  
 
                        //Daten berechnen
                        u32SectorSize:=512;
@@ -69,8 +78,11 @@ begin
                        Log_Add(sOutput,Format('ddb.geometry.heads = "%d"',[u32HeadCount]));
                        Log_Add(sOutput,Format('ddb.geometry.sectors = "%d"',[u32SectorCount]));
                        Log_Add(sOutput,'ddb.adapterType = "ide"');
+
+                       MessageBox(Self.Handle,'Done','info',MB_OK);
                   end;
           end;
+
 end;
 
 procedure TForm1.btExitClick(Sender: TObject);
