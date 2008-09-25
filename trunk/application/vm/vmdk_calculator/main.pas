@@ -62,14 +62,14 @@ begin
 
                        Log_Clear(sOutput);
                        randomize();
-                       Log_Add(sOutput,'#Disk Decriptorfile / Borg@Sven-of-Nine.de',FALSE);
+                       Log_Add(sOutput,'#Disk Descriptorfile / Borg@Sven-of-Nine.de',FALSE);
                        Log_Add(sOutput,'version=1',FALSE);
                        Log_Add(sOutput,Format('CID=%s',[IntToHex(random(High(Integer)),8)]),FALSE);
                        Log_Add(sOutput,'parentCID=ffffffff',FALSE);
                        Log_Add(sOutput,'createType="monolithicFlat"',FALSE);
 
                        Log_Add(sOutput,'# Extent description',FALSE);
-                       Log_Add(sOutput,Format('RW %d FLAT "%s" 0',[u64FileSize div u32SectorSize,sInput]),FALSE);
+                       Log_Add(sOutput,Format('RW %d FLAT "%s" 0',[u64FileSize div u32SectorSize,ExtractFilename(sInput)]),FALSE);
 
                        Log_Add(sOutput,'# The Disk Data Base',FALSE);
                        Log_Add(sOutput,'#DDB',FALSE);
