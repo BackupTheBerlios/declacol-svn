@@ -30,14 +30,55 @@ unit unit_hddhelper;
 interface
 uses unit_typedefs,sysutils;
 
-function GetCHSParameter(Size : unsigned64;var cylinder : unsigned64; var heads : unsigned32; var sectors : unsigned32; SectorSize : unsigned32 ):Boolean;
+//Die Sektoren und Köpfe bestimmen
+procedure GetCHSSizes    (Size : unsigned64; var heads    : unsigned32; var Sectors : unsigned32);
+function  GetCHSParameter(Size : unsigned64; var cylinder : unsigned64; var heads : unsigned32; var sectors : unsigned32; SectorSize : unsigned32 ):Boolean;
 
 implementation
 
+////////////////////////////////////////////////////////////////////////////////
+//Die Sektoren und Köpfe bestimmen
+procedure GetCHSSize(Size : unsigned64; var heads : unsigned32; var sectors : unsigned32);
+var
+   u32Mark : unsigned32;
+begin
+     //GB runterbrechen
+     u32Mark := Size shr (10 + 10 + 10);
 
+     if (u32Mark > 1 ) then
+        begin
+             if (u32Mark > 2) then
+                begin
+                     //> 2 GB
+                     Heads  :=255;
+                     Sectors:=63;
+                end
+             else
+                begin
+                     // >1gb <= 2GB
+                     Heads  :=128;
+                     Sectors:=32;
+                end;
+        end
+     else
+        begin
+             // <= 1GB
+             Heads  :=64;
+             Sectors:=32;
+        end;
+end;
+
+
+////////////////////////////////////////////////////////////////////////////////
 function GetCHSParameter(Size : unsigned64;var cylinder : unsigned64; var heads : unsigned32; var sectors : unsigned32; SectorSize : unsigned32 ):Boolean;
 begin
-    Result:=TRUE;
+     //Die Kopfverteilung lesen
+     GetCHSSize(Size,heads,sectors);
+
+     //Und die Cylinder berechnen
+     cylinder:=Size div (heads * sectors * sectorsize);
+
+     result:=TRUE;
 end;
 
 end.
