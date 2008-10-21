@@ -61,5 +61,4 @@ class session
         echo $id;
         }
     }
-
 </script>
