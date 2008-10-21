@@ -94,14 +94,13 @@ class classinst
                     $this->_registry->write($classkey,CLASS_INDEX_AUTOLOAD  ,$result[CLASS_INDEX_AUTOLOAD]);
                     $this->_registry->write($classkey,CLASS_INDEX_COMPRESSED,$result[CLASS_INDEX_COMPRESSED]);
 
+                    $regfile = $classid.".reg";
+                    $this->_registry->write($classkey,CLASS_INDEX_REGISTRY    ,$result[CLASS_INDEX_REGISTRY]);
+                    $this->_registry->write($classkey,CLASS_INDEX_REGISTRYFILE,$regfile);
+
                     //Registry einrichten ?
                     if ($result[CLASS_INDEX_REGISTRY] != FALSE)
                         {
-                        $regfile = $classid.".reg";
-                        
-                        $this->_registry->write($classkey,CLASS_INDEX_REGISTRY    ,TRUE);
-                        $this->_registry->write($classkey,CLASS_INDEX_REGISTRYFILE,$regfile);
-                        
                         $dummy= new registry($regfile,$result[CLASS_INDEX_COMPRESSED]);
                         $dummy->write("/",CLASS_INDEX_INSTALLDATE,time());
                         $dummy->flush();
@@ -146,6 +145,5 @@ class classinst
         {
         return ( isset($array[$name])==TRUE?$array[$name]:$default);
         }
-
     }
 </script>
