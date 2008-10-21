@@ -48,7 +48,7 @@ class userdata
 class user
     {
     //Private
-    var $_factory  = array();
+    var $_idbuffer = array();
     var $_states   = array();
     var $_registry = FALSE;
 
@@ -122,7 +122,7 @@ class user
                 $user->active   = TRUE;
                 
                 //Die ID merken wir uns um Manipulation zu vermeiden
-                $this->_factory[$user->id]=$user->id;
+                $this->_idbuffer[$user->id]=$user->id;
                 }
             }
         return($user);
@@ -149,7 +149,7 @@ class user
             $user->email=$email;
 
             //Die ID merken wir uns um Manipulation zu vermeiden
-            $this->_factory[$user->id]=$user->id;
+            $this->_idbuffer[$user->id]=$user->id;
 
             //Und abspeichern
             $this->save($user);
@@ -172,7 +172,7 @@ class user
         if ($this->checkuserobject($user)==TRUE)
             {
             //Wurde auch von uns erzeugt ?
-            if ( in_array($user->id,$this->_factory)==TRUE)
+            if ( in_array($user->id,$this->_idbuffer)==TRUE)
                 {
                 //Und abspeichern
                 $path=$this->createpath($user->id);
