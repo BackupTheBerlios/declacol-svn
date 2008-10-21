@@ -93,7 +93,7 @@ class classload
         global $CLASSES;
         
         $classdata=$this->_registry->enum("classes/".$classname);
-
+        
         require_once(PATH_CLASSES.$classdata[CLASS_INDEX_CLASSFILE]);
 
         if ($classdata[CLASS_INDEX_REGISTRY]==TRUE)
