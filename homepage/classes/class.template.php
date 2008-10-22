@@ -1,8 +1,18 @@
 <script language="php">
+/*
+ _|    _|            _|                              _|                _|            
+ _|    _|  _|_|_|        _|_|_|  _|_|      _|_|_|  _|_|_|_|  _|  _|_|      _|    _|  
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|_|      _|    _|_|    
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|        _|  _|    _|  
+   _|_|    _|    _|  _|  _|    _|    _|    _|_|_|      _|_|  _|        _|  _|    _|  
+                                                                                     
+(c) 2008 Borg@sven-of-nine.de
+*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
-/// Beispielklasse
-///
+/// Beispielklasse,
+/// An diese Vorlage sollten sich alle Klassen halten. Insbesonder, wenn diese per automatische
+/// Initialisierung durch die Install-Methode verfügbar gemacht werden sollen.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 require_once("conf.classes.php");
 

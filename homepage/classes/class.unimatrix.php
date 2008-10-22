@@ -1,4 +1,13 @@
 <script language="php">
+/*
+ _|    _|            _|                              _|                _|            
+ _|    _|  _|_|_|        _|_|_|  _|_|      _|_|_|  _|_|_|_|  _|  _|_|      _|    _|  
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|_|      _|    _|_|    
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|        _|  _|    _|  
+   _|_|    _|    _|  _|  _|    _|    _|    _|_|_|      _|_|  _|        _|  _|    _|  
+                                                                                     
+(c) 2008 Borg@sven-of-nine.de
+*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 /// Interne Templateengine
@@ -25,6 +34,38 @@
 /// {{var:renderengine}}  Name der Renderengine
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+///Beispiel
+///Ohne Caching
+///$render=new unimatrix();                       //Templater initialisieren
+///$render->basepath="Pfad mit meinen Templates"; //Basispfad angeben
+///$render->assign("username","Mein Name");       //{{var:username}} wird im Template durch "Mein Name" ersetzt
+///$render->render("dateiname.template");         //Seite ausgeben
+///
+///Mit Caching
+///$render=new unimatrix();                       //Templater initialisieren
+///$render->cacheengine=new cache();              //Cacheengine klarmachen (Siehe Hinweise unten)
+///$render->cachetimeout=3600;                    //Verfallsdatum für gepufferte Seiten in Sekunden
+///$render->basepath="Pfad mit meinen Templates"; //Basispfad angeben
+///if ($render->iscached("dateiname.template") != TRUE) //Muß die Seite neu erzeugt werden ?
+///   {
+///   $render->assign("username","Mein Name");       //{{var:username}} wird im Template durch "Mein Name" ersetzt
+///   }
+///$render->render("dateiname.template");         //Seite ausgeben
+///$render->cacheengine->destroy();
+///$render->destroy();
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///Hinweise zur Cacheengine
+///
+///Es kann im Prinzip eine beliebie Engine benutzt werden. Sie muß lediglich folgende Methoden
+///unterstützen. Evtl. ist ein Wrapper notwendig.
+///
+///iscached("dateiname"):boolean;
+///load("dateiname"):dateiinhalt;
+///save("dateiname","lebensdauer","Dateiinhalt");
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 require_once("conf.classes.php");
 
 

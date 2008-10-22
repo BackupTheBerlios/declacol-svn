@@ -1,4 +1,13 @@
 <script language="php">
+/*
+ _|    _|            _|                              _|                _|            
+ _|    _|  _|_|_|        _|_|_|  _|_|      _|_|_|  _|_|_|_|  _|  _|_|      _|    _|  
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|_|      _|    _|_|    
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|        _|  _|    _|  
+   _|_|    _|    _|  _|  _|    _|    _|    _|_|_|      _|_|  _|        _|  _|    _|  
+                                                                                     
+(c) 2008 Borg@sven-of-nine.de
+*/
 //Alle Pfade
 define ("PATH_BASE"     ,str_replace("\\","/",realpath("./"))."/");
 define ("PATH_CLASSES"  ,PATH_BASE."classes/");

@@ -1,9 +1,32 @@
 <script language="php">
+/*
+ _|    _|            _|                              _|                _|            
+ _|    _|  _|_|_|        _|_|_|  _|_|      _|_|_|  _|_|_|_|  _|  _|_|      _|    _|  
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|_|      _|    _|_|    
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|        _|  _|    _|  
+   _|_|    _|    _|  _|  _|    _|    _|    _|_|_|      _|_|  _|        _|  _|    _|  
+                                                                                     
+(c) 2008 Borg@sven-of-nine.de
+*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 /// Klasse um alle anderen Klassen zu laden
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+///Der Classloader initialisert automatisch alle mit ClassInst registrierten Klassen
+///
+///Beispiel
+///
+///$loader=new classload($pathtoregistry);
+///$loader->load("session"); //Startet die Klasse "session";
+///$loader->load();          //Startet alle registrierten Klassen in der Reihenfolge ihres runlevels
+///
+///Hier sind die Klassen durch $CLASSES["klassenname"]->methoden verfügbar
+///
+///$loader->destroy();       //Alle Klassen zerstören und deren Registries abspeichern
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 require_once("conf.classes.php");
 require_once("class.registry.php");
 

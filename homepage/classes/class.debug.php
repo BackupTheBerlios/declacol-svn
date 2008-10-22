@@ -1,7 +1,21 @@
 <script language="php">
+/*
+ _|    _|            _|                              _|                _|            
+ _|    _|  _|_|_|        _|_|_|  _|_|      _|_|_|  _|_|_|_|  _|  _|_|      _|    _|  
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|_|      _|    _|_|    
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|        _|  _|    _|  
+   _|_|    _|    _|  _|  _|    _|    _|    _|_|_|      _|_|  _|        _|  _|    _|  
+                                                                                     
+(c) 2008 Borg@sven-of-nine.de
+*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
-/// Beispielklasse
+/// Internes Fehlerhandling
+///
+///Ist eine Konstante DEBUG definiert, h‰ngt sich die Klasse automatisch in das interne PHP-Fehler-
+///handling ein und f‰ngt alle Fehlerlevel und Exceptions ab.
+///Die Fehler/Exceptions werden mitgeloggt und lesbar ausgegeben.
+///Standardm‰ﬂig brechen alle Warnungen,Hinweise und Fehler die Verarbeitung ab.
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 require_once("conf.classes.php");

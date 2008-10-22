@@ -1,4 +1,13 @@
 <script language="php">
+/*
+ _|    _|            _|                              _|                _|            
+ _|    _|  _|_|_|        _|_|_|  _|_|      _|_|_|  _|_|_|_|  _|  _|_|      _|    _|  
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|_|      _|    _|_|    
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|        _|  _|    _|  
+   _|_|    _|    _|  _|  _|    _|    _|    _|_|_|      _|_|  _|        _|  _|    _|  
+                                                                                     
+(c) 2008 Borg@sven-of-nine.de
+*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 /// Simple Registrierdatenbank
@@ -18,10 +27,10 @@
 ///
 /////Alle Wert in einem Verzeichnis ausgeben
 /////Arrays bezeichnen Unterveichnisse
-///$values=$reg->enum("basispfad/unterverzeichnis/unterverzeichnis/");s
+///$values=$reg->enum("basispfad/unterverzeichnis/unterverzeichnis/");
 ///
-///$reg->flush();  // Änderungen in die Datei Abspeichern
-///$reg->destroy();
+///$reg->flush();    // Änderungen in die Datei Abspeichern
+///$reg->destroy();  // Alles freigeben (Es wird nichts gespeichert!)
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Mit dem Voidmarker werden leere Verzeichnisse markiert

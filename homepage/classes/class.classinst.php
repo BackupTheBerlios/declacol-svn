@@ -1,8 +1,54 @@
 <script language="php">
+/*
+ _|    _|            _|                              _|                _|            
+ _|    _|  _|_|_|        _|_|_|  _|_|      _|_|_|  _|_|_|_|  _|  _|_|      _|    _|  
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|_|      _|    _|_|    
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|        _|  _|    _|  
+   _|_|    _|    _|  _|  _|    _|    _|    _|_|_|      _|_|  _|        _|  _|    _|  
+                                                                                     
+(c) 2008 Borg@sven-of-nine.de
+*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 /// Installiert alle Klassen die eine install-Methode anbieten
 /// und registriert die Klassen in der classes.reg
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///Beispiel
+///
+///$inst = new classinst($registrydirectory);
+///$inst->register($classfile,$classname,$classid)  //Eine Klasse registrieren
+///$inst->registerall($pathtoclasses);              //Alle verfügbaren Klassen registrieren
+///$inst->destroy();
+///
+///Damit sind alle relevanten Daten der Klassen in die classes.reg gespeichert.
+///Mit dem ClassLoader können diese dann automatisch geladen werden
+///
+///Wichtig
+///Jede automatisch zu registrierende Klasse muß folgen Methode besitzen :
+///(Die Konstanten liegen in conf.classes.php
+///    function install()
+///        {
+///        $result[CLASS_INDEX_ID]        = "templateid";      //ID unserer Klasse, nur alphanumerisch (mit diesem Namen wird das Objekt instanziert)
+///        $result[CLASS_INDEX_NAME]      = "templatename";    //Name der Klasse
+///        $result[CLASS_INDEX_VERSION]   = "0.1";             //Version der Klasse
+///        $result[CLASS_INDEX_REGISTRY]  = TRUE;              //Wird eine Registry benötigt
+///        $result[CLASS_INDEX_DATABASE]  = FALSE;             //Wird eine Datenbank benötigt
+///
+///        $result[CLASS_INDEX_CLEANUP]   = TRUE;              //Soll die Datenbank initialisiert werden ?
+///
+///        $result[CLASS_INDEX_AUTOLOAD]  = TRUE;              //Soll die Klasse beim Systemstart geladen werden ?
+///        $result[CLASS_INDEX_COMPRESSED]= TRUE;              //Soll die Datenbank komprimiert werden (gz)
+///
+///        $result[CLASS_INDEX_COMPRESSED]= TRUE;              //Soll die Datenbank komprimiert werden (gz)
+///
+///        $result[CLASS_INDEX_RUNLEVEL]  = 10;                //In welchen Runlevel soll die Klasse geladen werden
+///
+///        return($result);
+///        }
+///
+///Erwartet die Klasse eine Registry muß der Konstruktor diese als Parameter erwarten 
+///function myclass(&$myregistry)
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

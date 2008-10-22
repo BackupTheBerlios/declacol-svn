@@ -1,4 +1,13 @@
 <script language="php">
+/*
+ _|    _|            _|                              _|                _|            
+ _|    _|  _|_|_|        _|_|_|  _|_|      _|_|_|  _|_|_|_|  _|  _|_|      _|    _|  
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|_|      _|    _|_|    
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|        _|  _|    _|  
+   _|_|    _|    _|  _|  _|    _|    _|    _|_|_|      _|_|  _|        _|  _|    _|  
+                                                                                     
+(c) 2008 Borg@sven-of-nine.de
+*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 /// Cacheklasse für beliebige Daten
@@ -7,16 +16,20 @@
 /// Und später per cache->get(uniqueid) holen
 /// ist die Rückgabe FALSE müssen die Daten neu gepuffert werden
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+///Beispiel
 ///
+/// $pageid="indexpage"
 /// $cache=new cache();
 /// $cache->cachepath="./cache/";           //Hier werden alle Cachedateien abgelegt
-/// $output=$cache->get("indexpage");       //Nach dem Inhalt suchen (unique ID)
-/// if ( $output == FALSE)                  //Daten sind noch nicht gepuffert ?
+/// if ( $cache->iscached($page) != TRUE)   //Daten sind noch nicht gepuffert ?
 ///    {
-///    $output=createpage("indexpage");     //Inhalt erzeugen
-///    $cache->save($output,3600,$output);  //in den Pufer speichern
+///    $output=createpage($pageid);         //Hier würde der Inhalt erzeugen
+///    $cache->save($pageid,3600,$output);  //in den Pufer speichern
 ///    }
-///
+/// else
+///    {
+///    $output=$cache->load($pageid);       //Aus dem Cache laden
+///    }
 /// echo $output:                           //Seite ausgeben
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
