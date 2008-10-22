@@ -84,7 +84,7 @@ class classinst
                     //Den Eintrag in der Klassenregistry initialisieren ?
                     if ($result[CLASS_INDEX_CLEANUP]!=FALSE)
                         {
-                        $this->_registry->del("classes/",$classid);
+                        $this->_registry->del("classes/".$result[CLASS_INDEX_RUNLEVEL]."/",$classid);
                         }
 
                     //Und los
@@ -99,9 +99,9 @@ class classinst
                     $this->_registry->write($classkey,CLASS_INDEX_REGISTRYFILE,$regfile);
 
                     //Registry einrichten ?
-                    if ($result[CLASS_INDEX_REGISTRY] != FALSE)
+                    if ($result[CLASS_INDEX_REGISTRY] !== FALSE)
                         {
-                        $dummy= new registry($regfile,$result[CLASS_INDEX_COMPRESSED]);
+                        $dummy= new registry($this->_regpath.$regfile,$result[CLASS_INDEX_COMPRESSED]);
                         $dummy->write("/",CLASS_INDEX_INSTALLDATE,time());
                         $dummy->flush();
                         $dummy->destroy();
