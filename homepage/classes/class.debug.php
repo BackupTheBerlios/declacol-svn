@@ -22,11 +22,10 @@ class debug
         if (defined("DEBUG")==TRUE)
             {
             $this->active=TRUE;
-            ob_start();
-            
+
             //Unsere Daten holen
             $data = $this->install();
-            define("DEBUG_CLASS",$data[CLASS_INDEX_NAME]);
+            define("DEBUG_CLASS",$data[CLASS_INDEX_ID]);
 
             //Allen eigenen Handler einhängen
             set_exception_handler(array(DEBUG_CLASS,"exception"));
@@ -43,9 +42,6 @@ class debug
             restore_error_handler();
             restore_exception_handler();
             $this->clearlog();
-
-            //Buffer der HTML-Seite ausgeben
-            //ob_end_flush();
             }
         unset($this);
         }
@@ -54,8 +50,8 @@ class debug
     //Die Installfunktion gibt ein Array mit relevanten Daten zurück
     function install()
         {
-        $result[CLASS_INDEX_ID]        = "debugger";       //ID unserer Klasse, nur alphanumerisch
-        $result[CLASS_INDEX_NAME]      = "debug";          //Name der Klasse
+        $result[CLASS_INDEX_ID]        = "debug";          //ID unserer Klasse, nur alphanumerisch
+        $result[CLASS_INDEX_NAME]      = "debugger";       //Name der Klasse
         $result[CLASS_INDEX_VERSION]   = "0.1";            //Version der Klasse
         $result[CLASS_INDEX_REGISTRY]  = FALSE;            //Wird eine Registry benötigt
         $result[CLASS_INDEX_DATABASE]  = FALSE;            //Wird eine Datenbank benötigt
@@ -64,6 +60,7 @@ class debug
 
         $result[CLASS_INDEX_AUTOLOAD]  = TRUE;             //Soll die Klasse beim Systemstart geladen werden ?
         $result[CLASS_INDEX_COMPRESSED]= FALSE;            //Soll die Datenbank komprimiert werden (gz)
+        $result[CLASS_INDEX_RUNLEVEL]  = 0;                 //In welchen Runlevel soll die Klasse geladen werden
 
         return($result);
         }
