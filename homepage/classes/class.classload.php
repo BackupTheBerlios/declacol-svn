@@ -51,13 +51,20 @@ class classload
             }
         else
             {
-            //Alle Klassen holen
-            $classes=$this->_registry->enum("classes/");
-            foreach ($classes as $key => $data)
+            //Alle Runlevel holen
+            $runlevels=$this->_registry->enum("classes/");
+
+            foreach ($runlevels as $runlevel => $dummy)
                 {
-                if (is_array($data))
+                $classes=$this->_registry->enum("classes/".$runlevel."/");
+                
+                //Alle Klassen holen
+                foreach ($classes as $key => $data)
                     {
-                    $this->_create($key);
+                    if (is_array($data))
+                        {
+                        $this->_create($runlevel,$key);
+                        }
                     }
                 }
             }
@@ -74,13 +81,23 @@ class classload
             }
         else
             {
-            //Alle Klassen holen
-            $classes=$this->_registry->enum("classes/");
-            foreach ($classes as $key => $data)
+            //Alle Runlevel holen
+            $runlevels=$this->_registry->enum("classes/");
+
+            //Zerstören geht natürlich umgekehrt
+            $runlevels=array_reverse($runlevels);
+
+            foreach ($runlevels as $runlevel => $dummy)
                 {
-                if (is_array($data))
+                $classes=$this->_registry->enum("classes/".$runlevel."/");
+
+                //Alle Klassen holen
+                foreach ($classes as $key => $data)
                     {
-                    $this->_destroy($key);
+                    if (is_array($data))
+                        {
+                        $this->_destroy($key);
+                        }
                     }
                 }
             }
@@ -88,11 +105,11 @@ class classload
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Eine Klasse laden
-    function _create($classname)
+    function _create($runlevel,$classname)
         {
         global $CLASSES;
         
-        $classdata=$this->_registry->enum("classes/".$classname);
+        $classdata=$this->_registry->enum("classes/".$runlevel."/".$classname);
         
         require_once(PATH_CLASSES.$classdata[CLASS_INDEX_CLASSFILE]);
 

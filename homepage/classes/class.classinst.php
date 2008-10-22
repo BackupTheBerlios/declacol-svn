@@ -88,7 +88,7 @@ class classinst
                         }
 
                     //Und los
-                    $classkey="classes/".$classid;
+                    $classkey="classes/".$result[CLASS_INDEX_RUNLEVEL]."/".$classid;
                     $this->_registry->write($classkey,CLASS_INDEX_NAME      ,$result[CLASS_INDEX_NAME]);
                     $this->_registry->write($classkey,CLASS_INDEX_VERSION   ,$result[CLASS_INDEX_VERSION]);
                     $this->_registry->write($classkey,CLASS_INDEX_AUTOLOAD  ,$result[CLASS_INDEX_AUTOLOAD]);

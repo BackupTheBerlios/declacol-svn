@@ -26,4 +26,7 @@ define ("CLASS_INDEX_CLEANUP"       , "cleanup");
 define ("CLASS_INDEX_READONLY"      , "readonly");
 
 define ("CLASS_INDEX_COMPRESSED"    , "compressed");
+
+define ("CLASS_INDEX_RUNLEVEL"      , "runlevel");
+
 </script>
