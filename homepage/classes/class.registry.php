@@ -197,7 +197,7 @@ class registry
         //Alles durchgehen
         foreach ($pointer as $key => $value)
             {
-            if  ($key != VOID_MARKER)
+            if  ($key !== VOID_MARKER)
                 {
                 //Werte sind keine Arrays
                 if ( is_array($value) === FALSE )
@@ -211,6 +211,8 @@ class registry
                     }
                 }
             }
+        ksort($result);
+
         return($result);
         }
 

@@ -1,5 +1,7 @@
-<pre>
 <script language="php">
+//define ("DEBUG",TRUE);
+
+//Ab hier gehts los
 require_once("config.php");
 require_once(PATH_CLASSES."class.registry.php");
 require_once(PATH_CLASSES."class.classload.php");
@@ -8,19 +10,29 @@ require_once(PATH_CLASSES."class.classload.php");
 $loader=new classload(PATH_REGISTRY);
 $loader->load();
 
-for ($index = 0; $index < 100; $index++)
-    {
-    //$CLASSES["user"]->add("Sven Lorenz","borg@Sven-of-Nine.de","svenofnine".$index.time(),"hybris10");
-    }
-    
-$CLASSES["user"]->add("Sven Lorenz","borg@Sven-of-Nine.de","svenofnine".time(),"hybris10");
+//echo "<pre>";
+
+//Templateengine einhängen
+$CLASSES["unimatrix"]->cacheengine=$CLASSES["cache"];
+$CLASSES["unimatrix"]->assign("title","Startseite");
+$CLASSES["unimatrix"]->assign("sitename","Guru-Meditation");
 
 
-//Damit sind alle Klassen im globalen Array $CLASSES verfügbar
-print_r($CLASSES["user"]);
+$CLASSES["unimatrix"]->assign("version","1.0");
+$CLASSES["unimatrix"]->assign("user","Sven Lorenz");
+$CLASSES["unimatrix"]->assign("login",TRUE);
+
+$CLASSES["unimatrix"]->assign("menu",array( "http://www.google.de"=>"google",
+                                            "http://www.sven-of-nine.de"=>"Sven Of Nine"
+                                          ));
+
+$CLASSES["unimatrix"]->render("main.txt");
 
 
+//print_r($CLASSES["unimatrix"]);
 
 //Alle Klassen entladen und Inhalte flushen
 $loader->destroy();
+
+
 </script>

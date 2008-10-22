@@ -37,7 +37,7 @@ class templateclass
     //Die Installfunktion gibt ein Array mit relevanten Daten zurück
     function install()
         {
-        $result[CLASS_INDEX_ID]        = "templateid";      //ID unserer Klasse, nur alphanumerisch
+        $result[CLASS_INDEX_ID]        = "templateid";      //ID unserer Klasse, nur alphanumerisch (mit diesem Namen wird das Objekt instanziert)
         $result[CLASS_INDEX_NAME]      = "templatename";    //Name der Klasse
         $result[CLASS_INDEX_VERSION]   = "0.1";             //Version der Klasse
         $result[CLASS_INDEX_REGISTRY]  = TRUE;              //Wird eine Registry benötigt
@@ -50,7 +50,7 @@ class templateclass
 
         $result[CLASS_INDEX_COMPRESSED]= TRUE;              //Soll die Datenbank komprimiert werden (gz)
 
-        $result[CLASS_INDEX_RUNLEVEL]  = 0;                 //In welchen Runlevel soll die Klasse geladen werden
+        $result[CLASS_INDEX_RUNLEVEL]  = 10;                //In welchen Runlevel soll die Klasse geladen werden
 
         return($result);
         }

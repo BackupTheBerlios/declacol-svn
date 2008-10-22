@@ -1,0 +1,8 @@
+{{include:header.txt}}
+{{include:menu.txt}}
+
+<div style="position:fixed; width:90%; height:85%; left:100px; top:10%; padding:10px; background-color:green;">
+Dogosch
+</div>
+
+{{include:footer.txt}}

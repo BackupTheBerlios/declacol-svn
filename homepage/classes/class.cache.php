@@ -1,0 +1,148 @@
+<script language="php">
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///
+/// Cacheklasse für beliebige Daten
+///
+/// Einfach die gewünschten Daten per cache->save(uniqueid,daten,runtime) abspeichern
+/// Und später per cache->get(uniqueid) holen
+/// ist die Rückgabe FALSE müssen die Daten neu gepuffert werden
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///
+/// $cache=new cache();
+/// $cache->cachepath="./cache/";           //Hier werden alle Cachedateien abgelegt
+/// $output=$cache->get("indexpage");       //Nach dem Inhalt suchen (unique ID)
+/// if ( $output == FALSE)                  //Daten sind noch nicht gepuffert ?
+///    {
+///    $output=createpage("indexpage");     //Inhalt erzeugen
+///    $cache->save($output,3600,$output);  //in den Pufer speichern
+///    }
+///
+/// echo $output:                           //Seite ausgeben
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
+require_once("conf.classes.php");
+
+//Trennzeichen für gecachte Dateinamen
+define ("CACHE_FILE_LIMITER" ,"#");
+
+//Eigentliche Klasse
+class cache
+    {
+    var $cachepath  = PATH_CACHE;
+
+    var $_filebuffer = array();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Konstruktor
+    function cache()
+        {
+        //Immer den ID-Buffer initialisieren
+        $this->updatecachebuffer();
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Destruktor
+    function destroy()
+        {
+        unset($this->_filebuffer);
+        unset($this);
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Die Installfunktion gibt ein Array mit relevanten Daten zurück
+    function install()
+        {
+        $result[CLASS_INDEX_ID]        = "cache";      //ID unserer Klasse, nur alphanumerisch
+        $result[CLASS_INDEX_NAME]      = "cache";      //Name der Klasse
+        $result[CLASS_INDEX_VERSION]   = "0.1";        //Version der Klasse
+        $result[CLASS_INDEX_REGISTRY]  = FALSE;        //Wird eine Registry benötigt
+        $result[CLASS_INDEX_DATABASE]  = FALSE;        //Wird eine Datenbank benötigt
+        $result[CLASS_INDEX_CLEANUP]   = FALSE;        //Soll die Datenbank initialisiert werden ?
+        $result[CLASS_INDEX_AUTOLOAD]  = TRUE;         //Soll die Klasse beim Systemstart geladen werden ?
+        $result[CLASS_INDEX_COMPRESSED]= FALSE;        //Soll die Datenbank komprimiert werden (gz)
+        $result[CLASS_INDEX_RUNLEVEL]  = 1;            //In welchen Runlevel soll die Klasse geladen werden
+
+        return($result);
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Cache füllen
+    function save($id,$runtime,$data)
+        {
+        //Daten ablegen
+        $data=gzcompress(serialize($data),1);
+
+        $filename=$this->createfilename($id,$runtime);
+
+        file_put_contents($this->cachepath.$filename,$data);
+
+        return(file_exists($data));
+        }
+        
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Daten holen
+    function get($id)
+        {
+        //Immer MD5 um böse Buben draußen zu halten
+        $id=md5($id);
+        
+        //Ist die Datei gepuffert ?
+        if (isset($this->_filebuffer[$id])==TRUE)
+            {
+            $result=file_get_contents($this->cachepath.$this->_filebuffer[$id]);
+
+            //Fehler abfangen
+            if ($result != "")
+                {
+                $result=gzuncompress($result);
+                $result=unserialize($result);
+                }
+            }
+        else
+            {
+            $result=FALSE;
+            }
+
+        return($result);
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Alle verfügbaren Cachefiles lesen
+    function updatecachebuffer()
+        {
+        //Alte Daten löschen
+        $this->_filebuffer = array();
+
+        //Bestehende Dateien lesen
+        $buffer=scandir($this->cachepath);
+
+        //Traversen rausnehmen
+        array_shift($buffer);
+        array_shift($buffer);
+
+        //Und jede Datei indizieren
+        foreach ($buffer as $file)
+            {
+            $data=explode(CACHE_FILE_LIMITER,$file);
+            
+            //Valide Daten ablegen
+            if (end($data) > time() )
+                {
+                $this->_filebuffer[reset($data)] = $file;
+                }
+            else
+                {
+                //Abgelaufene Dateien entfernen
+                unlink($this->cachepath.$file);
+                }
+            }
+        }
+        
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Den Dateinamen für eine Bufferdatei erzeugen
+    function createfilename($id,$runtime)
+        {
+        return( (md5($id).CACHE_FILE_LIMITER.(time() + $runtime ) ) );
+        }
+    }
+</script>
