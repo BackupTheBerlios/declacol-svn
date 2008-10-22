@@ -85,9 +85,9 @@ class classload
             $runlevels=$this->_registry->enum("classes/");
 
             //Zerstören geht natürlich umgekehrt
-            $runlevels=array_reverse($runlevels);
+            $runlevels=array_reverse(array_keys($runlevels));
 
-            foreach ($runlevels as $runlevel => $dummy)
+            foreach ($runlevels as $runlevel)
                 {
                 $classes=$this->_registry->enum("classes/".$runlevel."/");
 
@@ -113,7 +113,7 @@ class classload
         
         require_once(PATH_CLASSES.$classdata[CLASS_INDEX_CLASSFILE]);
 
-        if ($classdata[CLASS_INDEX_REGISTRY]==TRUE)
+        if ($classdata[CLASS_INDEX_REGISTRY] == TRUE)
             {
             //ggf. eine Registry erzeugen
             $registry = new registry ( PATH_REGISTRY.$classdata[CLASS_INDEX_REGISTRYFILE],
@@ -127,7 +127,7 @@ class classload
             }
 
         //Objekt global veröffentlichen
-        $CLASSES[$classdata[CLASS_INDEX_NAME]]=$object;
+        $CLASSES[$classname]=$object;
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
