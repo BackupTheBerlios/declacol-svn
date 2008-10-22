@@ -45,7 +45,7 @@ class unimatrix
 
     //Soll die Cachingengine benutzt werden
     var $cacheengine  = FALSE;
-    var $cachetimeout = 3600; //In Sekunden
+    var $cachetimeout = 10; //In Sekunden
 
     //Private Data
     var $_buffer  = "";
@@ -93,6 +93,19 @@ class unimatrix
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Checken, ob eine Seite gecached ist
+    function iscached($page)
+        {
+        $result=FALSE;
+        if ($this->cacheengine!=FALSE)
+            {
+            $result=$this->cacheengine->iscached($this->basepath.$page);
+            }
+        return($result);
+        }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Eine Templatedatei laden und parsen
     function render($templatefile)
         {
@@ -104,7 +117,7 @@ class unimatrix
             if ($this->cacheengine!=FALSE)
                 {
                 //Cache holen
-                $this->_buffer = $this->cacheengine->get($this->basepath.$templatefile);
+                $this->_buffer = $this->cacheengine->load($this->basepath.$templatefile);
 
                 //Noch kein Cache vorhanden ?
                 if ($this->_buffer == FALSE)

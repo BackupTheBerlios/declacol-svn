@@ -81,7 +81,7 @@ class cache
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Daten holen
-    function get($id)
+    function load($id)
         {
         //Immer MD5 um böse Buben draußen zu halten
         $id=md5($id);
@@ -107,6 +107,13 @@ class cache
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Prüfen, ob eine Datei gepuffert ist
+    function iscached($id)
+        {
+        return (isset($this->_filebuffer[md5($id)]));
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Alle verfügbaren Cachefiles lesen
     function updatecachebuffer()
         {
@@ -116,24 +123,24 @@ class cache
         //Bestehende Dateien lesen
         $buffer=scandir($this->cachepath);
 
-        //Traversen rausnehmen
-        array_shift($buffer);
-        array_shift($buffer);
-
         //Und jede Datei indizieren
         foreach ($buffer as $file)
             {
-            $data=explode(CACHE_FILE_LIMITER,$file);
+            //Kein versteckten Dateien anfassen
+            if ($file[0]!=".")
+                {
+                $data=explode(CACHE_FILE_LIMITER,$file);
             
-            //Valide Daten ablegen
-            if (end($data) > time() )
-                {
-                $this->_filebuffer[reset($data)] = $file;
-                }
-            else
-                {
-                //Abgelaufene Dateien entfernen
-                unlink($this->cachepath.$file);
+                //Valide Daten ablegen
+                if (end($data) > time() )
+                    {
+                    $this->_filebuffer[reset($data)] = $file;
+                    }
+                else
+                    {
+                    //Abgelaufene Dateien entfernen
+                    unlink($this->cachepath.$file);
+                    }
                 }
             }
         }

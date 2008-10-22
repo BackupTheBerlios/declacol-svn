@@ -14,18 +14,22 @@ $loader->load();
 
 //Templateengine einhängen
 $CLASSES["unimatrix"]->cacheengine=$CLASSES["cache"];
-$CLASSES["unimatrix"]->assign("title","Startseite");
-$CLASSES["unimatrix"]->assign("sitename","Guru-Meditation");
+//Seite nur erzeugen, wenn sie nicht gepuffert ist
+if ($CLASSES["unimatrix"]->iscached("main.txt") == FALSE)
+    {
+    $CLASSES["unimatrix"]->assign("title","Startseite");
+    $CLASSES["unimatrix"]->assign("sitename","Guru-Meditation");
 
 
-$CLASSES["unimatrix"]->assign("version","1.0");
-$CLASSES["unimatrix"]->assign("user","Sven Lorenz");
-$CLASSES["unimatrix"]->assign("login",TRUE);
+    $CLASSES["unimatrix"]->assign("version","1.0");
+    $CLASSES["unimatrix"]->assign("user","Sven Lorenz");
+    $CLASSES["unimatrix"]->assign("login",TRUE);
 
-$CLASSES["unimatrix"]->assign("menu",array( "http://www.google.de"=>"google",
-                                            "http://www.sven-of-nine.de"=>"Sven Of Nine"
+    $CLASSES["unimatrix"]->assign("menu",array( "http://www.google.de"=>"google",
+                                                "http://www.sven-of-nine.de"=>"Sven Of Nine"
                                           ));
-
+    }
+//Here we go
 $CLASSES["unimatrix"]->render("main.txt");
 
 
