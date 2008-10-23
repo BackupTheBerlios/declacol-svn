@@ -32,9 +32,8 @@ define ("EMAIL_AUTH"    ,TRUE);
 define ("EMAIL_SUPPORT" ,TRUE);
 define ("EMAIL_MODE"    ,"smtp");
 
-
 //Allgemeine Definitionen
-define ("CURRENT_DATE"  ,time());
+define ("CURRENT_TIME"  ,time());
 define ("ID_NONE"       ,0);
 define ("SALT"          ,"876");
 </script>

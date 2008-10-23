@@ -86,7 +86,7 @@ class unimatrix
 
     //Soll die Cachingengine benutzt werden
     var $cacheengine  = FALSE;
-    var $cachetimeout = 10; //In Sekunden
+    var $cachetimeout = 3600; //In Sekunden
 
     //Private Data
     var $_buffer  = "";

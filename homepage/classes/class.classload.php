@@ -25,10 +25,18 @@
 ///
 ///$loader->destroy();       //Alle Klassen zerstören und deren Registries abspeichern
 ///
+///Ale geladenen Klassen bekommen ein Array mit allen geladenen Klassen in die Eigenschaft "uplink"
+///eingeblendet.
+///Damit erfolgt der Zugriff auf eine Klasse über $this->uplink["klassenname"]->methodenname
+///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 require_once("conf.classes.php");
 require_once("class.registry.php");
+
+//Ein paar wichtige Bibliotheken laden
+require_once(PATH_LIBS."lib.classinterface.php");
+require_once(PATH_LIBS."lib.strings.php");
 
 //Alle Klassen werden hier eingetragen
 $CLASSES = array();

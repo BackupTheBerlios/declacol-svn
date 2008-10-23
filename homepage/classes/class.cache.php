@@ -97,7 +97,7 @@ class cache
     function load($id)
         {
         //Immer MD5 um böse Buben draußen zu halten
-        $id=md5($id);
+        $id=classcall("crypt","hash",$id);
         
         //Ist die Datei gepuffert ?
         if (isset($this->_filebuffer[$id])==TRUE)
@@ -123,7 +123,7 @@ class cache
     //Prüfen, ob eine Datei gepuffert ist
     function iscached($id)
         {
-        return (isset($this->_filebuffer[md5($id)]));
+        return ( isset($this->_filebuffer[ classcall("crypt","hash",$id) ]));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -162,7 +162,7 @@ class cache
     //Den Dateinamen für eine Bufferdatei erzeugen
     function createfilename($id,$runtime)
         {
-        return( (md5($id).CACHE_FILE_LIMITER.(time() + $runtime ) ) );
+        return( (classcall("crypt","hash",$id).CACHE_FILE_LIMITER.(time() + $runtime ) ) );
         }
     }
 </script>

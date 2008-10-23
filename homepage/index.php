@@ -1,4 +1,6 @@
 <script language="php">
+echo "<pre>";
+
 //define ("DEBUG",TRUE);
 
 //Ab hier gehts los
@@ -10,30 +12,28 @@ require_once(PATH_CLASSES."class.classload.php");
 $loader=new classload(PATH_REGISTRY);
 $loader->load();
 
-//echo "<pre>";
+
 
 //Templateengine einhängen
-$CLASSES["unimatrix"]->cacheengine=$CLASSES["cache"];
+setproperty("unimatrix","cacheengine" ,$CLASSES["cache"]);
+setproperty("unimatrix","cachetimeout",10);
 //Seite nur erzeugen, wenn sie nicht gepuffert ist
-if ($CLASSES["unimatrix"]->iscached("main.txt") == FALSE)
+if (classcall("unimatrix","iscached","main.txt") == FALSE)
     {
-    $CLASSES["unimatrix"]->assign("title","Startseite");
-    $CLASSES["unimatrix"]->assign("sitename","Guru-Meditation");
-
-
-    $CLASSES["unimatrix"]->assign("version","1.0");
-    $CLASSES["unimatrix"]->assign("user","Sven Lorenz");
-    $CLASSES["unimatrix"]->assign("login",TRUE);
-
-    $CLASSES["unimatrix"]->assign("menu",array( "http://www.google.de"=>"google",
+    classcall("unimatrix","assign","title","Startseite");
+    classcall("unimatrix","assign","sitename","Guru-Meditation");
+    classcall("unimatrix","assign","version","1.0");
+    classcall("unimatrix","assign","user","Sven Lorenz");
+    classcall("unimatrix","assign","login",TRUE);
+    classcall("unimatrix","assign","menu",array( "http://www.google.de"=>"google",
                                                 "http://www.sven-of-nine.de"=>"Sven Of Nine"
                                           ));
     }
 //Here we go
-$CLASSES["unimatrix"]->render("main.txt");
+//classcall("unimatrix","render","main.txt");
+print_r($CLASSES["request"]);
 
-
-//print_r($CLASSES["unimatrix"]);
+echo classcall("request","getrequest","admin",FALSE,FILTER_ALPHA);
 
 //Alle Klassen entladen und Inhalte flushen
 $loader->destroy();

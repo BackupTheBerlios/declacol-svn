@@ -15,10 +15,5 @@ $inst->destroy();
 $loader=new classload(PATH_REGISTRY);
 $loader->load();
 
-
-//print_r($CLASSES);
-
-
-
 $loader->destroy();
 </script>

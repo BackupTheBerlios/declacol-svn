@@ -252,7 +252,7 @@ class user
             }
         else
             {
-            $result=USER_PREFIX.md5($input.SALT);
+            $result=USER_PREFIX.classcall("crypt","hash",($input));
             }
         return ($result);
         }
@@ -267,7 +267,7 @@ class user
             }
         else
             {
-            $result=PASS_PREFIX.md5(md5($input.SALT));
+            $result=PASS_PREFIX.classcall("crypt","passhash",($input));
             }
         return ($result);
         }
