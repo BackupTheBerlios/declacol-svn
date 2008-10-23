@@ -1,8 +1,65 @@
 {{include:header.txt}}
 {{include:menu.txt}}
 
-<div style="position:fixed; width:90%; height:85%; left:100px; top:10%; padding:10px; background-color:green;">
-Dogosch
+<div style="position:fixed;
+            left:110px;
+            width:80%;
+            height:70%;
+            top:100px;
+            padding:10px;
+            background-color:green;
+            overflow:auto;">
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
+Dogosch<br/>
 </div>
 
 {{include:footer.txt}}

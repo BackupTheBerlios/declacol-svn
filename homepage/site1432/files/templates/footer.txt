@@ -1,5 +1,3 @@
-<div style="position:fixed; width:100%; height:5%; left:0px; top:94%; background-color:silver;">
-<sub>Seite gecached {{var:cached}}</sub>
-</div>
+<div style="position:fixed; width:100%; height:3%; left:0px; top:97%; background-color:silver; font-size:10px">Seite gecached {{var:cached}}</div>
 </body>
 </html>

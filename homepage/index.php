@@ -1,5 +1,4 @@
 <script language="php">
-echo "<pre>";
 
 //define ("DEBUG",TRUE);
 
@@ -16,7 +15,7 @@ $loader->load();
 
 //Templateengine einhängen
 setproperty("unimatrix","cacheengine" ,$CLASSES["cache"]);
-setproperty("unimatrix","cachetimeout",10);
+setproperty("unimatrix","cachetimeout",3600);
 //Seite nur erzeugen, wenn sie nicht gepuffert ist
 if (classcall("unimatrix","iscached","main.txt") == FALSE)
     {
@@ -30,11 +29,12 @@ if (classcall("unimatrix","iscached","main.txt") == FALSE)
                                           ));
     }
 //Here we go
-//classcall("unimatrix","render","main.txt");
+classcall("unimatrix","render","main.txt");
+
+/*
 print_r($CLASSES["request"]);
-
 echo classcall("request","getrequest","admin",FALSE,FILTER_ALPHA);
-
+*/
 //Alle Klassen entladen und Inhalte flushen
 $loader->destroy();
 

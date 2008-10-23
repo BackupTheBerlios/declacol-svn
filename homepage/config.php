@@ -9,7 +9,7 @@
 (c) 2008 Borg@sven-of-nine.de
 */
 //Alle Pfade
-define ("PATH_SALT"     ,"1431"); //Pfad Obfuscator wird einmal bei der Installation gesetzt
+define ("PATH_SALT"     ,"1432"); //Pfad Obfuscator wird einmal bei der Installation gesetzt
 define ("PATH_BASE"     ,str_replace("\\","/",realpath("./"))."site".PATH_SALT."/");
 define ("PATH_CLASSES"  ,PATH_BASE."classes/");
 define ("PATH_LIBS"     ,PATH_BASE."libs/");

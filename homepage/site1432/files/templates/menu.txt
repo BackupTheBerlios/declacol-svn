@@ -1,4 +1,4 @@
-<div style="position:fixed; width:90px; height:80%; left:0px; top:10%; background-color:yellow;">
+<div style="position:fixed; width:110px; height:80%; left:0px; top:100px; background-color:yellow;">
 <table>
 {{array:menu}}
 <tr>
