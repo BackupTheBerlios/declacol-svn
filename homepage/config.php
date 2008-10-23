@@ -9,7 +9,8 @@
 (c) 2008 Borg@sven-of-nine.de
 */
 //Alle Pfade
-define ("PATH_BASE"     ,str_replace("\\","/",realpath("./"))."/");
+define ("PATH_SALT"     ,"");
+define ("PATH_BASE"     ,str_replace("\\","/",realpath("./"))."site".PATH_SALT."/");
 define ("PATH_CLASSES"  ,PATH_BASE."classes/");
 define ("PATH_LIBS"     ,PATH_BASE."libs/");
 define ("PATH_REGISTRY" ,PATH_BASE."registry/");

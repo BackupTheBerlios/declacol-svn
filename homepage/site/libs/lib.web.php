@@ -13,239 +13,7 @@
 /// Diverse Webfunktionen
 /// die Das Leben leichter machen
 ///
-///
-///
-///
 //////////////////////////////////////////////////////////////////////////
-
-//Versioninfo speichern
-define ("LIB_WEB","lib_web");
-define ("LIB_WEB_VERSION","0.03");
-if (isset($debug)) $debug->add(LIB_WEB,"version ".LIB_WEB_VERSION);
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//Einige Libs erzwingen
-require_once("lib.crypt.php");
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//Prüfen, ob ein Useragent ein Bot ist
-function web_isbot($agent="")
-    {
-    $bot_array      =array("baidu","nhnnoon","mjbotv","twiceler","msnbotmedia","seekbot","jeevesteoma","msnbot","slurp","jeevestemoa","gulper","googlebot","linkwalker","validator","webaltbot","wget");
-    if ($agent=="")
-        {
-        @$agent=$_SERVER["HTTP_USER_AGENT"];
-        }
-
-    $agent=strtolower(string_filter($agent,FILTER_ALPHA));
-    return((BOOL)count(array_intersect(explode(" ",$agent),$bot_array)));
-    }
-
-//////////////////////////////////////////////////////////////////////////////////
-/// Den Useragenten extrahieren
-function web_get_useragent()
-    {
-    //Alle Agenten
-    $agent_array  =array("mjbotv","mozilla","opera","firefox","safari","msie","gecko","epiphany","galeon","konquerer","netpositive");
-    //Alle Bots
-    $bot_array    =array("baidu","nhnnoon","twiceler","msnbotmedia","seekbot","jeevesteoma","msnbot","slurp","jeevestemoa","gulper","googlebot","linkwalker","validator","webaltbot","wget");
-    //Alle Systeme
-    $system_array =array("windows","macintosh","linux","redhat","bsd","zeta","beos","macpowerpc");
-
-    //Agenten holen
-    if (isset($_SERVER["HTTP_USER_AGENT"]))
-        {
-        $agent=$_SERVER["HTTP_USER_AGENT"];
-        }
-    else
-        {
-        $agent="unknown";
-        }
-
-    //Den Agenten cleanen
-    $agentalpha=strtolower(string_filter($agent,FILTER_ALPHA));
-
-    //In seine Teile zerlegen
-    $agentalpha=explode(" ",$agentalpha);
-
-    //Und durchprüfen
-    $browser=implode(" ",array_unique(array_intersect($agentalpha,$agent_array)));
-    $bot    =implode(" ",array_unique(array_intersect($agentalpha,$bot_array)));
-    $system =implode(" ",array_unique(array_intersect($agentalpha,$system_array)));
-
-    //Wenn ein Teil nicht gesetzt ist, dann den ganzen Agenten anzeigen
-    if ( ($system=="") || ($browser=="") )
-        {
-        //Evtl. ein bot ?
-        if ($bot!="")
-            {
-            $result="[BOT] ".$bot;
-            }
-        else
-            {
-            $result=implode(" ",$agentalpha);
-            }
-        }
-    else
-        {
-        $result=$browser." ".$system;
-        }
-    return($result);
-    }
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//Einen Port checken
-function web_checkport($url,$port)
-    {
-    //Ein evtl. Vorhandenes Protokoll rausnehmen
-    $url=preg_replace(array("#(.*://)#","#(.*:\\\\)#"),"",$url);
-
-    $ip=gethostbyname($url);
-    //Einmal HTTP
-    $error=FALSE;
-    $errorstring="";
-    @$socket=fsockopen($ip,$port,$error,$errorstring,1);
-
-    //Und auswerten
-    if ($socket===FALSE)
-        {
-        return(FALSE);
-        }
-    else
-        {
-        fclose($socket);
-        return(TRUE);
-        }
-    }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//"Echtes" Ping durchführen. Die Antwort ist die Laufzeit in ms
-function web_ping($ip)
-    {
-    global $debug;
-
-    //Das hier ist ein ICMP-Packet, um ein Ping zu simulieren
-    $icmp_paket  = "\x08\x00";    //Header = Echo Request
-    $icmp_paket .= "\x19\x2f\x00\x00\x00\x00\x70\x69\x6e\x67"; //IP-Buffer und Prüfsumme
-
-    //Immer Fehler annehmen
-    $result=99999;
-
-    //Ein ICMP-Socket aufmachen
-    @$sock = socket_create(AF_INET, SOCK_RAW, 1);
-       //Fehler abfangen
-       if ($sock!==FALSE)
-           {
-        $debug->add("ping","socket open");
-        //Optionen setzen
-        //Timeout auf zwei Sekunden setzen (VPN hat manchmal hohe Latenzen)
-           socket_set_option($sock,SOL_SOCKET,SO_RCVTIMEO,array("sec" => 2, "usec" => 0));
-
-        //Kanal öffnen (Ohne Port)
-        if (socket_connect($sock, $ip, null))
-            {
-            $debug->add("ping","socket connected");
-            //Laufzeitmessung starten
-            //####ACHTUNG microtime ist nicht auf jedem System verfügbar####
-               $runtime=microtime(TRUE);
-
-               //Paket abschicken
-            if (socket_send($sock, $icmp_paket, strlen($icmp_paket),0)==strlen($icmp_paket))
-                {
-                $debug->add("ping","packet send");
-                   //Und as Ergebnis lesen (Wenn es eines gibt)
-                   //Der Klammeraffe unterdrückt evtl. Warnungen oder Fehler
-                if(@socket_read($sock, 255))
-                    {
-                    $debug->add("ping","answer recieved");
-                    //Messung beendet
-                    $result=(microtime(TRUE)-$runtime);
-                    }
-                else
-                    {
-                    $debug->add("ping","received");
-                    }
-                }
-            }
-
-        //Socket schließen
-        socket_close($sock);
-        $debug->add("ping","socket closed");
-           }
-    $debug->add("ping","runtime ".$runtime);
-    //Und Laufzeit zurückgeben
-    return($result);
-    }
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//Die Remote-Adresse holen
-function web_get_ip()
-    {
-    //Fehler abfangen
-    if (isset($_SERVER["REMOTE_ADDR"]))
-        {
-        return($_SERVER["REMOTE_ADDR"]);
-        }
-    else
-        {
-        return("0.0.0.0");
-        }
-    }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//Einen Text mit dem Google-Service übersetzen
-//Input ist die gesuchte Phrase
-//Languagepair gibt die Richtung der Übersetzung an
-//Die Sprachkürzel sind
-// de Deutsch
-// en English
-// fr Französisch
-// it Italienisch
-// pt Portugisisch
-// ar Arabisch
-// ja Japanisch
-// ko Koreanisch
-//
-// Erst die Quellsprache dann die Zielsprache
-// also von Deutsch nach Koreanisch
-// de|ko
-
-function web_translate($query,$languagepair)
-    {
-    //BasisURL
-    $url="http://translate.google.com/translate_t?hl=en&ie=UTF8&Translate";
-
-    $result=FALSE;
-
-    //Leerzeichen ersetzen
-    $q=str_replace(" ","%20",$query);
-
-    //Zusammenbauen
-    $file=$url."&langpair=".$languagepair."&text=".$q;
-
-    //Google fragen
-    $file=file_get_contents($file);
-
-    //Ergebnis extrahieren
-    $trans=FALSE;
-    if (preg_match("#<textarea[^>]*>([a-zA-Z0-9,.\\?! ]*)</textarea[^>]*>#i",$file,$trans)==1)
-        {
-        //Was gefunden !"
-        $result=TRUE;
-        $query=trim($trans[1]);
-        }
-
-    //Und Ergebnis zurückgeben
-    return($result);
-    }
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Schickt eine Postanfrage an eine Internetseite und gibt die Antwort als String zurück
 //Values muß ein Array mit werten nach dem Muster name=>datum sein
@@ -426,13 +194,12 @@ function web_get($url,$values)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Eine Datei pushen
 //Funktioniert nur, wenn vorher keine Daten geschicket wurden
-function web_push_file($filepath,$name=FALSE,$maxspeed=50,$encrypted=FALSE)
+function web_push_file($filepath,$name=FALSE,$maxspeed=50)
     {
     $result=FALSE;
-    require_once(DIR_CLASS."lib.mime.php");
 
-    //Wenn kein Name übergebn wurde, den Dateinamen nehmen
-    if ($name==FALSE) $name=string_extractfilename($filepath);
+    //Wenn kein Name übergeben wurde, den Dateinamen nehmen
+    if ($name==FALSE) $name=basename($filepath);
     $name=str_replace(" ","_",$name);
 
     //Prüfen, ob es ihn gibt
@@ -467,13 +234,6 @@ function web_push_file($filepath,$name=FALSE,$maxspeed=50,$encrypted=FALSE)
                     sleep(1);
                     }
                 $out = fread($fp, $size);
-                
-                //Verschlüsselung beachten
-                if ($encrypted)
-                    {
-                    $out=crypt_decode($out);
-                    }
-                
                 print ($out);
                 flush();
                 }
