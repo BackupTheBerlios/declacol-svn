@@ -17,8 +17,10 @@
 ///
 /// {{var:name}}          Es wird der Wert des Eintrages name eingefügt
 ///
-/// {{include:filename}}  fügt ein Datei an dieser Stelle ein
-/// {{include:url}}       fügt eine Webseite an dieser Stelle ein
+/// {{include:filename}}     fügt eine Datei an dieser Stelle ein
+/// {{varinclude:filename}}  fügt eine Datei aus dem Variablennamen filename an dieser Stelle ein
+/// {{include:url}}          fügt eine Webseite an dieser Stelle ein
+///
 ///
 /// {{array:name}}        fügt für jeden Wert in Array name die Zeiche zwischen den Arraytags ein
 /// <b>{{key}}</b>        und ersetzt key und value durch die entsprechenden Arraydaten
@@ -115,7 +117,7 @@ class unimatrix
         {
         $result[CLASS_INDEX_ID]        = "unimatrix";      //ID unserer Klasse, nur alphanumerisch
         $result[CLASS_INDEX_NAME]      = "unimatrix";      //Name der Klasse
-        $result[CLASS_INDEX_VERSION]   = "0.1";            //Version der Klasse
+        $result[CLASS_INDEX_VERSION]   = "0.2";            //Version der Klasse
         $result[CLASS_INDEX_REGISTRY]  = FALSE;            //Wird eine Registry benötigt
         $result[CLASS_INDEX_DATABASE]  = FALSE;            //Wird eine Datenbank benötigt
         $result[CLASS_INDEX_CLEANUP]   = FALSE;            //Soll die Datenbank initialisiert werden ?
@@ -135,51 +137,51 @@ class unimatrix
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Checken, ob eine Seite gecached ist
-    function iscached($page)
+    function iscached($id)
         {
         $result=FALSE;
         if ($this->cacheengine!=FALSE)
             {
-            $result=$this->cacheengine->iscached($this->basepath.$page);
+            $result=$this->cacheengine->iscached($id);
             }
         return($result);
         }
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Eine Templatedatei laden und parsen
-    function render($templatefile)
+    //Unter der ID wird die Datei abgelegt und über iscached kann geprüft werden, ob sie noch aktiv ist
+    function render($id,$templatefile)
         {
         $result=FALSE;
         
+        //Pfad passend setzen
+        $templatefile=$this->basepath.$templatefile;
+        
         //Datei lesen
-        if (file_exists($this->basepath.$templatefile) == TRUE)
+        if (file_exists($templatefile) == TRUE)
             {
+            //Cache aktiviert ?
             if ($this->cacheengine!=FALSE)
                 {
                 //Cache holen
-                $this->_buffer = $this->cacheengine->load($this->basepath.$templatefile);
+                $this->_buffer = $this->cacheengine->load($id);
 
                 //Noch kein Cache vorhanden ?
                 if ($this->_buffer == FALSE)
                     {
                     //Dann rendern und anlegen
                     $this->_render($templatefile);
-                    $this->cacheengine->save($this->basepath.$templatefile,$this->cachetimeout,$this->_buffer);
+                    $this->cacheengine->save($id,$this->cachetimeout,$this->_buffer);
                     }
                 }
             else
                 {
                 $this->_render($templatefile);
                 }
-            }
-        else
-            {
-            $result=FALSE;
+            //Als Ergebnis die Seite liefern
+            $result=$this->_buffer;
             }
 
-        echo $this->_buffer;
-            
         return($result);
         }
         
@@ -188,7 +190,7 @@ class unimatrix
     function _render($templatefile)
         {
         //Seite rendern
-        $this->_buffer=file_get_contents($this->basepath.$templatefile);
+        $this->_buffer=file_get_contents($templatefile);
 
         //Alle Includes verarbeiten, damit diese mitgeparst werden
         $this->processincludes();

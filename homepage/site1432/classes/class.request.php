@@ -23,7 +23,7 @@ class request
     var $cookies    = FALSE;
     
     //Alle zugelassenen Variablennamen
-    var $allowed_requests = array( "cmd", "cmdid", "folder", "details", "admin", "name", "selected","id","file",
+    var $allowed_requests = array( "cmd", "cmdid", "folder", "details", "admin", "name", "selected","id","file","page",
                                    "data0","data1","data2","data3","data4","data5","data6","data7","data8","data9",
                                  );
 

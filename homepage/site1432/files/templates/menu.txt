@@ -1,4 +1,5 @@
-<div style="position:fixed; width:110px; height:80%; left:0px; top:100px; background-color:yellow;">
+<div style="position:fixed; width:13%; height:80%; left:5px; top:95px; background-color:yellow;">
+<div style="padding:5px">
 <table>
 {{array:menu}}
 <tr>
@@ -7,6 +8,6 @@
     </td>
 </tr>
 {{array}}
-
 </table>
+</div>
 </div>

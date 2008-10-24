@@ -1,3 +1,10 @@
-<div style="position:fixed; width:100%; height:3%; left:0px; top:97%; background-color:silver; font-size:10px">Seite gecached {{var:cached}}</div>
+<div style="position:fixed;
+            width:100%;
+            height:3%;
+            left:0px;
+            top:97%;
+            background-color:silver;
+            font-family:arial;
+            font-size:10px">Seite gecached {{var:cached}}</div>
 </body>
 </html>

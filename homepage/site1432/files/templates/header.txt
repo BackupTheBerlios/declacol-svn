@@ -3,8 +3,8 @@
 <head>
 <title>{{var:sitename}} :: {{var:title}}</title>
 </head>
-<body style="font-family:courier">
-<div style="position:fixed; width:100%; height:100px; left:0px; top:0px; background-color:black; text-align:center; font-weight:bold; color:green;"><pre>
+<body style="font-family:courier; margin:0px; padding:0px;">
+<div style="position:fixed; width:100%; height:90px; left:0px; top:0px; background-color:black; text-align:center; font-weight:bold; color:green;"><pre>
  ______   _    _   ______   _    _      _________   ______  _____   _____ _______  ______  _______ _____  ______   ______  
 | | ____ | |  | | | |  | \ | |  | |    | | | | | \ | |     | | \ \   | |    | |   | |  | |   | |    | |  / |  | \ | |  \ \ 
 | |  | | | |  | | | |__| | | |  | |    | | | | | | | |---- | |  | |  | |    | |   | |__| |   | |    | |  | |  | | | |  | | 
