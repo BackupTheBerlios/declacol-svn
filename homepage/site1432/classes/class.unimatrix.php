@@ -72,11 +72,12 @@ require_once("conf.classes.php");
 
 
 //Die Regulären Ausdrücke bauen
-define ("TEMPLATE_REG_VAR"      ,"@{{var:[a-zA-Z0-9_]+?}}@");
-define ("TEMPLATE_REG_SYSTEM"   ,"@{{sys:[a-zA-Z0-9_]+?}}@");
-define ("TEMPLATE_REG_INCLUDE"  ,"@{{include:[a-zA-Z0-9\\.\\_\\-\\/]+?}}@");
-define ("TEMPLATE_REG_BOOL"     ,"@{{bool:[a-zA-Z0-9_]+?}}[\\w\\W]*?{{bool}}@");
-define ("TEMPLATE_REG_ARRAY"    ,"@{{array:[a-zA-Z0-9_]+?}}[\\w\\W]*?{{array}}@");
+define ("TEMPLATE_REG_VAR"        ,"@{{var:[a-zA-Z0-9_]+?}}@");
+define ("TEMPLATE_REG_SYSTEM"     ,"@{{sys:[a-zA-Z0-9_]+?}}@");
+define ("TEMPLATE_REG_INCLUDE"    ,"@{{include:[a-zA-Z0-9\\.\\_\\-\\/]+?}}@");
+define ("TEMPLATE_REG_VARINCLUDE" ,"@{{varinclude:[a-zA-Z0-9\\.\\_\\-\\/]+?}}@");
+define ("TEMPLATE_REG_BOOL"       ,"@{{bool:[a-zA-Z0-9_]+?}}[\\w\\W]*?{{bool}}@");
+define ("TEMPLATE_REG_ARRAY"      ,"@{{array:[a-zA-Z0-9_]+?}}[\\w\\W]*?{{array}}@");
 
 //Eigentliche Klasse
 class unimatrix
@@ -193,12 +194,47 @@ class unimatrix
         $this->_buffer=file_get_contents($templatefile);
 
         //Alle Includes verarbeiten, damit diese mitgeparst werden
+        $this->processvarincludes();
+        
         $this->processincludes();
 
         //Alle Bools, da diese über Sichtbarkeit entscheiden
         $this->processboolean();
         $this->processarrays();
         $this->processvars();
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Extrahiert alle include Tokens und fügt die Dateien ein
+    function processvarincludes()
+        {
+        //Alle Includes rausholen
+        if (preg_match_all(TEMPLATE_REG_VARINCLUDE,$this->_buffer,$result)>0)
+            {
+            foreach (reset($result) as $include)
+                {
+                $name=$this->extractvalue($include);
+                
+                //Existiert die Variable ?
+                if (isset($this->replace[$name])==TRUE)
+                    {
+                    $file=$this->replace[$name];
+                    }
+                else
+                    {
+                    $file="var : ".$name;
+                    }
+
+                if (file_exists($this->basepath.$file)==TRUE)
+                    {
+                    $this->_buffer = str_replace($include,file_get_contents($this->basepath.$file),$this->_buffer);
+                    }
+                else
+                    {
+                    $this->_buffer = str_replace($include,"[<b>".$file." not assigned</b>]",$this->_buffer);
+                    }
+                }
+            }
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

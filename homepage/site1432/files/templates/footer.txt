@@ -1,4 +1,4 @@
-<div style="position:fixed;
+<div style="position:absolute;
             width:100%;
             height:3%;
             left:0px;
