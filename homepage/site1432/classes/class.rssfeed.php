@@ -49,7 +49,7 @@ Aufbau eines Feeds nach Version 2.0
 //require_once("conf.classes.php");
 
 $rss=new rssfeed("rss.db");
-$rss->add("Mein erster Feed","http://sven-of-nine.de","Sven of Nine","Mein erster Feed in der langen Version");
+//$rss->add("Mein erster Feed","http://sven-of-nine.de","Sven of Nine","Mein erster Feed in der langen Version");
 $rss->write("feed.rss");
 echo file("feed.rss");
 $rss->destroy();
@@ -61,7 +61,7 @@ class rssfeed
     var $items    = array();
     
     //Anzahl der maximal gepufferten Einträge
-    var $maxcount = 10;
+    var $maxcount = 200;
     
     //Name zur Datenbankdatei
     var $dbfile   = FALSE;
@@ -181,7 +181,8 @@ class rssfeed
     //Feeddatum erzeugen
     function _feeddate($time)
       {
-      return(date("d.m.Y H:i:s",$time));
+      //Thu, 21 Feb 2008 08:47:25 +0100
+      return(date("D, d M Y H:i:s +0100",$time));
       }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
