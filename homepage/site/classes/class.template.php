@@ -62,5 +62,10 @@ class templateclass
 
         return($result);
         }
+        
+    //Hier können bei der Installation Daten in die Registry geschrieben werden
+    function preset(&$registry)
+        {
+        }
     }
 </script>

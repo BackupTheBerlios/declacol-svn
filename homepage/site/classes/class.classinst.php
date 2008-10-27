@@ -149,6 +149,10 @@ class classinst
                         {
                         $dummy= new registry($this->_regpath.$regfile,$result[CLASS_INDEX_COMPRESSED]);
                         $dummy->write("/",CLASS_INDEX_INSTALLDATE,time());
+
+                        //Presets schreiben
+                        $result = call_user_func( array($classname,"preset"),$dummy );
+
                         $dummy->flush();
                         $dummy->destroy();
                         }

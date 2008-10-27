@@ -78,7 +78,12 @@ class debug
 
         return($result);
         }
-        
+
+    //Hier können bei der Installation Daten in die Registry geschrieben werden
+    function preset(&$registry)
+        {
+        }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Unser eigener Errohandler
     function error($errno, $errstr, $errfile="unknown", $errline="0", $errcontext="undefined")

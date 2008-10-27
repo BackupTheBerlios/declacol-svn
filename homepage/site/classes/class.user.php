@@ -102,7 +102,12 @@ class user
         $result[CLASS_INDEX_RUNLEVEL]  = 5;                 //In welchen Runlevel soll die Klasse geladen werden
         return($result);
         }
-        
+
+    //Hier können bei der Installation Daten in die Registry geschrieben werden
+    function preset(&$registry)
+        {
+        }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Einen User lesen (gibt ein Usreobjekt zurück)
     function read($username,$password)

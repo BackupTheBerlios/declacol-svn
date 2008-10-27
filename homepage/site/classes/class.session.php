@@ -63,6 +63,11 @@ class session
         return($result);
         }
 
+    //Hier können bei der Installation Daten in die Registry geschrieben werden
+    function preset(&$registry)
+        {
+        }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Eine Session starten
     function start($id)

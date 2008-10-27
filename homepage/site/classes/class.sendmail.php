@@ -66,6 +66,11 @@ class sendmail
         return($result);
         }
 
+    //Hier können bei der Installation Daten in die Registry geschrieben werden
+    function preset(&$registry)
+        {
+        }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Email senden. Mailto kann ein Array mit Empfängern sein
     function send($mailto,$mailfrom,$subject,$body,$delay=SENDMAIL_INSTANT)

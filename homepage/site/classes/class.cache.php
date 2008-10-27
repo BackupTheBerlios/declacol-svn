@@ -78,6 +78,11 @@ class cache
         return($result);
         }
 
+    //Hier können bei der Installation Daten in die Registry geschrieben werden
+    function preset(&$registry)
+        {
+        }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Cache füllen
     function save($id,$runtime,$data)

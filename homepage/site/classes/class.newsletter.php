@@ -95,11 +95,18 @@ class newsletter
         return($result);
         }
 
+    //Hier können bei der Installation Daten in die Registry geschrieben werden
+    function preset(&$registry)
+        {
+        $registry->write("","feedfile",PATH_FILES."feed.rss");
+        $registry->write("","rsscount",200);
+        }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Die Ausgabedatei für einen RSS-Feed setzen
     function setrssfile($filename)
         {
-        $this->_registry->write("","feedfile",$filenam);
+        $this->_registry->write("","feedfile",$filename);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

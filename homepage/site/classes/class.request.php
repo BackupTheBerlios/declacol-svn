@@ -68,6 +68,11 @@ class request
         return($result);
         }
 
+    //Hier können bei der Installation Daten in die Registry geschrieben werden
+    function preset(&$registry)
+        {
+        }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Alle Requests lesen und nur erlaubte zulassen
     function initrequests()

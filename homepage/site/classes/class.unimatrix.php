@@ -129,6 +129,11 @@ class unimatrix
         return($result);
         }
 
+    //Hier können bei der Installation Daten in die Registry geschrieben werden
+    function preset(&$registry)
+        {
+        }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Einem Variablennamen einen Wert zuweisen
     function assign($varname,$value)
