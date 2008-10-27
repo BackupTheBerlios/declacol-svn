@@ -38,9 +38,12 @@ define ("CURRENT_TIME"  ,time());
 define ("ID_NONE"       ,0);
 define ("SALT"          ,"876");
 
-if (is_dir(PATH_BASE) != TRUE)
+//Fehlkonfigurationen abfangen  
+if (is_readable(PATH_REGISTRY."classes.reg")==FALSE)
   {
-  echo PATH_BASE."\n";
-  die("unable to access basepath check your config");
+  if (defined("SETUP")==FALSE)
+    {
+    die("run <a href=\"setup.php\">setup</a> to use this software");
+    }
   }
 </script>

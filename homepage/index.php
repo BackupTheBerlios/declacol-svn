@@ -31,7 +31,7 @@ $paramarray=array("modul"  =>"Hauptprojekt",
 $temp = $rpc->create ("vfbtygvsljcandhb",rand(0,65535),"newsletter","add",$paramarray);
 $rpc->process($temp);
 
-/*
+
 
 //Templateengine einhängen
 $pagefile =strtolower(classcall("request","getrequest","page","news",FILTER_ALPHANUM));
@@ -58,7 +58,7 @@ if (classcall("unimatrix","iscached",$id) == FALSE)
     
 //Here we go
 echo classcall("unimatrix","render",$id,$template);
-*/
+
 
 //Alle Klassen entladen und Inhalte flushen
 $classloader->destroy();

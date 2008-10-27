@@ -1,5 +1,5 @@
-<pre>
 <script language="php">
+define("SETUP",TRUE);
 //Nur diese Basisconfigurationen ziehen,
 //der Rest liegt in den Reg-Files
 require_once("config.php");
