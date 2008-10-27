@@ -72,52 +72,25 @@ function xmltoarray($xml)
 //////////////////////////////////////////////////////////////////////////////
 //Aus einem beliebig verschachtelten Array eine XML-Darstellung machen
 //(Hauptfunktion)
-//format = TRUE formatiert die Rückgabe automatisch
-function arraytoxml($array,$format=TRUE)
+function arraytoxml($array,$spacer="")
     {
-    $result=_array2xml($array,0,$format);
-    return($result);
-    }
-
-//Aus einem beliebig verschachtelten Array eine XML-Darstellung machen
-//(Unterfunktion)
-function _array2xml($array,$level,$format)
-    {
-    $space ="";
     $result="";
-    $nl    ="";
-
-    //Automatisches Einrücken
-    if ($format)
+    if (is_array($array)==TRUE)
         {
-        for ($fill=0; $fill < $level; $fill++)
+        foreach ($array as $tag => $val)
             {
-            $space.="   ";
-            }
-        $nl=TAG_NEXTLINE;
-        }
-
-    //Jeden Eintrag durchgehen
-    if (is_array($array))
-    {
-    foreach ($array as $index => $value)
-        {
-        //Tags sind immer Kleinschrift
-        $index=strtolower($index);
-
-        //Recursiv durchgehen
-        if (is_array($value))
-            {
-            $result.=$space.TAG_OPEN.$index.TAG_CLOSE.$nl;
-            $result.=_array2xml($value,$level+1,$format);
-            $result.=$space.TAG_OPEN.TAG_END.$index.TAG_CLOSE.$nl;
-            }
-        else
-            {
-            $result.=$space.TAG_OPEN.$index.TAG_CLOSE.$value.TAG_OPEN.TAG_END.$index.TAG_CLOSE.$nl;
+            $result.=$spacer.TAG_OPEN.$tag.TAG_CLOSE;
+            if ( is_array($val) == TRUE )
+              {
+              $result.=$this->arraytoxml($val,$spacer." ");
+              }
+            else
+              {
+              $result.=$val;
+              }
+            $result.=TAG_OPEN.TAG_END.$tag.TAG_CLOSE.TAG_NEXTLINE;
             }
         }
-    }
     return($result);
     }
 </script>
