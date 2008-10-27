@@ -14,7 +14,6 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 require_once("conf.classes.php");
-require_once(PATH_EXTERN."class.phpmailer.php");
 
 define ("SENDMAIL_INSTANT"  ,-1);
 
@@ -119,6 +118,8 @@ class sendmail
     //Eine EMail verschicken
     function _send($mailto,$mailfrom,$subject,$body)
         {
+        require_once(PATH_CLASSES."class.phpmailer.php");
+
         $this->_phpmailer(array($mailto),$mailfrom,$subject,$body);
         echo "sending ".$subject." to ".$mailto." from ".$mailfrom."\n";
         }

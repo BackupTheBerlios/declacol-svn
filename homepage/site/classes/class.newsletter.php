@@ -98,7 +98,7 @@ class newsletter
     //Hier können bei der Installation Daten in die Registry geschrieben werden
     function preset(&$registry)
         {
-        $registry->write("","feedfile",PATH_FILES."feed.rss");
+        $registry->write("","feedfile",PATH_EXTERN."feed.rss");
         $registry->write("","rsscount",200);
         }
 

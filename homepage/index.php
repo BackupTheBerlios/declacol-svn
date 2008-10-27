@@ -7,20 +7,17 @@ require_once(PATH_CLASSES."class.classload.php");
 $loader=new classload(PATH_REGISTRY);
 $loader->load();
 
-
-
-
 require_once(PATH_CLASSES."class.rpc.php");
 $rpc=new rpc();
+$rpc->userstatus=ID_NONE;
 $paramarray=array("modul"  =>"Hauptprojekt",
                   "title"  =>"Mein Neuer Eintrag",
                   "link"   =>"http://www.google.de",
                   "message"=>"Nur eine kleine Nachricht",
                   "author" =>"Sven Lorenz");
 
-$temp = $rpc->create ("ufbtljipxzteokc",rand(0,65535),"newsletter","add",$paramarray);
+$temp = $rpc->create ("vfbtygvsljcandhb",rand(0,65535),"newsletter","add",$paramarray);
 $rpc->process($temp);
-
 
 /*
 
@@ -50,7 +47,6 @@ if (classcall("unimatrix","iscached",$id) == FALSE)
 //Here we go
 echo classcall("unimatrix","render",$id,$template);
 */
-
 
 //Alle Klassen entladen und Inhalte flushen
 $loader->destroy();

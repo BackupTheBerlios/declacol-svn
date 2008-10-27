@@ -205,6 +205,8 @@ function web_push_file($filepath,$name=FALSE,$maxspeed=50)
     //Prüfen, ob es ihn gibt
     if (file_exists($filepath))
         {
+        require_once(PATH_LIBS."lib.mime.php");
+
         //Unseren Header schicken
         header("Content-Description: File Transfer",TRUE);
         header("Content-Type: ".mime_get_type($name),TRUE);
