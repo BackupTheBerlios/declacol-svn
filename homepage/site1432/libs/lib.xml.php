@@ -71,7 +71,6 @@ function xmltoarray($xml)
 
 //////////////////////////////////////////////////////////////////////////////
 //Aus einem beliebig verschachtelten Array eine XML-Darstellung machen
-//(Hauptfunktion)
 function arraytoxml($array,$spacer="")
     {
     $result="";
@@ -82,13 +81,14 @@ function arraytoxml($array,$spacer="")
             $result.=$spacer.TAG_OPEN.$tag.TAG_CLOSE;
             if ( is_array($val) == TRUE )
               {
-              $result.=$this->arraytoxml($val,$spacer." ");
+              $result.=TAG_NEXTLINE.arraytoxml($val,$spacer."  ");
+              $result.=$spacer.TAG_OPEN.TAG_END.trim($tag).TAG_CLOSE.TAG_NEXTLINE;
               }
             else
               {
-              $result.=$val;
+              $result.=trim($val);
+              $result.=TAG_OPEN.TAG_END.trim($tag).TAG_CLOSE.TAG_NEXTLINE;
               }
-            $result.=TAG_OPEN.TAG_END.$tag.TAG_CLOSE.TAG_NEXTLINE;
             }
         }
     return($result);
