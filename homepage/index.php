@@ -1,11 +1,23 @@
 <script language="php">
-//Ab hier gehts los
+/*
+ _|    _|            _|                              _|                _|            
+ _|    _|  _|_|_|        _|_|_|  _|_|      _|_|_|  _|_|_|_|  _|  _|_|      _|    _|  
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|_|      _|    _|_|    
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|        _|  _|    _|  
+   _|_|    _|    _|  _|  _|    _|    _|    _|_|_|      _|_|  _|        _|  _|    _|  
+                                                                                     
+(c) 2008 Borg@sven-of-nine.de
+*/
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Hauptseite
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Dieser Kopf muß immer so sein
 require_once("config.php");
 require_once(PATH_CLASSES."class.registry.php");
 require_once(PATH_CLASSES."class.classload.php");
-//Der Classloader öffnet automatisch alle notwendigen Klassen und initialisiert sie
-$loader=new classload(PATH_REGISTRY);
-$loader->load();
+$classloader=new classload(PATH_REGISTRY);
+$classloader->load();
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 require_once(PATH_CLASSES."class.rpc.php");
 $rpc=new rpc();
@@ -49,5 +61,5 @@ echo classcall("unimatrix","render",$id,$template);
 */
 
 //Alle Klassen entladen und Inhalte flushen
-$loader->destroy();
+$classloader->destroy();
 </script>
