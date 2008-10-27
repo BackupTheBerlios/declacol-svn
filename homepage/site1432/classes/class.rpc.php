@@ -65,7 +65,7 @@
 ///Antwort
 ///<rpc>
 /// <accessid>ab253ba3a5bf</accessid>
-/// <callid>MyID01</callid>
+/// <connectionid>MyID01</connectionid>
 ///  <call>
 ///   <class>registry</class>
 ///   <function>read</function>
@@ -117,6 +117,24 @@ class rpc
     function destroy()
         {
         unset($this);
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Ein Paket bauen
+    function create ($accessid,$connectionid,$class,$function,$paramarray)
+        {
+        $result=array();
+        $result["rpc"]["accessid"]=$accessid;
+        $result["rpc"]["connectionid"]=$connectionid;
+        $result["rpc"]["call"]["class"]=$class;
+        $result["rpc"]["call"]["function"]=$function;
+        
+        foreach ($paramarray as $name => $value)
+            {
+            $result["rpc"]["call"]["parameter"][$name]=$this->encodevalue(gettype($value),$value);
+            }
+
+        return ($this->xmlhead.arraytoxml($result));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
