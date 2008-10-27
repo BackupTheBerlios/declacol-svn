@@ -19,7 +19,7 @@
 ///
 ///<rpc>
 /// <accessid>ID</accessid>
-/// <callid>SelfmadeID</callid>
+/// <connectionid>SelfmadeID</connectionid>
 ///  <call>
 ///   <class>classname</class>
 ///   <function>functionname</function>
@@ -48,7 +48,7 @@
 ///Anfrage
 ///<rpc>
 /// <accessid>ab253ba3a5bf</accessid>
-/// <callid>MyID01</callid>
+/// <connectionid>MyID01</connectionid>
 ///  <call>
 ///   <class>registry</class>
 ///   <function>read</function>
@@ -94,15 +94,17 @@ define ("RPC_ERROR_INVALID_FUNCTION"  ,16);
 //Eigentliche Klasse
 class rpc
     {
-    var $xmlhead  = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    var $result   = "";
+    var $userstatus = USER_GUEST;   // Ab welchem Benutzerstatus ist RPC zugelassen
     
+    var $xmlhead  = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+
     var $errorstr = array ( RPC_ERROR_INVALID_CALL     => "rpc-packet not valid",
                             RPC_ERROR_INVALID_ID       => "access denied",
                             RPC_ERROR_INVALID_CLASS    => "access to unknown class or object",
                             RPC_ERROR_INVALID_FUNCTION => "access to unknown function or method",
                             RPC_ERROR_NONE             => "none",
                            );
+    var $result   = "";
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
@@ -127,42 +129,48 @@ class rpc
         $data=arraytoxml($data);
         $data=xmltoarray($data);
 
-        
         if ($this->rpcvalid($data)==TRUE)
             {
-            //Das der Klassenaufruf ein wenig ungelenkt ist,
-            //sieht auch der Aufbau der Parameter doof aus
-            $class=$data["rpc"]["call"]["class"];
-            $func =$data["rpc"]["call"]["function"];
-            $p1  = $this->decodevalue(reset( $data["rpc"]["call"]["parameter"] ) );
-            $p2  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
-            $p3  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
-            $p4  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
-            $p5  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
-            $p6  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
-            $p7  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
-            $p8  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
-            $p9  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
-            $p10 = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
-
-            //Alle möglichen Probleme abfangen
-            if ( classexists($class) == TRUE )
+            if ($this->rpcaccess($data["rpc"]["accessid"]) >= $this->userstatus)
                 {
-                if ( methodexists($class,$func) == TRUE )
-                    {
-                    $temp = classcall($class,$func,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9,$p10);
+                //Das der Klassenaufruf ein wenig ungelenkt ist,
+                //sieht auch der Aufbau der Parameter doof aus
+                $class=$data["rpc"]["call"]["class"];
+                $func =$data["rpc"]["call"]["function"];
+                $p1  = $this->decodevalue(reset( $data["rpc"]["call"]["parameter"] ) );
+                $p2  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
+                $p3  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
+                $p4  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
+                $p5  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
+                $p6  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
+                $p7  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
+                $p8  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
+                $p9  = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
+                $p10 = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
 
-                    $data["rpc"]["result"]=$this->encodevalue(gettype($temp),$temp);
-                    $this->rpcerror($data,RPC_ERROR_NONE);
+                //Alle möglichen Probleme abfangen
+                if ( classexists($class) == TRUE )
+                    {
+                    if ( methodexists($class,$func) == TRUE )
+                        {
+                        $temp = classcall($class,$func,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9,$p10);
+
+                        $data["rpc"]["result"]=$this->encodevalue(gettype($temp),$temp);
+                        $this->rpcerror($data,RPC_ERROR_NONE);
+                        }
+                    else
+                        {
+                        $this->rpcerror($data,RPC_ERROR_INVALID_FUNCTION);
+                        }
                     }
                 else
                     {
-                    $this->rpcerror($data,RPC_ERROR_INVALID_FUNCTION);
+                    $this->rpcerror($data,RPC_ERROR_INVALID_CLASS);
                     }
                 }
             else
                 {
-                $this->rpcerror($data,RPC_ERROR_INVALID_CLASS);
+                $this->rpcerror($data,RPC_ERROR_INVALID_ID);
                 }
             }
         else
@@ -176,6 +184,14 @@ class rpc
         return ( $data["rpc"]["errorno"] == RPC_ERROR_NONE );
         }
     
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Prüfen, ob der Benutzer Zugriff hat
+    function rpcaccess($id)
+        {
+        return (classcall("user","exists",USER_PREFIX.$id));
+        }
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Fehler dem Paket zufügen
     function rpcerror(&$rpcarray,$errno)
