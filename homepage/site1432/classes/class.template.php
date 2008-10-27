@@ -25,7 +25,7 @@ class templateclass
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
-    function session(&$registry)
+    function template(&$registry)
         {
         //Unsere Registrieung intern ablegen
         $this->_registry=$registry;

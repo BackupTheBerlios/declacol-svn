@@ -98,7 +98,9 @@ class registry
     //Existiert ein Wert oder Pfad ?
     function exists($path,$name)
         {
-        return ($this->read($path,$name,VOID_MARKER)!=VOID_MARKER);
+        $pointer=$this->_getregpointer($path);
+        
+        return (isset($pointer[$name]));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -18,9 +18,7 @@ setproperty("unimatrix","cachetimeout",300);
 //Seite nur erzeugen, wenn sie nicht gepuffert ist
 if (classcall("unimatrix","iscached",$id) == FALSE)
     {
-    $pagetitle=ucwords($pagefile);
-
-    classcall("unimatrix","assign","pagetitle",$pagetitle);
+    classcall("unimatrix","assign","pagetitle",$pagefile);
     classcall("unimatrix","assign","sitename","Guru-Meditation");
     classcall("unimatrix","assign","pagefile",$pagefile.".txt");
     classcall("unimatrix","assign","version","1.0");
@@ -34,7 +32,21 @@ if (classcall("unimatrix","iscached",$id) == FALSE)
     }
 
 //Here we go
-echo classcall("unimatrix","render",$id,$template);
+//echo classcall("unimatrix","render",$id,$template);
+
+$CLASSES["rssfeed"]->addchannel("hauptprojekt","Hauptprojekt","http://bopfen.com","Alles was im Hauptprojekt liegt");
+$CLASSES["rssfeed"]->addchannel("verwaltung",  "Projektverwaltung","http://bopfen.com","Alles was im Hauptprojekt liegt");
+
+
+$CLASSES["rssfeed"]->additem("hauptprojekt","mytitle","http://www.google.de","Ich","Description");
+$CLASSES["rssfeed"]->additem("hauptprojekt","mytitle","http://www.google.de","Ich","Description");
+$CLASSES["rssfeed"]->additem("hauptprojekt","mytitle","http://www.google.de","Ich","Description");
+$CLASSES["rssfeed"]->additem("hauptprojekt","mytitle","http://www.google.de","Ich","Description");
+$CLASSES["rssfeed"]->additem("verwaltung","mytitle","http://www.google.de","Ich","Description");
+
+//print_r($CLASSES["rssfeed"]);
+$CLASSES["rssfeed"]->write("./dogosch.rss");
+
 
 //Alle Klassen entladen und Inhalte flushen
 $loader->destroy();
