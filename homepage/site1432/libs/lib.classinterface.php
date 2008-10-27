@@ -16,6 +16,35 @@
 //////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////
+//Prüfen, ob eine Klasse existiert
+function classexists($classname)
+    {
+    global $CLASSES;
+
+    return(isset($CLASSES[$classname]));
+    }
+
+
+//////////////////////////////////////////////////////////////////////////
+//Prüfen, ob eine Methode existiert
+function methodexists($classname,$method)
+    {
+    global $CLASSES;
+
+    return( method_exists($CLASSES[$classname],$method) );
+    }
+
+//////////////////////////////////////////////////////////////////////////
+//Prüfen, ob eine Eigenschaft existiert
+function propertyexists($classname,$method)
+    {
+    global $CLASSES;
+
+    return( property_exists($CLASSES[$classname],$method) );
+    }
+
+
+//////////////////////////////////////////////////////////////////////////
 //Hier die Interfacefunktion, um auf die geladenen Klassen zugreifen zu können
 //Der Aufruf ist zwar ziemlich schräg, ober eine bessere Methode habe ich noch nicht gefunden
 function classcall($classname,$method,$p1=FALSE,$p2=FALSE,$p3=FALSE,$p4=FALSE,$p5=FALSE,$p6=FALSE,$p7=FALSE,$p8=FALSE,$p9=FALSE,$p10=FALSE)
