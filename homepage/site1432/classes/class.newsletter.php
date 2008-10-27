@@ -116,18 +116,26 @@ class newsletter
         $this->addfeed($modul,$title,$link,$message,$author);
         }
         
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Eine Newsletter-Email schicken
+    function addmail($modul,$title,$link,$message,$author)
+        {
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen Newsfeed eintragen
     function addfeed($modul,$title,$link,$message,$author)
         {
         //Den RSS-Feed aktualisieren
         require_once(PATH_CLASSES."class.rssfeed.php");
 
         //Zur Sicherheit den Kanal miteinrichten
+        $channel=strtolower($modul);
         $rss=new rssfeed($this->_registry);
         $rss->maxcount=$this->_registry->read("","rsscount",200);
-        $rss->addchannel($modul,$modul,$link,$modul);
-        $rss->additem   ($modul,$title,$link,$author,$message);
+        $rss->addchannel($channel,$modul,$link,$modul);
+        $rss->additem   ($channel,$title,$link,$author,$message);
         $rss->write( $this->_registry->read("","feedfile","feed.rss") );
-        $rss->destroy();
         }
     }
 </script>
