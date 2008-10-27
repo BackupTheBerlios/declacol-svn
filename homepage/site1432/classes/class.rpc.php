@@ -123,6 +123,8 @@ class rpc
     //Eingabe
     function process($xmldata)
         {
+        $time=time();
+
         //Einmal in beider Richtungen parsen,
         //um das Paket sauber zu kriegen
         $data=xmltoarray($xmldata);
@@ -179,6 +181,7 @@ class rpc
             }
 
         //Und als XML-Paket ablegen
+        $data["rpc"]["runtime"]=(time() - $time);
         $this->result=$this->xmlhead.arraytoxml($data);
         
         return ( $data["rpc"]["errorno"] == RPC_ERROR_NONE );
