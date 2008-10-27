@@ -10,7 +10,9 @@
 */
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
-/// Simples Feedinterface
+/// Newsletterklasse,
+/// die Neuigkeiten als EMail an registrierte Benutzer verschickt und
+/// parallel dazu einen RSS-Feed anbietet
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -45,15 +47,15 @@ Aufbau eines Feeds nach Version 2.0
   </channel>
 </rss>
 */
-require_once("conf.classes.php");
-
+require_once(PATH_LIBS."lib.xml.php");
 
 //Eigentliche Klasse
 class rssfeed
     {
-    var $maxcount  = 5;
+    var $maxcount  = 200;
     //Private
     var $_registry = FALSE;
+    var $_basedir  = "feed/";
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
@@ -75,26 +77,6 @@ class rssfeed
         unset($this);
         }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Die Installfunktion gibt ein Array mit relevanten Daten zurück
-    function install()
-        {
-        $result[CLASS_INDEX_ID]        = "rssfeed";  //ID unserer Klasse, nur alphanumerisch (mit diesem Namen wird das Objekt instanziert)
-        $result[CLASS_INDEX_NAME]      = "rssfeed";  //Name der Klasse
-        $result[CLASS_INDEX_VERSION]   = "0.1";      //Version der Klasse
-        $result[CLASS_INDEX_REGISTRY]  = TRUE;       //Wird eine Registry benötigt
-        $result[CLASS_INDEX_DATABASE]  = FALSE;      //Wird eine Datenbank benötigt
-
-        $result[CLASS_INDEX_CLEANUP]   = TRUE;       //Soll die Datenbank initialisiert werden ?
-
-        $result[CLASS_INDEX_AUTOLOAD]  = TRUE;       //Soll die Klasse beim Systemstart geladen werden ?
-        $result[CLASS_INDEX_COMPRESSED]= TRUE;       //Soll die Datenbank komprimiert werden (gz)
-
-        $result[CLASS_INDEX_RUNLEVEL]  = 5;          //In welchen Runlevel soll die Klasse geladen werden
-
-        return($result);
-        }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Die XML-Datei schreiben
@@ -104,24 +86,29 @@ class rssfeed
       $rss.="<rss version=\"2.0\">\n";
 
       //Alle Kanäle lesen
-      $channels=$this->_registry->enum("");
+      $channels=$this->_registry->enum($this->_basedir);
+
+      echo "<pre>";
 
       foreach ($channels as $channelid => $channel)
         {
         //Kopf des Kanals
-        $channel=unserialize($this->_registry->read($channelid,"data",""));
+        $channelpath=$this->_basedir.$channelid;
+        $channel=unserialize($this->_registry->read($channelpath,"data",""));
 
         $rss.=" <channel>\n";
-        $rss.=$this->arraytoxml($channel,"  ");
+        $rss.=arraytoxml($channel,"  ");
 
         //Alle Items
-        $items=$this->_registry->enum($channelid."/items/");
+        $itempath=$channelpath."/items/";
+        $items=$this->_registry->enum($itempath);
+        krsort($items);
         foreach($items as $itemid => $item)
             {
-            $item=unserialize($this->_registry->read($channelid."/items/",$itemid,""));
+            $item=unserialize($this->_registry->read($itempath,$itemid,""));
             
             $rss.="  <item>\n";
-            $rss.=$this->arraytoxml($item,"   ");
+            $rss.=arraytoxml($item,"   ");
             $rss.="  </item>\n";
             }
 
@@ -132,56 +119,41 @@ class rssfeed
       unset($rss);
       return(file_exists($rssfile));
       }
-       
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Simple ArrayToXML-Konvertierung
-    function arraytoxml($array,$spacer="")
-      {
-      $result="";
-      if (is_array($array)==TRUE)
-        {
-        foreach ($array as $tag => $val)
-            {
-            $result.=$spacer."<".$tag.">";
-            if ( is_array($val) == TRUE )
-              {
-              $result.=$this->arraytoxml($val,$spacer." ");
-              }
-            else
-              {
-              $result.=$val;
-              }
-            $result.="</".$tag.">\n";
-            }
-        }
-      return($result);
-      }
-        
-        
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Einen neuen Kanal initialisieren
-    function addchannel($channel,$title,$link,$description)
+    function addchannel($channelid,$title,$link,$description)
         {
-        $channelid=md5($channel);
+        $channelid=$this->createchannelid($channelid);
         if ($this->_registry->exists("",$channelid)==FALSE)
             {
-            $this->_registry->write($channelid,"data",serialize(array("title"=>$title,
-                                                                      "link"=>$link,
-                                                                      "description"=>$description,
-                                                                      "pubDate"=>$this->_feeddate(CURRENT_TIME)
-                                                                      )));
+            $this->_registry->write($this->_basedir.$channelid,
+                                    "data",
+                                    serialize(array("title"=>$title,
+                                                    "link"=>$link,
+                                                    "description"=>$description,
+                                                    "pubDate"=>$this->_feeddate(CURRENT_TIME)
+                                                    )));
             }
         }
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen Kanal löschen
+    function delchannel($channelid)
+        {
+        $channelid=$this->createchannelid($channelid);
+        return ( $this->_registry->del($this->_basepath, $channelid) );
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Einen RSS-Eintrag machen
-    function additem($channel,$title,$link,$author,$description)
+    function additem($channelid,$title,$link,$author,$description)
       {
       //Simple ID bilden
-      $channelid=$this->createchannelid($channel);
+      $channelid=$this->createchannelid($channelid);
       
       //Gibt es diesen Kanal überhaupt ?
-      if ( $this->_registry->exists("",$channelid) == TRUE )
+      if ( $this->_registry->exists($this->_basedir,$channelid) == TRUE )
         {
         //Und die Datenbank shrinken
         $this->shrinkdb($channelid);
@@ -199,7 +171,7 @@ class rssfeed
         $item["guid"]       = $sec.$usec;
 
         //Abspeichern
-        $this->_registry->write($channelid."/items/",$item["guid"],serialize($item) );
+        $this->_registry->write($this->_basedir.$channelid."/items/",$item["guid"],serialize($item) );
         $result=TRUE;
         }
       else
@@ -259,7 +231,7 @@ class rssfeed
     //Die Datenbank eines Kanals reduzieren
     function shrinkdb($channelid)
       {
-      $path=$channelid."/items/";
+      $path=$this->_basedir.$channelid."/items/";
       
       //Einträge sortiert holen
       $items=$this->_registry->enum($path);

@@ -124,7 +124,7 @@ class unimatrix
         $result[CLASS_INDEX_CLEANUP]   = FALSE;            //Soll die Datenbank initialisiert werden ?
         $result[CLASS_INDEX_AUTOLOAD]  = TRUE;             //Soll die Klasse beim Systemstart geladen werden ?
         $result[CLASS_INDEX_COMPRESSED]= FALSE;            //Soll die Datenbank komprimiert werden (gz)
-        $result[CLASS_INDEX_RUNLEVEL]  = 10;               //In welchen Runlevel soll die Klasse geladen werden
+        $result[CLASS_INDEX_RUNLEVEL]  = 11;               //In welchen Runlevel soll die Klasse geladen werden
 
         return($result);
         }
