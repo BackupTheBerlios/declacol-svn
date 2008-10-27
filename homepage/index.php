@@ -3,10 +3,26 @@
 require_once("config.php");
 require_once(PATH_CLASSES."class.registry.php");
 require_once(PATH_CLASSES."class.classload.php");
-
 //Der Classloader öffnet automatisch alle notwendigen Klassen und initialisiert sie
 $loader=new classload(PATH_REGISTRY);
 $loader->load();
+
+
+
+
+require_once(PATH_CLASSES."class.rpc.php");
+$rpc=new rpc();
+$paramarray=array("modul"  =>"Hauptprojekt",
+                  "title"  =>"Mein Neuer Eintrag",
+                  "link"   =>"http://www.google.de",
+                  "message"=>"Nur eine kleine Nachricht",
+                  "author" =>"Sven Lorenz");
+
+$temp = $rpc->create ("ufbtljipxzteokc",rand(0,65535),"newsletter","add",$paramarray);
+$rpc->process($temp);
+
+
+/*
 
 //Templateengine einhängen
 $pagefile =strtolower(classcall("request","getrequest","page","news",FILTER_ALPHANUM));
@@ -30,22 +46,10 @@ if (classcall("unimatrix","iscached",$id) == FALSE)
                                                 "?page=faq"        => "FAQ",
                                           ));
     }
-
+    
 //Here we go
-//echo classcall("unimatrix","render",$id,$template);
-
-$CLASSES["rssfeed"]->addchannel("hauptprojekt","Hauptprojekt","http://bopfen.com","Alles was im Hauptprojekt liegt");
-$CLASSES["rssfeed"]->addchannel("verwaltung",  "Projektverwaltung","http://bopfen.com","Alles was im Hauptprojekt liegt");
-
-
-$CLASSES["rssfeed"]->additem("hauptprojekt","mytitle","http://www.google.de","Ich","Description");
-$CLASSES["rssfeed"]->additem("hauptprojekt","mytitle","http://www.google.de","Ich","Description");
-$CLASSES["rssfeed"]->additem("hauptprojekt","mytitle","http://www.google.de","Ich","Description");
-$CLASSES["rssfeed"]->additem("hauptprojekt","mytitle","http://www.google.de","Ich","Description");
-$CLASSES["rssfeed"]->additem("verwaltung","mytitle","http://www.google.de","Ich","Description");
-
-//print_r($CLASSES["rssfeed"]);
-$CLASSES["rssfeed"]->write("./dogosch.rss");
+echo classcall("unimatrix","render",$id,$template);
+*/
 
 
 //Alle Klassen entladen und Inhalte flushen

@@ -43,5 +43,4 @@ if (is_dir(PATH_BASE) != TRUE)
   echo PATH_BASE."\n";
   die("unable to access basepath check your config");
   }
-
 </script>
