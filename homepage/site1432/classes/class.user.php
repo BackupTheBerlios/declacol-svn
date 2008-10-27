@@ -211,9 +211,10 @@ class user
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Prüfen, ob ein Benutzer schon existiert
+    //Es wird der Userstatus zurückgeliefert
     function exists($input)
         {
-        return ( $this->_registry->exists("user/".$this->createid($input),"id") );
+        return ( $this->_registry->read ($this->createpath($this->createid($input)),"status",FALSE) );
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
