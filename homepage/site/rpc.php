@@ -14,7 +14,7 @@
 require_once(PATH_CLASSES."class.rpc.php");
 
 //Daten von der Requestklasse holen
-$xml=classcall("request","getrequest","rpc","",FILTER_SECURE);
+$xml=callmethod("request","getrequest","rpc","",FILTER_SECURE);
 
 //Verarbeiten
 $rpc = new rpc();

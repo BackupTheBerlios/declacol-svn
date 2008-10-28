@@ -258,7 +258,7 @@ class user
             }
         else
             {
-            $result=USER_PREFIX.classcall("crypt","hash",($input));
+            $result=USER_PREFIX.callmethod("crypt","hash",($input));
             }
         return ($result);
         }
@@ -273,7 +273,7 @@ class user
             }
         else
             {
-            $result=PASS_PREFIX.classcall("crypt","passhash",($input));
+            $result=PASS_PREFIX.callmethod("crypt","passhash",($input));
             }
         return ($result);
         }

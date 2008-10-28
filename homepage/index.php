@@ -20,25 +20,23 @@ $classloader->load();
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Nun einfach die Funktion auswählen
-if ( classcall("request","getrequest","rpc",FALSE,FILTER_SECURE) != FALSE)
+//Ein Download ?
+if ( callmethod("request","getrequest","file",FALSE,FILTER_SECURE) != FALSE)
     {
-    //Ein Remotecall ?
-    include(PATH_BASE."rpc.php");
+    include(PATH_BASE."push.php");
     }
 else
     {
-    //Ein Download ?
-    if ( classcall("request","getrequest","file",FALSE,FILTER_SECURE) != FALSE)
+    if ( callmethod("request","getrequest","rpc",FALSE,FILTER_SECURE) != FALSE)
         {
-        include(PATH_BASE."push.php");
+        //Ein Remotecall ?
+        include(PATH_BASE."rpc.php");
         }
     else
         {
         //Alles andere
         include(PATH_BASE."index.php");
         }
-        
-
     }
 //Alle Klassen entladen und Inhalte flushen
 $classloader->destroy();

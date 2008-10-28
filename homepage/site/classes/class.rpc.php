@@ -187,7 +187,7 @@ class rpc
                     {
                     if ( methodexists($class,$func) == TRUE )
                         {
-                        $temp = classcall($class,$func,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9,$p10);
+                        $temp = callmethod($class,$func,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9,$p10);
 
                         $data["rpc"]["result"]=$this->encodevalue(gettype($temp),$temp);
                         $this->rpcerror($data,RPC_ERROR_NONE);
@@ -223,7 +223,7 @@ class rpc
     //Prüfen, ob der Benutzer Zugriff hat
     function rpcaccess($id)
         {
-        return (classcall("user","exists",USER_PREFIX.$id));
+        return (callmethod("user","exists",USER_PREFIX.$id));
         }
 
 

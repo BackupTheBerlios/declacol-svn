@@ -37,6 +37,7 @@ define ("EMAIL_MODE"    ,"smtp");
 define ("CURRENT_TIME"  ,time());
 define ("ID_NONE"       ,0);
 define ("SALT"          ,"876");
+define ("EVERYTHING"    ,"42");
 
 //Fehlkonfigurationen abfangen  
 if (is_readable(PATH_REGISTRY."classes.reg")==FALSE)

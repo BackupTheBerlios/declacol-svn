@@ -16,16 +16,18 @@
 //Dateiname holen
 require_once(PATH_LIBS."lib.mime.php");
 
-$pushfile=classcall("request","getrequest","file",FALSE,FILTER_URL);
+//User angemeldet ?
+$answer   = callmethod("request","getcookie","answer","16");
 
-//Angemeldet ?
-if (1 != 1)
+//Datei holen (Pfade sind im Pushmodus nicht zugelassen)
+$filename = basename( callmethod("request","getrequest","file",FALSE,FILTER_URL));
+$pushfile = PATH_FILES.$filename;
+
+//Originaldatei nicht gefunden oder nicht angemeldet ?
+if ( ( file_exists($pushfile) == FALSE) || ($answer != EVERYTHING) )
     {
-    $pushfile=PATH_FILES.basename($pushfile);
-    }
-else
-    {
-    $pushfile=PATH_EXTERN.basename($pushfile);
+    //Dann nur externe Dateien zulassen
+    $pushfile=PATH_EXTERN.$filename;
     }
 
 //Datei OK?
@@ -47,6 +49,8 @@ if (file_exists($pushfile)==TRUE)
     }
 else
     {
-    echo "file not found";
+    header("HTTP/1.0 404 Not Found");
+    echo "<h1>404</h1><hr>";
+    echo "<h2>file not found [".$filename."]</h2>";
     }
 </script>

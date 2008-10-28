@@ -108,13 +108,13 @@ class request
             foreach ($_COOKIE as $index=>$cookie)
                 {
                 //Id des Kontrollcookies erzeugen
-                $controlid =classcall("crypt","hash",$index);
+                $controlid =callmethod("crypt","hash",$index);
 
                 //Gibt es ein ControlCookie ?
                 if (isset($_COOKIE[$controlid]))
                     {
                     //Stimmen die Daten ?
-                    if ($_COOKIE[$controlid]==classcall("crypt","hash",$cookie))
+                    if ($_COOKIE[$controlid]==callmethod("crypt","hash",$cookie))
                         {
                         //Alles OK, dann merken
                         $this->cookies[$index]=$cookie;
@@ -147,7 +147,7 @@ class request
         setcookie($name,$value,$expire,$path);
 
         //Und einmal das Controlcookie
-        setcookie( classcall("crypt","hash",$name), classcall("crypt","hash",$value),$expire,$path);
+        setcookie( callmethod("crypt","hash",$name), callmethod("crypt","hash",$value),$expire,$path);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

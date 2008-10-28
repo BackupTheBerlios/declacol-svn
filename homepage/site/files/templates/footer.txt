@@ -5,6 +5,8 @@
             top:97%;
             background-color:silver;
             font-family:arial;
-            font-size:10px">Seite gecached {{var:cached}}</div>
+            font-size:10px">Seite gecached {{var:cached}}
+<a href="?file=feed.rss" target="_blank">rss-feed</a>            
+</div>
 </body>
 </html>
