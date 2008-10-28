@@ -36,6 +36,7 @@ uses
 {$IfDef EXPLICIT_VARIANT}
   Variants,
 {$EndIf}
+  zlib,      
 
   Unit_typedefs,Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs,class_diskio, StdCtrls,Spin, Grids, ComCtrls, ExtCtrls,class_checksum,class_random,
@@ -657,6 +658,12 @@ begin
                       //Fortschritt
                       pbWrite.Position:=signed32(trunc(u64Sector / unsigned32(SectorCount) * 1024));
                       Application.ProcessMessages();
+                    end
+                  else
+                    begin
+                         //Das Image ist zuende, aber das Medium könte mehr
+                          lbWriteLog.Items.Add('unexpected end of imagefile');
+                          bBusy:=FALSE;
                     end;
                 end;
 
