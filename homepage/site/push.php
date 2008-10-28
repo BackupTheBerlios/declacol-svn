@@ -8,6 +8,7 @@
                                                                                      
 (c) 2008 Borg@sven-of-nine.de
 */
+if (DEBUG) callmethod("debug","addlog","push","call");
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 /// Liefert Dateien auf Anfrage aus
@@ -22,15 +23,18 @@ $answer   = callmethod("request","getcookie","answer","16");
 //Datei holen (Pfade sind im Pushmodus nicht zugelassen)
 $filename = basename( callmethod("request","getrequest","file",FALSE,FILTER_URL));
 $pushfile = PATH_FILES.$filename;
+if (DEBUG) callmethod("debug","addlog","push","request ".$pushfile);
 
 //Originaldatei nicht gefunden oder nicht angemeldet ?
 if ( ( file_exists($pushfile) == FALSE) || ($answer != EVERYTHING) )
     {
     //Dann nur externe Dateien zulassen
     $pushfile=PATH_EXTERN.$filename;
+    if (DEBUG) callmethod("debug","addlog","push","redirect to EXTERN");
     }
 
 //Datei OK?
+if (DEBUG) callmethod("debug","addlog","push","request ".$pushfile);
 if (file_exists($pushfile)==TRUE)
     {
 

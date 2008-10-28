@@ -60,12 +60,13 @@ function callmethod($classname,$method,$p1=FALSE,$p2=FALSE,$p3=FALSE,$p4=FALSE,$
             }
         else
             {
-            trigger_error("invalid method ".$classname.":".$method);
+            //Bei Debug lassen wir fehler weiterlaufen
+            if (!DEBUG) trigger_error("invalid method ".$classname.":".$method);
             }
         }
     else
         {
-        trigger_error("invalid object ".$classname.":".$method);
+        if (!DEBUG) trigger_error("invalid object ".$classname.":".$method);
         }
     return($result);
     }
@@ -85,12 +86,12 @@ function setproperty($classname,$property,$value)
             }
         else
             {
-            trigger_error("invalid property ".$classname.":".$property);
+            if (!DEBUG) trigger_error("invalid property ".$classname.":".$property);
             }
         }
     else
         {
-        trigger_error("invalid object ".$classname.":".$property);
+        if (!DEBUG) trigger_error("invalid object ".$classname.":".$property);
         }
     return($result);
     }
@@ -109,12 +110,12 @@ function getproperty($classname,$property,$default)
             }
         else
             {
-            trigger_error("invalid property ".$classname.":".$property);
+            if (!DEBUG) trigger_error("invalid property ".$classname.":".$property);
             }
         }
     else
         {
-        trigger_error("invalid object ".$classname.":".$property);
+        if (!DEBUG) trigger_error("invalid object ".$classname.":".$property);
         }
     return($result);
     }

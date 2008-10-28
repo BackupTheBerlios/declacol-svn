@@ -18,7 +18,6 @@ require_once(PATH_CLASSES."class.classload.php");
 $classloader=new classload(PATH_REGISTRY);
 $classloader->load();
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
 //Nun einfach die Funktion auswählen
 //Ein Download ?
 if ( callmethod("request","getrequest","file",FALSE,FILTER_SECURE) != FALSE)
