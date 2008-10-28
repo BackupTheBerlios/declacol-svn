@@ -8,7 +8,7 @@
                                                                                      
 (c) 2008 Borg@sven-of-nine.de
 */
-
+define ("DEBUGMODE" , TRUE);
 
 //Alle Pfade
 define ("PATH_SALT"     ,""); //Pfad Obfuscator wird einmal bei der Installation gesetzt
@@ -52,5 +52,16 @@ if (is_readable(PATH_REGISTRY."classes.reg")==FALSE)
     {
     die("run <a href=\"setup.php\">setup</a> to use this software");
     }
+  else
+    {
+    define("DEBUG",FALSE);
+    }
   }
+else
+  {
+  define("DEBUG",DEBUGMODE);
+  }
+  
+
+  
 </script>

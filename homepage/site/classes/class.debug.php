@@ -20,12 +20,11 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 require_once("conf.classes.php");
 
-//Das Debugarray halten wir global, um immer daruf zugreifen zu können
-$GLOBALS["DEBUGLOG"]=array();
-
 //Eigentliche Klasse
 class debug
     {
+    var $log         = array();
+    
     //Private
     var $active      = FALSE;
 
@@ -35,6 +34,8 @@ class debug
         {
         if (defined("DEBUG")==TRUE)
             {
+            require_once(PATH_LIBS."lib.xml.php");
+
             $this->active=TRUE;
 
             //Unsere Daten holen
@@ -44,6 +45,8 @@ class debug
             //Allen eigenen Handler einhängen
             set_exception_handler(array(DEBUG_CLASS,"exception"));
             set_error_handler    (array(DEBUG_CLASS,"error"));
+            
+            $this->addlog("debug","launched");
             }
         }
 
@@ -55,6 +58,12 @@ class debug
             {
             restore_error_handler();
             restore_exception_handler();
+
+            $this->addlog("debug","ended");
+
+            //Und log als XML schreiben
+            file_put_contents(PATH_TEMP."debug_".CURRENT_TIME.".log",arraytoxml($this->log));
+            
             $this->clearlog();
             }
         unset($this);
@@ -134,13 +143,16 @@ class debug
         $error.="\n context : ".print_r($errcontext,TRUE);
 
         //Abspeichern
-        call_user_func(array(DEBUG_CLASS,"addlog"),$error);
+        callmethod("debug","addlog","system",$error);
 
         //Wir killen bei jedem Fehler oder Problem
         if ($errno != 0)
             {
-            call_user_func(array(DEBUG_CLASS,"printlog"),$error);
-            die("system halted");
+            callmethod("debug","printlog");
+            if ($halt==TRUE)
+                {
+                die("system halted");
+                }
             }
 
         return(TRUE);
@@ -151,28 +163,22 @@ class debug
     function exception ($exception)
         {
         $error="EXCEPTION    [".$exception->code."] ".$exception->message;
-        call_user_func(array(DEBUG_CLASS,"addlog"),$error);
+        callmethod("debug","addlog","system",$error);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Log zufügen
-    function addlog($text)
+    function addlog($module,$text)
         {
-        global $DEBUGLOG;
-        $DEBUGLOG[]=date("H:i:s")." : ".$text;
+        $this->log[$module][]=date("H:i:s")." : ".$text;
         }
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Log ausgeben
     function printlog()
         {
-        global $DEBUGLOG;
         echo "<pre>";
-        foreach ($DEBUGLOG as $time => $line)
-            {
-            echo $line;
-            echo "<hr>";
-            }
+        print_r(arraytoxml($this->log));
         echo "</pre>";
         }
 
@@ -180,8 +186,7 @@ class debug
     //Log löschen
     function clearlog()
         {
-        global $DEBUGLOG;
-        $DEBUGLOG=array();
+        $this->log=array();
         }
     }
 </script>

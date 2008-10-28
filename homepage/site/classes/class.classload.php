@@ -87,6 +87,8 @@ class classload
 
             foreach ($runlevels as $runlevel => $dummy)
                 {
+                if (DEBUG) callmethod("debug","addlog","classload","entering runlevel [".$runlevel."]");
+
                 $classes=$this->_registry->enum("classes/".$runlevel."/");
                 
                 //Alle Klassen holen
@@ -99,6 +101,7 @@ class classload
                     }
                 }
             }
+        if (DEBUG) callmethod("debug","addlog","classload","done");
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,6 +123,8 @@ class classload
 
             foreach ($runlevels as $runlevel)
                 {
+                if (DEBUG) callmethod("debug","addlog","classload","entering runlevel [".$runlevel."]");
+
                 $classes=$this->_registry->enum("classes/".$runlevel."/");
 
                 //Alle Klassen holen
@@ -140,12 +145,16 @@ class classload
         {
         global $CLASSES;
         
+        if (DEBUG) callmethod("debug","addlog","classload","creating ".$classname." [rl_".$runlevel."]");
+        
         $classdata=$this->_registry->enum("classes/".$runlevel."/".$classname);
         
         require_once(PATH_CLASSES.$classdata[CLASS_INDEX_CLASSFILE]);
 
         if ($classdata[CLASS_INDEX_REGISTRY] == TRUE)
             {
+            if (DEBUG) callmethod("debug","addlog","classload","loading registry ".$classdata[CLASS_INDEX_REGISTRYFILE]);
+
             //ggf. eine Registry erzeugen
             $registry = new registry ( PATH_REGISTRY.$classdata[CLASS_INDEX_REGISTRYFILE],
                                        $classdata[CLASS_INDEX_COMPRESSED]);
@@ -169,6 +178,8 @@ class classload
         
         if (isset($CLASSES[$classname])==TRUE)
             {
+            if (DEBUG) callmethod("debug","addlog","classload","destroying ".$classname);
+
             $CLASSES[$classname]->destroy();
             unset($CLASSES[$classname]);
             }

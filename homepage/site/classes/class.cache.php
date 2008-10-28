@@ -73,7 +73,7 @@ class cache
         $result[CLASS_INDEX_CLEANUP]   = FALSE;        //Soll die Datenbank initialisiert werden ?
         $result[CLASS_INDEX_AUTOLOAD]  = TRUE;         //Soll die Klasse beim Systemstart geladen werden ?
         $result[CLASS_INDEX_COMPRESSED]= FALSE;        //Soll die Datenbank komprimiert werden (gz)
-        $result[CLASS_INDEX_RUNLEVEL]  = 1;            //In welchen Runlevel soll die Klasse geladen werden
+        $result[CLASS_INDEX_RUNLEVEL]  = 2;            //In welchen Runlevel soll die Klasse geladen werden
 
         return($result);
         }
@@ -94,6 +94,8 @@ class cache
 
         file_put_contents($this->cachepath.$filename,$data);
 
+        if (DEBUG) callmethod("debug","addlog","cache","caching ".$filename);
+
         return(file_exists($data));
         }
         
@@ -110,6 +112,9 @@ class cache
                 unlink($this->cachepath.$file);
                 }
             }
+
+        if (DEBUG) callmethod("debug","addlog","cache","clear");
+
         //Statuscache neu initialisieren
         clearstatcache ();
         }
@@ -132,6 +137,7 @@ class cache
                 $result=gzuncompress($result);
                 $result=unserialize($result);
                 }
+            if (DEBUG) callmethod("debug","addlog","cache","recall ".$id);
             }
         else
             {
@@ -174,6 +180,7 @@ class cache
                 else
                     {
                     //Abgelaufene Dateien entfernen
+                    if (DEBUG) callmethod("debug","addlog","cache","timeout ".$file);
                     unlink($this->cachepath.$file);
                     }
                 }

@@ -12,7 +12,6 @@
 /// Hauptseite
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Dieser Kopf muﬂ immer so sein
-define("DEBUG",TRUE);
 require_once("config.php");
 require_once(PATH_CLASSES."class.registry.php");
 require_once(PATH_CLASSES."class.classload.php");
