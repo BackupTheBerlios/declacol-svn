@@ -92,29 +92,40 @@ class debug
         $halt = FALSE;
         switch ($errno)
             {
-            case E_USER_NOTICE:  $error.="USER_NOTICE  [".$errno."] ".$errstr;
-                                 $halt=FALSE;
-                                 break;
-            case E_USER_WARNING: $error.="USER_WARNING [".$errno."] ".$errstr;
-                                 $halt=TRUE;
-                                 break;
-            case E_USER_ERROR:   $error.="USER_ERROR   [".$errno."] ".$errstr;
-                                 $halt=TRUE;
-                                 break;
+            case E_USER_NOTICE  :  $error.="USER_NOTICE   [".$errno."] ".$errstr;
+                                   $halt=FALSE;
+                                   break;
+            case E_USER_WARNING :  $error.="USER_WARNING  [".$errno."] ".$errstr;
+                                   $halt=TRUE;
+                                   break;
+            case E_USER_ERROR   :  $error.="USER_ERROR    [".$errno."] ".$errstr;
+                                   $halt=TRUE;
+                                   break;
 
-            case E_NOTICE     :  $error.="SYS_NOTICE   [".$errno."] ".$errstr;
-                                 $halt=FALSE;
-                                 break;
-            case E_WARNING    :  $error.="SYS_WARNING  [".$errno."] ".$errstr;
-                                 $halt=TRUE;
-                                 break;
-            case E_ERROR      :  $error.="SYS_ERROR    [".$errno."] ".$errstr;
-                                 $halt=TRUE;
-                                 break;
+            case E_NOTICE       :  $error.="SYS_NOTICE    [".$errno."] ".$errstr;
+                                   $halt=FALSE;
+                                   break;
+            case E_WARNING      :  $error.="SYS_WARNING   [".$errno."] ".$errstr;
+                                   $halt=TRUE;
+                                   break;
+            case E_ERROR        :  $error.="SYS_ERROR     [".$errno."] ".$errstr;
+                                   $halt=TRUE;
+                                   break;
 
-            default:             $error.="CORE_ERROR   [".$errno."] ".$errstr;
-                                 $halt=TRUE;
-                                 break;
+            case E_CORE_WARNING :  $error.="CORE_WARNING  [".$errno."] ".$errstr;
+                                   $halt=TRUE;
+                                   break;
+            case E_CORE_NOTICE  :  $error.="CORE_NOTICE   [".$errno."] ".$errstr;
+                                   $halt=TRUE;
+                                   break;
+
+            case E_PARSE        :  $error.="PARSER_ERROR  [".$errno."] ".$errstr;
+                                   $halt=TRUE;
+                                   break;
+
+            default             :  $error.="UNKNOWN_ERROR [".$errno."] ".$errstr;
+                                   $halt=TRUE;
+                                   break;
             }
 
         //Zusatzdaten anhängen

@@ -8,6 +8,8 @@
                                                                                      
 (c) 2008 Borg@sven-of-nine.de
 */
+
+
 //Alle Pfade
 define ("PATH_SALT"     ,""); //Pfad Obfuscator wird einmal bei der Installation gesetzt
 define ("PATH_BASE"     ,str_replace("\\","/",realpath("./"))."/site".PATH_SALT."/");
@@ -34,10 +36,14 @@ define ("EMAIL_SUPPORT" ,TRUE);
 define ("EMAIL_MODE"    ,"smtp");
 
 //Allgemeine Definitionen
+define ("TIMEZONE"      ,"Europe/Berlin");
 define ("CURRENT_TIME"  ,time());
 define ("ID_NONE"       ,0);
 define ("SALT"          ,"876");
 define ("EVERYTHING"    ,"42");
+
+//Timezone setzen, um CORE-Errors zu vermeiden
+date_default_timezone_set(TIMEZONE);
 
 //Fehlkonfigurationen abfangen  
 if (is_readable(PATH_REGISTRY."classes.reg")==FALSE)
