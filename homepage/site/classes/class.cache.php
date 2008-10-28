@@ -98,6 +98,21 @@ class cache
         }
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Den Cache löschen
+    function clear()
+        {
+        //Bestehende Dateien lesen
+        $buffer=scandir($this->cachepath);
+        foreach ($buffer as $file)
+            {
+            if (strpos($file,".") !== 0)
+                {
+                unlink($this->cachepath.$file);
+                }
+            }
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Daten holen
     function load($id)
         {
