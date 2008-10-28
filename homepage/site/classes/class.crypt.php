@@ -33,7 +33,7 @@ class crypt
     function crypt()
         {
         //Salt setzen
-        if (defined("SALT")==TRUE)
+        if (defined("SALT") != FALSE)
             {
             $this->salt=SALT;
             }
@@ -103,18 +103,11 @@ class crypt
         {
         switch ($this->provider)
             {
-            case CRYPT_PROVIDER_MD5  : $result=$this->_md5   ($this->_id); break;
-            case CRYPT_PROVIDER_SHA1 : $result=$this->_sha1  ($this->_id); break;
-            default                  : $result=$this->_custom($this->_id); break;
+            case CRYPT_PROVIDER_MD5  : $result=$this->_md5   ($this->_id()); break;
+            case CRYPT_PROVIDER_SHA1 : $result=$this->_sha1  ($this->_id()); break;
+            default                  : $result=$this->_custom($this->_id()); break;
             }
         return($result);
-        }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Eine Zufallszahl erzeugen
-    function random($min=0,$max=CRYPT_MAX_RAND)
-        {
-        return(mt_rand($min,$max));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,6 +115,13 @@ class crypt
     function _id()
         {
         return( $this->random().time().$this->random() );
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Eine Zufallszahl erzeugen
+    function random($min=0,$max=CRYPT_MAX_RAND)
+        {
+        return(mt_rand($min,$max));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
