@@ -79,6 +79,20 @@
 ///   </result>
 ///  </call>
 ///</rpc>
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///Beispiel für den Aufbau eins Remotecalls
+///require_once(PATH_CLASSES."class.rpc.php");
+///$rpc=new rpc();
+///$rpc->userstatus=ID_NONE;
+///$paramarray=array("modul"  =>"Hauptprojekt",
+///                  "title"  =>"Mein Neuer Eintrag",
+///                  "link"   =>"http://www.google.de",
+///                  "message"=>"Nur eine kleine Nachricht",
+///                  "author" =>"Sven Lorenz");
+///$temp = $rpc->create ("vfbtygvsljcandhb",rand(0,65535),"newsletter","add",$paramarray);
+///$rpc->process($temp);
+///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 require_once("conf.classes.php");
 require_once(PATH_LIBS."lib.xml.php");
