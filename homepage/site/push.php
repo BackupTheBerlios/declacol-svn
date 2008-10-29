@@ -8,7 +8,7 @@
                                                                                      
 (c) 2008 Borg@sven-of-nine.de
 */
-if (DEBUG) callmethod("debug","addlog","push","call");
+if (DEBUG) callmethod("debug","addlog","page","call push");
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 /// Liefert Dateien auf Anfrage aus

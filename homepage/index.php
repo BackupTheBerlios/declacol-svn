@@ -17,6 +17,7 @@ require_once(PATH_CLASSES."class.registry.php");
 require_once(PATH_CLASSES."class.classload.php");
 $classloader=new classload(PATH_REGISTRY);
 $classloader->load();
+if (DEBUG) callmethod("debug","addlog","page","call dispatcher");
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Nun einfach die Funktion auswählen
 //Ein Download ?
