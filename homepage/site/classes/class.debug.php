@@ -124,7 +124,7 @@ class debug
             case E_CORE_WARNING :  $error.="CORE_WARNING  [".$errno."] ".$errstr;
                                    $halt=TRUE;
                                    break;
-            case E_CORE_NOTICE  :  $error.="CORE_NOTICE   [".$errno."] ".$errstr;
+            case E_CORE_ERROR  :  $error.="CORE_NOTICE   [".$errno."] ".$errstr;
                                    $halt=TRUE;
                                    break;
 

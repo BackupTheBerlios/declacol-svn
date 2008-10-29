@@ -16,9 +16,9 @@ if (DEBUG) callmethod("debug","addlog","page","call index");
 callmethod("request","setcookie","answer","42",0,"/");
 
 //Templateengine einhängen
+$id=callmethod("request","getid");
 $pagefile =strtolower(callmethod("request","getrequest","page","news",FILTER_ALPHANUM));
 $template ="main.txt";
-$id=$template.$pagefile;
 
 //Die Cacheengine einhängen
 setproperty("unimatrix","cacheengine" ,$CLASSES["cache"]);

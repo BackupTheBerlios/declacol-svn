@@ -23,17 +23,19 @@ class request
     var $cookies    = FALSE;
     
     //Alle zugelassenen Variablennamen
-    var $allowed_requests = array( "cmd", "cmdid", "folder", "details", "admin", "name", "selected","id","file","page","rpc",
-                                   "data0","data1","data2","data3","data4","data5","data6","data7","data8","data9",
-                                 );
+    var $allowed_requests = array();
+    var $_registry = FALSE;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
-    function request()
+    function request(&$registry)
         {
         //Alle Übertragenen Daten übernehmen
         $this->filebuffer = $_FILES;
 
+        //Zugelassene Requests aktivieren und einlesen
+        $this->_registry=$registry;
+        $this->allowed_requests=unserialize($this->_registry->read("","allowedrequests",""));
         $this->initrequests();
         $this->initcookies();
 
@@ -48,6 +50,11 @@ class request
     //Destruktor
     function destroy()
         {
+        if ( $this->_registry !== FALSE )
+            {
+            $this->_registry->flush();
+            $this->_registry->destroy();
+            }
         unset($this);
         }
 
@@ -55,15 +62,15 @@ class request
     //Die Installfunktion gibt ein Array mit relevanten Daten zurück
     function install()
         {
-        $result[CLASS_INDEX_ID]        = "request";      //ID unserer Klasse, nur alphanumerisch (mit diesem Namen wird das Objekt instanziert)
-        $result[CLASS_INDEX_NAME]      = "request";    //Name der Klasse
+        $result[CLASS_INDEX_ID]        = "request";         //ID unserer Klasse, nur alphanumerisch (mit diesem Namen wird das Objekt instanziert)
+        $result[CLASS_INDEX_NAME]      = "request";         //Name der Klasse
         $result[CLASS_INDEX_VERSION]   = "0.1";             //Version der Klasse
-        $result[CLASS_INDEX_REGISTRY]  = FALSE;              //Wird eine Registry benötigt
+        $result[CLASS_INDEX_REGISTRY]  = TRUE;              //Wird eine Registry benötigt
         $result[CLASS_INDEX_DATABASE]  = FALSE;             //Wird eine Datenbank benötigt
-        $result[CLASS_INDEX_CLEANUP]   = FALSE;              //Soll die Datenbank initialisiert werden ?
+        $result[CLASS_INDEX_CLEANUP]   = FALSE;             //Soll die Datenbank initialisiert werden ?
         $result[CLASS_INDEX_AUTOLOAD]  = TRUE;              //Soll die Klasse beim Systemstart geladen werden ?
-        $result[CLASS_INDEX_COMPRESSED]= FALSE;              //Soll die Datenbank komprimiert werden (gz)
-        $result[CLASS_INDEX_RUNLEVEL]  = 2;                //In welchen Runlevel soll die Klasse geladen werden
+        $result[CLASS_INDEX_COMPRESSED]= FALSE;             //Soll die Datenbank komprimiert werden (gz)
+        $result[CLASS_INDEX_RUNLEVEL]  = 2;                 //In welchen Runlevel soll die Klasse geladen werden
 
         return($result);
         }
@@ -71,6 +78,11 @@ class request
     //Hier können bei der Installation Daten in die Registry geschrieben werden
     function preset(&$registry)
         {
+        //Alle zugelassenen Daten eintragen
+        $registry->write("","allowedrequests",serialize(array( "cmd", "cmdid", "folder", "details", "admin", "name", "selected","id","file","page","rpc",
+                                                            "data0","data1","data2","data3","data4","data5","data6","data7","data8","data9",
+                                                          )));
+
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,6 +97,16 @@ class request
                 }
             }
         }
+        
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Aus allen Requestanfragen eine ID zusammenbauen
+    function getid()
+        {
+        $result=serialize($this->requests);
+        $result=callmethod("crypt","hash",$result);
+        return($result);
+        }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Requests verarbeiten
     function getrequest($name,$default,$filtertype)
