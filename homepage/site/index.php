@@ -15,10 +15,10 @@ if (DEBUG) callmethod("debug","addlog","page","call index");
 //"Wir-Sind-Da-Cookie" setzen
 callmethod("request","setcookie","answer",EVERYTHING);
 
-//ID aus alles Requestparametern ($_POST und $_GET) erzeugen
+//ID aus allen Requestparametern ($_POST und $_GET) erzeugen
 $id=callmethod("request","getid");
 
-//Angefragte Datei ziehen
+//Angefragte Seite ziehen
 $pagefile =strtolower(callmethod("request","getrequest","page","news",FILTER_ALPHANUM));
 $template ="main.txt";
 
