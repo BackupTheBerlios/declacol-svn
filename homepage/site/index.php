@@ -12,11 +12,13 @@ if (DEBUG) callmethod("debug","addlog","page","call index");
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Hauptseite
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//Wir sind da cookie setzen
-callmethod("request","setcookie","answer","42",0,"/");
+//"Wir-Sind-Da-Cookie" setzen
+callmethod("request","setcookie","answer",EVERYTHING);
 
-//Templateengine einhängen
+//ID aus alles Requestparametern ($_POST und $_GET) erzeugen
 $id=callmethod("request","getid");
+
+//Angefragte Datei ziehen
 $pagefile =strtolower(callmethod("request","getrequest","page","news",FILTER_ALPHANUM));
 $template ="main.txt";
 
@@ -37,5 +39,5 @@ if (callmethod("unimatrix","iscached",$id) == FALSE)
     
 //Here we go
 echo callmethod("unimatrix","render",$id,$template);
-callmethod("cache","clear");
+//callmethod("cache","clear");
 </script>
