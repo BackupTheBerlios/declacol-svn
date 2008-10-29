@@ -67,5 +67,13 @@ class templateclass
     function preset(&$registry)
         {
         }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen Zeiger auf This liefern
+    function getthis()
+      {
+      $self=&$this;
+      return($self);
+      }
     }
 </script>

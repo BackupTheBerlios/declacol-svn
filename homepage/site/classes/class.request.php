@@ -82,8 +82,15 @@ class request
         $registry->write("","allowedrequests",serialize(array( "cmd", "cmdid", "folder", "details", "admin", "name", "selected","id","file","page","rpc",
                                                             "data0","data1","data2","data3","data4","data5","data6","data7","data8","data9",
                                                           )));
-
         }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen Zeiger auf This liefern
+    function getthis()
+      {
+      $self=&$this;
+      return($self);
+      }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Alle Requests lesen und nur erlaubte zulassen
@@ -108,16 +115,49 @@ class request
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Aus alle aktuellen Requests einen Link bauen        
+    function getlink($baseurl="./")
+        {
+        foreach ($this->requests as $name=>$value)
+          {
+          $temp[]=$name."=".$value;
+          }
+        return($baseurl."?".implode("&amp;",$temp));        
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen Requestwert setzen (hier schreiben wir alles rein, da es beim lesen sowieso gefiltert wird)
+    function setrequest($name,$value)
+        {
+        $this->requests[$name]=$value;
+        return(TRUE);
+        }
+        
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Requests verarbeiten
-    function getrequest($name,$default,$filtertype)
+    function getrequest($name,$default,$filtertype,$remove=FALSE)
         {
         $result=$default;
         if (isset($this->requests[$name])==TRUE)
             {
             $result=string_filter ( $this->requests[$name],$filtertype );
+            //Auf Wunsch Eintrag entfernen
+            if ($remove == TRUE)
+              {
+              unset($this->requests[$name]);
+              }
             }
-
         return($result);
+        }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen Request aus der Liste entfernen
+    function delrequest($name)
+        {
+        if (isset($this->requests[$name])==TRUE)
+            {
+            unset($this->requests[$name]);
+            }
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

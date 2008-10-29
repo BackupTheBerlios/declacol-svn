@@ -94,6 +94,14 @@ class debug
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen Zeiger auf This liefern
+    function getthis()
+      {
+      $self=&$this;
+      return($self);
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Unser eigener Errohandler
     function error($errno, $errstr, $errfile="unknown", $errline="0", $errcontext="undefined")
         {

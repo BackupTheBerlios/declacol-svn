@@ -71,6 +71,14 @@ class sendmail
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen Zeiger auf This liefern
+    function getthis()
+      {
+      $self=&$this;
+      return($self);
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Email senden. Mailto kann ein Array mit Empfängern sein
     function send($mailto,$mailfrom,$subject,$body,$delay=SENDMAIL_INSTANT)
         {
