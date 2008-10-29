@@ -21,9 +21,8 @@ function classexists($classname)
     {
     global $CLASSES;
 
-    return(isset($CLASSES[$classname]));
+    return( isset($CLASSES[$classname]) );
     }
-
 
 //////////////////////////////////////////////////////////////////////////
 //Prüfen, ob eine Methode existiert
@@ -43,7 +42,6 @@ function propertyexists($classname,$method)
     return( property_exists($CLASSES[$classname],$method) );
     }
 
-
 //////////////////////////////////////////////////////////////////////////
 //Hier die Interfacefunktion, um auf die geladenen Klassen zugreifen zu können
 //Der Aufruf ist zwar ziemlich schräg, ober eine bessere Methode habe ich noch nicht gefunden
@@ -60,12 +58,13 @@ function callmethod($classname,$method,$p1=FALSE,$p2=FALSE,$p3=FALSE,$p4=FALSE,$
             }
         else
             {
-            //Bei Debug lassen wir fehler weiterlaufen
+            //Bei Debug lassen wir Fehler weiterlaufen
             if (!DEBUG) trigger_error("invalid method ".$classname.":".$method);
             }
         }
     else
         {
+        //Bei Debug lassen wir Fehler weiterlaufen
         if (!DEBUG) trigger_error("invalid object ".$classname.":".$method);
         }
     return($result);
@@ -86,11 +85,13 @@ function setproperty($classname,$property,$value)
             }
         else
             {
+            //Bei Debug lassen wir Fehler weiterlaufen
             if (!DEBUG) trigger_error("invalid property ".$classname.":".$property);
             }
         }
     else
         {
+        //Bei Debug lassen wir Fehler weiterlaufen
         if (!DEBUG) trigger_error("invalid object ".$classname.":".$property);
         }
     return($result);
@@ -110,11 +111,13 @@ function getproperty($classname,$property,$default)
             }
         else
             {
+            //Bei Debug lassen wir Fehler weiterlaufen
             if (!DEBUG) trigger_error("invalid property ".$classname.":".$property);
             }
         }
     else
         {
+        //Bei Debug lassen wir Fehler weiterlaufen
         if (!DEBUG) trigger_error("invalid object ".$classname.":".$property);
         }
     return($result);
