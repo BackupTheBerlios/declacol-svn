@@ -1,15 +1,10 @@
+{{include:htmlheader.txt}}
+<div style="position:obsolute; top:0px; left:0px; height:100%; width:100%">
 {{include:header.txt}}
 {{include:menu.txt}}
-
-<div style="position:absolute;
-            left:14%;
-            width:85%;
-            height:400px;
-            top:95px;
-            background-color:green;
-            overflow:auto;">
+<div style="width:100%; background-color:green;">
 {{var:sitename}}>>{{var:pagetitle}}
-<div style="padding:10px;">
+<hr/>
 {{varinclude:pagefile}}
 </div>
 </div>

@@ -32,14 +32,10 @@ if (callmethod("unimatrix","iscached",$id) == FALSE)
     callmethod("unimatrix","assign","pagefile",$pagefile.".txt");
     callmethod("unimatrix","assign","version","1.0");
     callmethod("unimatrix","assign","user","Sven Lorenz");
-    callmethod("unimatrix","assign","login",TRUE);
-    callmethod("unimatrix","assign","menu",array("?page=news"       => "NEWS",
-                                                "?page=impressum"  => "IMPRESSUM",
-                                                "?page=links"      => "LINKS",
-                                                "?page=faq"        => "FAQ",
-                                          ));
+    callmethod("unimatrix","assign","login",FALSE);
     }
     
 //Here we go
 echo callmethod("unimatrix","render",$id,$template);
+callmethod("cache","clear");
 </script>

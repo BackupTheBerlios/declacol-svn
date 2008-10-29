@@ -1,13 +1,4 @@
-<div style="position:absolute; width:13%; height:80%; left:5px; top:95px; background-color:yellow;">
-<div style="padding:5px">
-<table>
-{{array:menu}}
-<tr>
-    <td>
-        <a href="{{key}}">{{val}}</a>
-    </td>
-</tr>
-{{array}}
-</table>
-</div>
-</div>
+[<a href="?page=news">News </a>] 
+[<a href="?page=faq">FAQ</a>] 
+[<a href="?page=links">Links</a>] 
+[<a href="?page=impressum">Kontakt</a>] 
