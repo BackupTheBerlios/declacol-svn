@@ -1,2 +1,4 @@
 FAQ-Liste
+
+<a href="{{var:pagelink}}&cmdid=5">Test</a>
 <hr>

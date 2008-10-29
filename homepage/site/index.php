@@ -23,7 +23,7 @@ $pagefile =strtolower(callmethod("request","getrequest","page","news",FILTER_ALP
 $template ="main.txt";
 
 //Die Cacheengine einhängen
-setproperty("unimatrix","cacheengine" ,$CLASSES["cache"]);
+setproperty("unimatrix","cacheengine" ,callmethod("cache","getthis"));
 setproperty("unimatrix","cachetimeout",300);
 
 //Seite nur erzeugen, wenn sie nicht gepuffert ist
@@ -32,6 +32,7 @@ if (callmethod("unimatrix","iscached",$id) == FALSE)
     callmethod("unimatrix","assign","pagetitle",$pagefile);
     callmethod("unimatrix","assign","sitename","Guru-Meditation");
     callmethod("unimatrix","assign","pagefile",$pagefile.".txt");
+    callmethod("unimatrix","assign","pagelink",callmethod("request","getlink"));
     callmethod("unimatrix","assign","version","1.0");
     callmethod("unimatrix","assign","user","Sven Lorenz");
     callmethod("unimatrix","assign","login",FALSE);
@@ -39,5 +40,5 @@ if (callmethod("unimatrix","iscached",$id) == FALSE)
     
 //Here we go
 echo callmethod("unimatrix","render",$id,$template);
-//callmethod("cache","clear");
+callmethod("cache","clear");
 </script>
