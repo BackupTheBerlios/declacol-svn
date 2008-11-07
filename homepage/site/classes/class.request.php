@@ -79,9 +79,9 @@ class request
     function preset(&$registry)
         {
         //Alle zugelassenen Daten eintragen
-        $registry->write("","allowedrequests",serialize(array( "cmd", "cmdid", "folder", "details", "admin", "name", "selected","id","file","page","rpc",
-                                                            "data0","data1","data2","data3","data4","data5","data6","data7","data8","data9",
-                                                          )));
+        $registry->write("","allowedrequests",serialize(array( "cmd", "cmdid", "folder", "details", "admin", "name", "selected","id","page","action",
+                                                               "data0","data1","data2","data3","data4","data5","data6","data7","data8","data9",
+                                                       )));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -118,6 +118,7 @@ class request
     //Aus alle aktuellen Requests einen Link bauen        
     function getlink($baseurl="./")
         {
+        $temp=array();
         foreach ($this->requests as $name=>$value)
           {
           $temp[]=$name."=".$value;

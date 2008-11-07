@@ -37,7 +37,6 @@ if (callmethod("unimatrix","iscached",$id) == FALSE)
     callmethod("unimatrix","assign","user","Sven Lorenz");
     callmethod("unimatrix","assign","login",FALSE);
     }
-    
 //Here we go
 echo callmethod("unimatrix","render",$id,$template);
 callmethod("cache","clear");

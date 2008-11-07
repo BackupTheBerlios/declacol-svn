@@ -14,43 +14,51 @@
 /// Kopiert alle Dateien aus dem Setup-Ordner in einen Zielordner und stripped dabei die php-seiten
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-$sourcepath="./site/";
-$targetpath="./target/";
 
-$dirs=getdirs($sourcepath);
-$dirs[]=$sourcepath;
-
-//Nach Länge sortieren, um die Verzeichnisse oben zu haben
-usort($dirs,"lencmp");
-
-foreach ($dirs as $source)
+if ( (defined("SETUP_SOURCE")==TRUE) && (defined("SETUP_TARGET")==TRUE) )
     {
-    $target=str_replace($sourcepath,$targetpath,$source);
-    
-    if (substr($source,-1,1)=="/")
+    $sourcepath=SETUP_SOURCE;
+    $targetpath=SETUP_TARGET;
+
+    $dirs=getdirs($sourcepath);
+    $dirs[]=$sourcepath;
+
+    //Nach Länge sortieren, um die Verzeichnisse oben zu haben
+    usort($dirs,"lencmp");
+
+    foreach ($dirs as $source)
         {
-        echo "mkdir ".$source;
-        if (is_dir($target)==FALSE) mkdir($target);
-        }
-    else
-        {
-        if (substr($source,-4,4)==".php")
+        $target=str_replace($sourcepath,$targetpath,$source);
+        if (substr($source,-1,1)=="/")
             {
-            echo "shrink ".$source;
-            file_put_contents($target,php_strip_whitespace($source));
+            echo "mkdir ".$source;
+            if (is_dir($target)==FALSE) mkdir($target);
             }
         else
             {
-            echo "copy ".$source;
-            if (file_exists($target)) unlink($target);
-            copy($source,$target);
+            if (substr($source,-4,4)==".php")
+                {
+                echo "shrink ".$source;
+                file_put_contents($target,php_strip_whitespace($source));
+                }
+            else
+                {
+                echo "copy ".$source;
+                if (file_exists($target)) unlink($target);
+                copy($source,$target);
+                }
             }
+        echo "\n";
         }
-
-    echo "\n";
+    }
+else
+    {
+    echo "no path defined";
     }
 
-function getdirs($source)
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Alle Dateien und Verzeichnisse scannen
+function scanfiles($source)
     {
     $result=array();
 
@@ -64,7 +72,7 @@ function getdirs($source)
             if ( is_dir($source.$entry)==TRUE )
                 {
                 $result[]=str_replace("\\","/",$source.$entry."/");
-                $result=array_merge($result,getdirs($source.$entry."/"));
+                $result=array_merge($result,scandiles($source.$entry."/"));
                 }
             else
                 {
@@ -75,7 +83,8 @@ function getdirs($source)
     return( array_unique($result) );
     }
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Callback zur Sortierung
 function lencmp($a,$b)
     {
     $lena=strlen($a);

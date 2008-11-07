@@ -20,24 +20,17 @@ $classloader->load();
 if (DEBUG) callmethod("debug","addlog","page","call dispatcher");
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Nun einfach die Funktion auswählen
-//Ein Download ?
-if ( callmethod("request","getrequest","file",FALSE,FILTER_SECURE) != FALSE)
+$action = callmethod("request","getrequest","action",FALSE,FILTER_ALPHANUM);
+
+switch ($action)
     {
-    include(PATH_BASE."push.php");
+    case ("file") : include(PATH_BASE."push.php");   break;
+    case ("rpc")  : include(PATH_BASE."rpc.php");    break;
+    case ("cron") : include(PATH_BASE."cron.php");   break;
+
+    default       : include(PATH_BASE."index.php"); break;
     }
-else
-    {
-    if ( callmethod("request","getrequest","rpc",FALSE,FILTER_SECURE) != FALSE)
-        {
-        //Ein Remotecall ?
-        include(PATH_BASE."rpc.php");
-        }
-    else
-        {
-        //Alles andere
-        include(PATH_BASE."index.php");
-        }
-    }
+
 //Alle Klassen entladen und Inhalte flushen
 $classloader->destroy();
 </script>
