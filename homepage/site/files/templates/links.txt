@@ -1,3 +1,4 @@
+{{sys:nocache}}
 Link1
 <br>
 Link2

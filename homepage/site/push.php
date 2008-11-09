@@ -21,7 +21,7 @@ require_once(PATH_LIBS."lib.mime.php");
 $answer   = callmethod("request","getcookie","answer","16");
 
 //Datei holen (Pfade sind im Pushmodus nicht zugelassen)
-$filename = basename( callmethod("request","getrequest","file",FALSE,FILTER_URL));
+$filename = basename( callmethod("request","getrequest","data",FALSE,FILTER_URL));
 $pushfile = PATH_FILES.$filename;
 if (DEBUG) callmethod("debug","addlog","push","request ".$pushfile);
 

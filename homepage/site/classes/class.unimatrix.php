@@ -35,6 +35,9 @@
 /// {{var:renderversion}} Version der Renderengine
 /// {{var:renderengine}}  Name der Renderengine
 ///
+/// {{sys:nocache}}       Deaktiviert Caching für diese Seite
+///
+///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///Beispiel
 ///Ohne Caching
@@ -93,6 +96,7 @@ class unimatrix
 
     //Private Data
     var $_buffer  = "";
+    var $_system  = array();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
@@ -135,6 +139,16 @@ class unimatrix
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Systemoptionen setzen
+    function _resetsystem()
+      {
+      $this->_system=array();
+
+      //Caching ist per default an
+      $this->_system["nocache"] = FALSE;
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Einen Zeiger auf This liefern
     function getthis()
       {
@@ -148,7 +162,7 @@ class unimatrix
         {
         $this->replace[$varname]=$value;
         }
-
+        
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Checken, ob eine Seite gecached ist
     function iscached($id)
@@ -168,6 +182,9 @@ class unimatrix
         {
         $result=FALSE;
         
+       //Optionen zurücksetzen
+       $this->_resetsystem();
+        
         //Pfad passend setzen
         $templatefile=$this->basepath.$templatefile;
         
@@ -185,7 +202,12 @@ class unimatrix
                     {
                     //Dann rendern und anlegen
                     $this->_render($templatefile);
-                    $this->cacheengine->save($id,$this->cachetimeout,$this->_buffer);
+                    
+                    //Wenn die Seite caching deaktiviert, dann nicht abspeichern
+                    if ( $this->_system["nocache"] != TRUE )
+                      {
+                      $this->cacheengine->save($id,$this->cachetimeout,$this->_buffer);
+                      }
                     }
                 }
             else
@@ -213,8 +235,12 @@ class unimatrix
 
         //Alle Bools, da diese über Sichtbarkeit entscheiden
         $this->processboolean();
+        //Und danach der Rest
         $this->processarrays();
         $this->processvars();
+
+        //Alle Systembefehle holen
+        $this->processsys();
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -369,6 +395,27 @@ class unimatrix
             }
         }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Systembefehle extrahieren und im _system-array setzen
+    function processsys()
+        {
+        if (preg_match_all(TEMPLATE_REG_SYSTEM,$this->_buffer,$result)>0)
+            {
+            foreach (reset($result) as $include)
+                {
+                $name=$this->extractvalue($include);
+                
+                //Zustand merken
+                $this->_system[$name]=TRUE;
+                
+                //Und auftreten ersetzen
+                $this->_buffer = str_replace($include,"",$this->_buffer);
+                }
+            }
+        }
+        
+        
+       
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Den Wert aus einem Token extrahieren
     function extractvalue($input)

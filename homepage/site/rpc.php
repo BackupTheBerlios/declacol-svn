@@ -15,7 +15,7 @@ if (DEBUG) callmethod("debug","addlog","page","rpccall rpc");
 require_once(PATH_CLASSES."class.rpc.php");
 
 //Daten von der Requestklasse holen
-$xml=callmethod("request","getrequest","rpc","",FILTER_SECURE);
+$xml=callmethod("request","getrequest","data","",FILTER_SECURE);
 
 //Verarbeiten
 $rpc = new rpc();

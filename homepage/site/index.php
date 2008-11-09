@@ -39,5 +39,6 @@ if (callmethod("unimatrix","iscached",$id) == FALSE)
     }
 //Here we go
 echo callmethod("unimatrix","render",$id,$template);
-callmethod("cache","clear");
+
+//callmethod("cache","clear");
 </script>
