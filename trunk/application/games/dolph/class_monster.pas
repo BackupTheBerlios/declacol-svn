@@ -6,16 +6,19 @@ unit class_monster;
 ///
 ////////////////////////////////////////////////////////////////////////////////
 interface
-uses unit_typedefs,windows,
+uses unit_typedefs,windows,sysutils,
      unit_types,
-    class_map,
-    const_magic,
-    const_weapon,
-    const_armor,
-    const_inventory;
+     class_map,
+     const_magic,
+     const_weapon,
+     const_armor,
+     const_inventory;
 
 //Eigenschaften eines Objektes
 type TAttributes = record
+    //Name
+    Name        : Longstring;
+
     //Position auf der Map
     Position    : TPosition;
 
@@ -24,9 +27,10 @@ type TAttributes = record
 
     //Maximale Werte der Attribute
     u32MaxAttack   : unsigned32;   //Trefferwahrscheinlichkeit [%]
+    u32MaxStrength : unsigned32;   //Wird auf den Schaden der Waffe addiert [%]
+
     u32MaxMoral    : unsigned32;   //Ist Health < Moral flüchtet das Monster
     u32MaxHealth   : unsigned32;   //aktuelle Hitpoints
-    u32MaxStrength : unsigned32;   //Wird auf den Schaden der Waffe addiert
     u32MaxSpeed    : unsigned32;   //Alle "Speed" Ticks reagiert das Monster
     u32MaxMagic    : unsigned32;   //Anzahl der erlaubten Magieverwendungen
 
@@ -69,6 +73,8 @@ type PMonster = ^TMonster;
 
     //Soll das Monster eine KI benutzen?
     bUseAI      : Boolean;
+
+    sAction     : longstring;
   protected
   private
     //Alle Daten löschen
@@ -82,18 +88,29 @@ type PMonster = ^TMonster;
     function  changeweapon(NewWeapon : TWeapon):TWeapon;
     //Auf die beste Waffe wechseln
     procedure  usebestweapon(Player:pMonster; Map:pMap);
+    //Eine Aktionsbeschreibung zufügen
+    procedure addaction(Text:Longstring);
 
   public
-    constructor create(bUseAI : Boolean);
+    constructor create(Name:longstring;bUseAI : Boolean);
+
+    //Einen Angriff auf Monster ausführen
+    procedure attack(Monster:pMonster);
+
+    //Uns selbst bewegen (Um TPosition)
+    procedure move(rMove : TPosition);
 
     //Welchen Schaden verursacht das Monster bei einem Angriff
-    function getdamage():unsigned32;
+    function getdamage(Monster:pMonster):unsigned32;
 
     //Monster nimmt Schaden
     procedure setdamage(value:unsigned32);
 
     //Timeslice Callback
     procedure callback(u32ticks:unsigned32; Player:PMonster; Map:pMap);
+
+    //Ein String der beschreibt, was das Monster tut
+    property action : longstring read saction;
 
 end;
 
@@ -103,11 +120,12 @@ uses unit_navigation;
 ////////////////////////////////////////////////////////////////////////////////
 //Die Monsterklasse
 ////////////////////////////////////////////////////////////////////////////////
-constructor TMonster.create(bUseAI : Boolean);
+constructor TMonster.create(Name:Longstring;bUseAI : Boolean);
 begin
   //AI aktivieren ?
   Self.bUseAI:=bUseAI;
   //Alle Arrays initialisieren
+  Self.Attributes.Name:=Name;
   Self.reset();
 
   randomize();
@@ -137,10 +155,9 @@ begin
   Self.Attributes.bBeserk:=FALSE;
   Self.Attributes.bDead:=FALSE;
 
-  //Am Anfang haben wir nur die Hände
-  Self.Attributes.Weapon.Name  :='Hands';
-  Self.Attributes.Weapon.Range :=1;
-  Self.Attributes.Weapon.Damage:=1;
+  //Am Anfang haben wir nur die Hände und nichts an
+  Self.Attributes.Weapon:=Weapons[WEAPON_HANDS]^;
+  Self.Attributes.Armor:=Armors[ARMOR_NONE]^;
 
   //Das Inventar leeren
   Self.Inventory.Weapons[0]:=Weapons[WEAPON_HANDS]^;
@@ -179,12 +196,22 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
+//Einen Actionsstring zufügen
+procedure TMonster.addaction(Text:Longstring);
+begin
+  Self.sAction:=Self.Attributes.Name + ' ' + Text;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 //Die beste Waffe für die aktuelle Situation wählen
 procedure  TMonster.usebestweapon(Player:pMonster; Map:pMap);
 var
   u32index : unsigned32;
   u32range : unsigned32;
+  sOldName : longstring;
 begin
+  sOldName:=Self.Attributes.Weapon.Name;
+
   //Abstand zum Spiele (0=Spieler kann nicht gesehen werden)
   u32Range:=getdistance(addr(Self),Player,Map);
 
@@ -217,6 +244,11 @@ begin
              end;
         end;
     end;
+
+    if (Self.Attributes.Weapon.Name <> sOldName) then
+      begin
+        Self.addaction('changes weapon to '+Self.Attributes.Weapon.Name);
+      end;
 end;
 
 
@@ -229,14 +261,61 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
-//Ermitteln, ob das Monster getroffen hat und welchen Schaden es macht
-function TMonster.getdamage():unsigned32;
+//Einen Angriff auf Monster ausführen
+procedure TMonster.attack(Monster:pMonster);
+var
+  u32damage : unsigned32;
 begin
-  //Getroffen ?
-  if ( unsigned32( random(100) ) < Self.Attributes.u32Attack) then
+  //Noch Munition
+  if (Self.Attributes.Weapon.Ammo > 0) then
     begin
-      //Schaden ist der Waffenschaden + Stärke
-      result:= unsigned32( random( Self.Attributes.Weapon.Damage ))  + Self.Attributes.u32Strength;
+      //Dem anderen Monster schaden zufügen
+      u32damage:=Self.getdamage(Monster);
+      if (u32damage > 0) then
+        begin
+          Monster^.setdamage(u32damage);
+          Self.addaction('hits '+Monster^.Attributes.Name+' inflicting '+IntToStr(u32damage)+' points of damage');
+        end
+      else
+        begin
+          Self.addaction('misses '+Monster^.Attributes.Name);
+        end;
+      //Einen Schuß abziehen
+      dec (Self.Attributes.Weapon.Ammo);
+    end
+  else
+    begin
+        Self.addaction('has no ammo to attack');
+    end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+//Uns selbst bewegen (Um TPosition)
+procedure TMonster.move(rMove : TPosition);
+begin
+  Self.Attributes.Position.XPos:=rMove.XPos;
+  Self.Attributes.Position.YPos:=rMove.YPos;
+end;
+
+
+////////////////////////////////////////////////////////////////////////////////
+//Ermitteln, ob das Monster getroffen hat und welchen Schaden es macht
+function TMonster.getdamage(Monster:pMonster):unsigned32;
+var
+  u32dice1 : unsigned32;
+begin
+  //Würfeln
+  u32dice1:=unsigned32(random(101));
+
+  //Getroffen ?
+  if ( u32dice1 < Self.Attributes.u32Attack ) //Trefferwurf OK
+     then
+    begin
+      //Schaden ist der Waffenschaden + (StärkeProzent / 10)
+      result:= unsigned32( random( Self.Attributes.Weapon.Damage )) + ( Self.Attributes.u32Strength DIV 10 );
+
+      //Rüstungsprozente des Monsters abziehen
+      result:= (result * (100 - Monster.Attributes.Armor.Damage)) div 100;
     end
   else
     begin
@@ -250,14 +329,22 @@ end;
 procedure TMonster.setdamage(value:unsigned32);
 begin
   //Tot?
-  if (value > Self.Attributes.u32Health) then
+  if (Self.Attributes.bDead = FALSE) then
     begin
-      Self.Attributes.u32Health:=0;
-      Self.Attributes.bDead:=TRUE;
+      if (value > Self.Attributes.u32Health) then
+        begin
+          Self.Attributes.u32Health:=0;
+          Self.Attributes.bDead:=TRUE;
+          Self.addaction('dies');
+        end
+      else
+        begin
+          dec(Self.Attributes.u32Health,value);
+        end;
     end
   else
     begin
-      dec(Self.Attributes.u32Health,value);
+      Self.addaction('is already dead');
     end;
 end;
 
@@ -283,9 +370,93 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 //Die KI des Monsters
 procedure TMonster.doai (u32timeslice:unsigned32;Player:pMonster;Map:pMap);
+var
+  rMove      : TPosition;
+  u32range   : unsigned32;
 begin
   //Auf jeden Fall die beste Waffe nehmen
   Self.usebestweapon(Player,Map);
+
+  //Haben wir noch genügend Mut?
+  if ( Self.Attributes.u32Health < Self.Attributes.u32Moral ) then
+    begin
+      //Fluchtkurs bestimmen
+      rMove:=getescape(@Self,Player,Map);
+
+      //Können wir flüchten ?
+      if ( ( rMove.XPos <> 0 ) AND ( rMove.YPos <> 0 ) ) then
+        begin
+          //Dann weg hier
+          Self.addaction('flees');
+          Self.move(rMove);
+        end
+      else
+        begin
+          Self.Attributes.bBeserk:=TRUE;
+
+          //Wir können nicht weg, dann greifen wir an
+          u32range:=getsight(@Self,Player,Map);
+          if ( u32range <= Self.Attributes.Weapon.Range ) then
+            begin
+              Self.addaction('attacks suicidally');
+              Self.attack(player);
+            end
+          else
+            begin
+              //Zu weit weg, hinlaufen
+              rMove:=getapproach(@Self,Player,Map);
+              Self.Move(rMove);
+              Self.addaction('approaches suicidally');
+            end;
+        end;
+    end
+  else
+    begin
+      //Wir haben noch genügend Mut
+      u32range:=getsight(@Self,Player,Map);
+      //Unsere Waffe erlaubt einen höheren Abstand?
+      if (u32range < Self.Attributes.Weapon.Range) then
+        begin
+          //Dann Abstand gewinnen
+          rMove:=getescape(@Self,Player,Map);
+          Self.Move(rMove);
+        end
+      else
+        begin
+          //Ansonsten greifen wir an
+          Self.attack(player);
+        end;
+    end;
+
+  {
+ TYPICAL AI
+            If damage > morale
+               if can-run-away-from-player
+                  run-away-from-player
+               else if can-attack-player
+                  attack-player
+            else if too-far-from-player
+               AND can-attack-player
+               AND can-move-toward-player
+                   if  random < charge-probability
+                       move-toward-player     
+                   else attack-player
+            else if too-close-to-character
+               AND can-attack-player
+               AND can-move-away-from-player
+                   if random < retreat-probability
+                      move-away-from-player
+                   else attack-player
+            else if can-attack-player
+               attack-player
+            else if too-far-from-player 
+               AND can-move-toward-player
+     move-toward-player
+            else if too-close-to-player
+               AND can-move-away-from-player
+                   move-away-from-player
+            else stand-still
+  }
 end;
 
 

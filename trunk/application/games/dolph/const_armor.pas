@@ -36,8 +36,8 @@ begin
 end;
 
 initialization
-//       ID              Name       Damage
-addarmor(ARMOR_NONE    ,'None'     ,1);
-addarmor(ARMOR_SHIRT   ,'Shirt'    ,2);
-addarmor(ARMOR_PLATE   ,'Plate'    ,4);
+//       ID              Name       Damage in [%]
+addarmor(ARMOR_NONE    ,'None'     ,10);
+addarmor(ARMOR_SHIRT   ,'Shirt'    ,20);
+addarmor(ARMOR_PLATE   ,'Plate'    ,70);
 end.

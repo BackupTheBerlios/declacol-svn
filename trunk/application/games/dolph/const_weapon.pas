@@ -53,10 +53,10 @@ initialization
 //Beim Systemstart alle Waffen anlegen
 //        ID                 Name       Range Damage Ammo
 addweapon(WEAPON_NONE      ,'None'     ,0    ,0     ,0);
-addweapon(WEAPON_HANDS     ,'Hands'    ,1    ,1     ,High(unsigned32));
-addweapon(WEAPON_DAGGER    ,'Dagger'   ,1    ,3     ,High(unsigned32));
-addweapon(WEAPON_SWORD     ,'Sword'    ,1    ,3     ,High(unsigned32));
-addweapon(WEAPON_LONGSWORD ,'LongSword',1    ,5     ,High(unsigned32));
-addweapon(WEAPON_BOW       ,'Bow'      ,5    ,3     ,12);
-addweapon(WEAPON_LONGBOW   ,'LongBow'  ,7    ,3     ,12);
+addweapon(WEAPON_HANDS     ,'Hands'    ,1    ,3     ,High(unsigned32));
+addweapon(WEAPON_DAGGER    ,'Dagger'   ,1    ,4    ,High(unsigned32));
+addweapon(WEAPON_SWORD     ,'Sword'    ,1    ,5    ,High(unsigned32));
+addweapon(WEAPON_LONGSWORD ,'LongSword',1    ,7     ,High(unsigned32));
+addweapon(WEAPON_BOW       ,'Bow'      ,5    ,5     ,12);
+addweapon(WEAPON_LONGBOW   ,'LongBow'  ,7    ,5     ,12);
 end.
