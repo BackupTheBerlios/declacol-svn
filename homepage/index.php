@@ -24,9 +24,10 @@ $action = callmethod("request","getrequest","action",FALSE,FILTER_ALPHANUM);
 
 switch ($action)
     {
-    case ("file") : include(PATH_BASE."push.php");   break;
-    case ("rpc")  : include(PATH_BASE."rpc.php");    break;
-    case ("cron") : include(PATH_BASE."cron.php");   break;
+    case ("file") : include(PATH_BASE."push.php");  break;
+    case ("rpc")  : include(PATH_BASE."rpc.php");   break;
+    case ("cron") : include(PATH_BASE."cron.php");  break;
+    case ("srv")  : include(PATH_BASE."srv.php");   break;
 
     default       : include(PATH_BASE."index.php"); break;
     }
