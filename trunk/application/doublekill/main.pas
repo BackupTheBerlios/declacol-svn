@@ -148,6 +148,7 @@ begin
                                   begin
                                        if ( slCRC[u32Index] = slCRC[u32Found] ) then
                                           begin
+                                               //Treffer anzeigen
                                                lbFound.Items.Add(slCRC[u32Index] + ' : ' + slFiles[u32Index] +' => ' + slFiles[u32Found]);
                                                inc(u32double);
                                           end;
