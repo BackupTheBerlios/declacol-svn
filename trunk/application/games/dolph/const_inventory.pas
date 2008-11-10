@@ -4,6 +4,7 @@ unit const_inventory;
 ////////////////////////////////////////////////////////////////////////////////
 interface
 uses unit_typedefs,
+     unit_types,
      const_weapon,
      const_magic,
      const_armor;
@@ -12,10 +13,9 @@ uses unit_typedefs,
 type  pInventory = ^TInventory;
       TInventory = record
   Weapons : array[0..3] of TWeapon;
-  Armor   : array[0..3] of TArmor;
-  Gold    : unsigned32;
-  Food    : unsigned32;
-  Potions : unsigned32;
+  Gold    : TAttributeValue;
+  Food    : TAttributeValue;
+  Potions : TAttributeValue;
 end;
 
 implementation

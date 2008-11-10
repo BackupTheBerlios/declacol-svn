@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 192
-  Top = 107
+  Left = 213
+  Top = 122
   Width = 696
   Height = 480
   Caption = 'Form1'
@@ -31,19 +31,5 @@ object Form1: TForm1
     Lines.Strings = (
       'Memo1')
     TabOrder = 1
-  end
-  object TrackBar1: TTrackBar
-    Left = 304
-    Top = 80
-    Width = 121
-    Height = 25
-    TabOrder = 2
-  end
-  object TrackBar2: TTrackBar
-    Left = 304
-    Top = 112
-    Width = 121
-    Height = 25
-    TabOrder = 3
   end
 end

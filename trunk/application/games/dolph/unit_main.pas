@@ -3,9 +3,11 @@ unit unit_main;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs,
   class_monster,
+  class_monstermaker,
+
   class_map,
   const_weapon,
   const_armor,
@@ -16,10 +18,8 @@ type
   TForm1 = class(TForm)
     Button1: TButton;
     Memo1: TMemo;
-    TrackBar1: TTrackBar;
-    TrackBar2: TTrackBar;
-    procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private-Deklarationen }
   public
@@ -28,32 +28,35 @@ type
 
 var
   Form1: TForm1;
+  mm   : TMonstermaker;
   m1   : TMonster;
   m2   : TMonster;
 implementation
 
 {$R *.dfm}
 
-procedure TForm1.FormCreate(Sender: TObject);
-begin
-  m1:=TMonster.create('honk',FALSE);
-  m2:=TMonster.create('bopfer',FALSE);
-
-  m1.Attributes.Weapon:=Weapons[WEAPON_SWORD]^;
-
-  m1.Attributes.u32Health:=10;
-  m2.Attributes.u32Health:=10;
-
-  m1.Attributes.u32MaxAttack:=90;
-  m1.Attributes.u32Attack:=90;
-end;
-
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-  m1.attack(@m2);
 
-  memo1.Lines.Add(m1.action);
-  memo1.Lines.Add(m2.action);
+     m1.callback(gettickcount(),@m2);
+     m2.callback(gettickcount(),@m1);
+
+     memo1.Lines.Add(m1.action);
+     memo1.Lines.Add(m2.action);
+
+     m1.sAction:='';
+     m2.sAction:='';
+
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+     mm:=TMonsterMaker.Create();
+
+     m1:=mm.createmonster(Player,nil);
+     m2:=mm.createmonster(Zombie,nil);
+
+     mm.free();
 end;
 
 end.

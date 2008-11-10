@@ -21,17 +21,22 @@ function getescape(Monster1:pMonster; Monster2:pMonster; Map:pMap):TPosition;
 //Einen Angriffskurs einschlagen wenn möglich
 function getapproach(Monster1:pMonster; Monster2:pMonster; Map:pMap):TPosition;
 
+//Einen verwirrten Kurs einschlagen
+function getberserk(Monster1:pMonster; Monster2:pMonster; Map:pMap):TPosition;
+
 implementation
 
 
 function getdistance(Monster1:pMonster; Monster2:pMonster; Map:pMap):unsigned32;
 begin
-  result:=random(100);
+  result:=random(10);
+  result:=4;
 end;
 
 function getsight(Monster1:pMonster; Monster2:pMonster; Map:pMap):unsigned32;
 begin
   result:=random(100);
+  result:=4;
 end;
 
 function getescape(Monster1:pMonster; Monster2:pMonster; Map:pMap):TPosition;
@@ -40,8 +45,13 @@ begin
   result.YPos:=random(2)-1;
 end;
 
-
 function getapproach(Monster1:pMonster; Monster2:pMonster; Map:pMap):TPosition;
+begin
+  result.XPos:=random(2)-1;
+  result.YPos:=random(2)-1;
+end;
+
+function getberserk(Monster1:pMonster; Monster2:pMonster; Map:pMap):TPosition;
 begin
   result.XPos:=random(2)-1;
   result.YPos:=random(2)-1;
