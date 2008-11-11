@@ -2,7 +2,7 @@
 define("SETUP",TRUE);
 //Nur diese Basisconfigurationen ziehen,
 //der Rest liegt in den Reg-Files
-require_once("config.php");
+require_once("./config/config.php");
 require_once(PATH_CLASSES."class.registry.php");
 require_once(PATH_CLASSES."class.classinst.php");
 require_once(PATH_CLASSES."class.classload.php");

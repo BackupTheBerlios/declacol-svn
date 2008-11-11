@@ -12,7 +12,7 @@
 /// Hauptseite
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Dieser Kopf muﬂ immer so sein
-require_once("config.php");
+require_once("./config/config.php");
 require_once(PATH_CLASSES."class.registry.php");
 require_once(PATH_CLASSES."class.classload.php");
 $classloader=new classload(PATH_REGISTRY);
