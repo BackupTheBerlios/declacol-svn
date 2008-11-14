@@ -229,26 +229,27 @@ class unimatrix
         $this->_buffer=file_get_contents($templatefile);
 
         //Alle Includes verarbeiten, damit diese mitgeparst werden
-        $this->processvarincludes();
+        $this->_buffer=$this->processvarincludes($this->_buffer);
         
-        $this->processincludes();
+        $this->_buffer=$this->processincludes($this->_buffer);
 
         //Alle Bools, da diese über Sichtbarkeit entscheiden
-        $this->processboolean();
+        $this->_buffer=$this->processboolean($this->_buffer);
+
         //Und danach der Rest
-        $this->processarrays();
-        $this->processvars();
+        $this->_buffer=$this->processarrays($this->_buffer);
+        $this->_buffer=$this->processvars($this->_buffer);
 
         //Alle Systembefehle holen
-        $this->processsys();
+        $this->_buffer=$this->processsys($this->_buffer);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Extrahiert alle include Tokens und fügt die Dateien ein
-    function processvarincludes()
+    function processvarincludes($input)
         {
         //Alle Includes rausholen
-        if (preg_match_all(TEMPLATE_REG_VARINCLUDE,$this->_buffer,$result)>0)
+        if (preg_match_all(TEMPLATE_REG_VARINCLUDE,$input,$result)>0)
             {
             foreach (reset($result) as $include)
                 {
@@ -266,22 +267,23 @@ class unimatrix
 
                 if (file_exists($this->basepath.$file)==TRUE)
                     {
-                    $this->_buffer = str_replace($include,file_get_contents($this->basepath.$file),$this->_buffer);
+                    $input = str_replace($include,file_get_contents($this->basepath.$file),$input);
                     }
                 else
                     {
-                    $this->_buffer = str_replace($include,"[<b>".$file." not assigned</b>]",$this->_buffer);
+                    $input = str_replace($include,"[<b>".$file." not found</b>]",$input);
                     }
                 }
             }
+        return($input);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Extrahiert alle include Tokens und fügt die Dateien ein
-    function processincludes()
+    function processincludes($input)
         {
         //Alle Includes rausholen
-        if (preg_match_all(TEMPLATE_REG_INCLUDE,$this->_buffer,$result)>0)
+        if (preg_match_all(TEMPLATE_REG_INCLUDE,$input,$result)>0)
             {
             foreach (reset($result) as $include)
                 {
@@ -289,21 +291,22 @@ class unimatrix
 
                 if (file_exists($this->basepath.$file)==TRUE)
                     {
-                    $this->_buffer = str_replace($include,file_get_contents($this->basepath.$file),$this->_buffer);
+                    $input = str_replace($include,file_get_contents($this->basepath.$file),$input);
                     }
                 else
                     {
-                    $this->_buffer = str_replace($include,"[<b>".$file." not found</b>]",$this->_buffer);
+                    $input = str_replace($include,"[<b>".$file." not found</b>]",$input);
                     }
                 }
             }
+        return($input);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Ersetzt alle Token durch ihren Wert
-    function processvars()
+    function processvars($input)
         {
-        if (preg_match_all(TEMPLATE_REG_VAR,$this->_buffer,$result)>0)
+        if (preg_match_all(TEMPLATE_REG_VAR,$input,$result)>0)
             {
             foreach (reset($result) as $include)
                 {
@@ -311,49 +314,52 @@ class unimatrix
                 //Variable existiert ?
                 if (isset($this->replace[$name])==TRUE)
                     {
-                    $this->_buffer = str_replace($include,$this->replace[$name],$this->_buffer);
+                    $input = str_replace($include,$this->replace[$name],$input);
                     }
                 else
                     {
-                    $this->_buffer = str_replace($include,"[<b>".$name." not assigned</b>]",$this->_buffer);
+                    $input = str_replace($include,"[<b>".$name." not assigned</b>]",$input);
                     }
                 }
             }
+        return($input);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Ersetzt alle Boolean durch ihren Wert
-    function processboolean()
+    function processboolean($input)
         {
-        if (preg_match_all(TEMPLATE_REG_BOOL,$this->_buffer,$result)>0)
+        if (preg_match_all(TEMPLATE_REG_BOOL,$input,$result)>0)
             {
             foreach (reset($result) as $include)
                 {
                 $id=substr($include,0,strpos($include,"}}")+2);
                 $value=trim(substr($include,strlen($id),strlen($include) - strlen($id) - strlen("{{bool}}") ) );
-                
+
+
                 //Variable gesetzt ?
                 $id=$this->extractvalue($id);
                 if (isset($this->replace[$id])==TRUE)
                     {
                     if ($this->replace[$id]==TRUE)
                         {
-                        $this->_buffer = str_replace($include,$value,$this->_buffer);
+                        $input = str_replace($include,$value,$input);
                         }
                     else
                         {
-                        $this->_buffer = str_replace($include,"",$this->_buffer);
+                        $input = str_replace($include,"",$input);
                         }
                     }
                 }
             }
+        return($input);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Verarbeitet alle Arrays
-    function processarrays()
+    function processarrays($input)
         {
-        if (preg_match_all(TEMPLATE_REG_ARRAY,$this->_buffer,$result)>0)
+        if (preg_match_all(TEMPLATE_REG_ARRAY,$input,$result)>0)
             {
             foreach (reset($result) as $include)
                 {
@@ -385,21 +391,22 @@ class unimatrix
                         $count++;
                         }
                     //Ersetzen
-                    $this->_buffer = str_replace($include,$newvalue,$this->_buffer);
+                    $input = str_replace($include,$newvalue,$input);
                     }
                 else
                     {
-                    $this->_buffer = str_replace($include,"[<b>".$name." not assigned</b>]",$this->_buffer);
+                    $input = str_replace($include,"[<b>".$name." not assigned</b>]",$input);
                     }
                 }
             }
+        return($input);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Systembefehle extrahieren und im _system-array setzen
-    function processsys()
+    function processsys($input)
         {
-        if (preg_match_all(TEMPLATE_REG_SYSTEM,$this->_buffer,$result)>0)
+        if (preg_match_all(TEMPLATE_REG_SYSTEM,$input,$result)>0)
             {
             foreach (reset($result) as $include)
                 {
@@ -409,9 +416,10 @@ class unimatrix
                 $this->_system[$name]=TRUE;
                 
                 //Und auftreten ersetzen
-                $this->_buffer = str_replace($include,"",$this->_buffer);
+                $input = str_replace($include,"",$input);
                 }
             }
+        return($input);
         }
         
         
