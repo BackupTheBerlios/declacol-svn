@@ -25,18 +25,19 @@
 /// {{array:name}}        fügt für jeden Wert in Array name die Zeiche zwischen den Arraytags ein
 /// <b>{{key}}</b>        und ersetzt key und value durch die entsprechenden Arraydaten
 /// => {{val}}<br>
-/// {{array}}
+/// {{name}}
 ///
 /// {{bool:name}}         Gibt je nach Bool-Wert von name die Ausgabe aus oder nicht
 /// Ausgabe
-/// {{bool}}
+/// {{name}}
 ///
 /// {{var:cached}}        Zeitpunkt, wann die Datei gecached wurde
 /// {{var:renderversion}} Version der Renderengine
 /// {{var:renderengine}}  Name der Renderengine
 ///
 /// {{sys:nocache}}       Deaktiviert Caching für diese Seite
-///
+/// {{sys:recursion}}     Aktiviert rekursive Verarbeitung von eingebundenen Dateien
+///                       Kann auch über die Eigenschaft recursion aktiviert werden
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///Beispiel
@@ -75,12 +76,12 @@ require_once("conf.classes.php");
 
 
 //Die Regulären Ausdrücke bauen
-define ("TEMPLATE_REG_VAR"        ,"@{{var:[a-zA-Z0-9_]+?}}@");
-define ("TEMPLATE_REG_SYSTEM"     ,"@{{sys:[a-zA-Z0-9_]+?}}@");
-define ("TEMPLATE_REG_INCLUDE"    ,"@{{include:[a-zA-Z0-9\\.\\_\\-\\/]+?}}@");
-define ("TEMPLATE_REG_VARINCLUDE" ,"@{{varinclude:[a-zA-Z0-9\\.\\_\\-\\/]+?}}@");
-define ("TEMPLATE_REG_BOOL"       ,"@{{bool:[a-zA-Z0-9_]+?}}[\\w\\W]*?{{bool}}@");
-define ("TEMPLATE_REG_ARRAY"      ,"@{{array:[a-zA-Z0-9_]+?}}[\\w\\W]*?{{array}}@");
+define ("TEMPLATE_REG_VAR"        ,"@{{var:([a-zA-Z0-9_]+?)}}@");
+define ("TEMPLATE_REG_SYSTEM"     ,"@{{sys:([a-zA-Z0-9_]+?)}}@");
+define ("TEMPLATE_REG_INCLUDE"    ,"@{{include:([a-zA-Z0-9\\.\\_\\-\\/]+?)}}@");
+define ("TEMPLATE_REG_VARINCLUDE" ,"@{{varinclude:([a-zA-Z0-9\\.\\_\\-\\/]+?)}}@");
+define ("TEMPLATE_REG_BOOL"       ,"@{{bool:([a-zA-Z0-9_]+?)}}([\\w\\W]*?){{\\1}}@");
+define ("TEMPLATE_REG_ARRAY"      ,"@{{array:([a-zA-Z0-9_]+?)}}([\\w\\W]*?){{\\1}}@");
 
 //Eigentliche Klasse
 class unimatrix
@@ -93,10 +94,11 @@ class unimatrix
     //Soll die Cachingengine benutzt werden
     var $cacheengine  = FALSE;
     var $cachetimeout = 3600; //In Sekunden
-
+    
     //Private Data
     var $_buffer  = "";
     var $_system  = array();
+    var $_burned  = FALSE;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
@@ -146,6 +148,9 @@ class unimatrix
 
       //Caching ist per default an
       $this->_system["nocache"] = FALSE;
+
+      //Rekursion ist per default aus
+      $this->_system["recursion"] = FALSE;
       }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,7 +222,6 @@ class unimatrix
             //Als Ergebnis die Seite liefern
             $result=$this->_buffer;
             }
-
         return($result);
         }
         
@@ -225,53 +229,51 @@ class unimatrix
     //Die Seite rendern (der Buffer muß schon gefüllt sein)
     function _render($templatefile)
         {
-        //Seite rendern
+        //Datei laden
         $this->_buffer=file_get_contents($templatefile);
 
-        //Alle Includes verarbeiten, damit diese mitgeparst werden
-        $this->_buffer=$this->processvarincludes($this->_buffer);
+        do
+          {
+          //
+          $this->_burned=FALSE;
+
+          //Alle Includes verarbeiten, damit diese mitgeparst werden
+          $this->_buffer=$this->processvarincludes($this->_buffer);
         
-        $this->_buffer=$this->processincludes($this->_buffer);
+          $this->_buffer=$this->processincludes($this->_buffer);
 
-        //Alle Bools, da diese über Sichtbarkeit entscheiden
-        $this->_buffer=$this->processboolean($this->_buffer);
+          //Alle Bools, da diese über Sichtbarkeit entscheiden
+          $this->_buffer=$this->processboolean($this->_buffer);
 
-        //Und danach der Rest
-        $this->_buffer=$this->processarrays($this->_buffer);
-        $this->_buffer=$this->processvars($this->_buffer);
+          //Und danach der Rest
+          $this->_buffer=$this->processarrays($this->_buffer);
+          $this->_buffer=$this->processvars($this->_buffer);
 
-        //Alle Systembefehle holen
-        $this->_buffer=$this->processsys($this->_buffer);
+          //Alle Systembefehle holen
+          $this->_buffer=$this->processsys($this->_buffer);
+        
+          //Solange parsen, bis alles erledigt ist
+          } while ( ($this->_burned==TRUE) && ($this->_system["recursion"]==TRUE) );
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Extrahiert alle include Tokens und fügt die Dateien ein
+    //Wir lösen einfach das Token auf und ersetzen es durch {{include:variable}}
     function processvarincludes($input)
         {
-        //Alle Includes rausholen
         if (preg_match_all(TEMPLATE_REG_VARINCLUDE,$input,$result)>0)
             {
-            foreach (reset($result) as $include)
+            $replaces=reset($result);
+            $vars    =next($result);
+            foreach ($vars as $index=>$var)
                 {
-                $name=$this->extractvalue($include);
-                
-                //Existiert die Variable ?
-                if (isset($this->replace[$name])==TRUE)
+                //Variable existiert ?
+                if (isset($this->replace[$var])==TRUE)
                     {
-                    $file=$this->replace[$name];
+                    $input = str_replace($replaces[$index],"{{include:".$this->replace[$var]."}}",$input);
                     }
                 else
                     {
-                    $file="var : ".$name;
-                    }
-
-                if (file_exists($this->basepath.$file)==TRUE)
-                    {
-                    $input = str_replace($include,file_get_contents($this->basepath.$file),$input);
-                    }
-                else
-                    {
-                    $input = str_replace($include,"[<b>".$file." not found</b>]",$input);
+                    $input = str_replace($replaces[$index],"[<b>".$var." not assigned</b>]",$input);
                     }
                 }
             }
@@ -285,17 +287,24 @@ class unimatrix
         //Alle Includes rausholen
         if (preg_match_all(TEMPLATE_REG_INCLUDE,$input,$result)>0)
             {
-            foreach (reset($result) as $include)
-                {
-                $file=$this->extractvalue($include);
+            //Ein Replace ist angefordert
+            $this->_burned=TRUE;
 
-                if (file_exists($this->basepath.$file)==TRUE)
+            $replaces=reset($result);
+            $vars    =next($result);
+              
+            foreach ($vars as $index=>$var)
+                {
+                if (file_exists($this->basepath.$var)==TRUE)
                     {
-                    $input = str_replace($include,file_get_contents($this->basepath.$file),$input);
+                    //Rekursionsvariante
+                    //$input = str_replace($replaces[$index],$this->processincludes(file_get_contents($this->basepath.$var)),$input);
+
+                    $input = str_replace($replaces[$index],file_get_contents($this->basepath.$var),$input);
                     }
                 else
                     {
-                    $input = str_replace($include,"[<b>".$file." not found</b>]",$input);
+                    $input = str_replace($replaces[$index],"[<b>".$var." not found</b>]",$input);
                     }
                 }
             }
@@ -308,17 +317,21 @@ class unimatrix
         {
         if (preg_match_all(TEMPLATE_REG_VAR,$input,$result)>0)
             {
-            foreach (reset($result) as $include)
+            //Ein Replace ist angefordert
+            $this->_burned=TRUE;
+            
+            $replaces=reset($result);
+            $vars    =next($result);
+            foreach ($vars as $index=>$var)
                 {
-                $name=$this->extractvalue($include);
                 //Variable existiert ?
-                if (isset($this->replace[$name])==TRUE)
+                if (isset($this->replace[$var])==TRUE)
                     {
-                    $input = str_replace($include,$this->replace[$name],$input);
+                    $input = str_replace($replaces[$index],$this->replace[$var],$input);
                     }
                 else
                     {
-                    $input = str_replace($include,"[<b>".$name." not assigned</b>]",$input);
+                    $input = str_replace($replaces[$index],"[<b>".$var." not assigned</b>]",$input);
                     }
                 }
             }
@@ -331,25 +344,34 @@ class unimatrix
         {
         if (preg_match_all(TEMPLATE_REG_BOOL,$input,$result)>0)
             {
-            foreach (reset($result) as $include)
-                {
-                $id=substr($include,0,strpos($include,"}}")+2);
-                $value=trim(substr($include,strlen($id),strlen($include) - strlen($id) - strlen("{{bool}}") ) );
+            //Ein Replace ist angefordert
+            $this->_burned=TRUE;
+            
+            $replaces = reset($result);    //Der kpl. Ausdruck
+            $ids      = next($result);     //Die Variable
+            $vals     = next($result);     //Der Inhalt
 
-
-                //Variable gesetzt ?
-                $id=$this->extractvalue($id);
-                if (isset($this->replace[$id])==TRUE)
+            //Alle Treffer durchgehen
+            foreach ($replaces as $index => $replace)
+              {
+              //Variable gesetzt ?
+              $id=$ids[$index];
+              if (isset($this->replace[$id])==TRUE)
                     {
                     if ($this->replace[$id]==TRUE)
                         {
-                        $input = str_replace($include,$value,$input);
+                        //Und rekursiv auflösen
+                        $input = str_replace($replace,$this->processboolean($vals[$index]),$input);
                         }
                     else
                         {
-                        $input = str_replace($include,"",$input);
+                        $input = str_replace($replace,"",$input);
                         }
                     }
+              else
+                  {
+                  $input = str_replace($replace,"[[".$id." not assigned]]",$input);
+                  }
                 }
             }
         return($input);
@@ -361,41 +383,54 @@ class unimatrix
         {
         if (preg_match_all(TEMPLATE_REG_ARRAY,$input,$result)>0)
             {
-            foreach (reset($result) as $include)
+            //Ein Replace ist angefordert
+            $this->_burned=TRUE;
+            
+            $replaces = reset($result);
+            $ids      = next ($result);
+            $vals     = next ($result);
+            
+            foreach ($replaces as $index=>$replace)
                 {
-                //Alle wichtigen Werte rausziehen
-                $id=substr($include,0,strpos($include,"}}")+2);
-                $value=trim(substr( $include,strlen($id),strlen($include) - strlen($id) - strlen("{{array}}") ));
-                $name=$this->extractvalue($id);
+                $val=$vals[$index];
+                $id =$ids[$index];
 
                 //Gibt es das Array ?
-                if (isset($this->replace[$name])==TRUE)
+                if (isset($this->replace[$id])==TRUE)
                     {
-                    $newvalue="";
-                    //Für jeden Eintrag im Array die Variablen setzen
-                    $count=1;
-                    foreach ($this->replace[$name] as $key => $val)
+                    if (is_array($this->replace[$id])==TRUE)
+                      {
+                      //Dann den Replacetext aufbauen
+                      $newvalue="";
+                      //Für jeden Eintrag im Array die Variablen setzen
+                      $count=1;
+                      foreach ($this->replace[$id] as $key => $value)
                         {
                         //Für jedes Paar einen Datensatz anlegen
-                        $keyname=$name."_key".$count;
-                        $valname=$name."_val".$count;
+                        $keyname=$id."_key".$count;
+                        $valname=$id."_val".$count;
 
                         $this->assign($keyname,$key);
-                        $this->assign($valname,$val);
+                        $this->assign($valname,$value);
 
                         //Den neuen Eintrag für den Buffer aufbauen
-                        $temp=str_replace("{{key}}","{{var:".$keyname."}}",$value);
+                        $temp=str_replace("{{key}}","{{var:".$keyname."}}",$val);
                         $temp=str_replace("{{val}}","{{var:".$valname."}}",$temp);
                         $newvalue.=$temp;
 
                         $count++;
                         }
-                    //Ersetzen
-                    $input = str_replace($include,$newvalue,$input);
+                      //Ersetzen
+                      $input = str_replace($replace,$newvalue,$input);
+                      }
+                    else
+                      {
+                      $input = str_replace($replace,"[<b>".$id." not an array</b>]",$input);
+                      }
                     }
                 else
                     {
-                    $input = str_replace($include,"[<b>".$name." not assigned</b>]",$input);
+                    $input = str_replace($replace,"[<b>".$id." not assigned</b>]",$input);
                     }
                 }
             }
@@ -404,32 +439,23 @@ class unimatrix
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Systembefehle extrahieren und im _system-array setzen
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Ersetzt alle Token durch ihren Wert
     function processsys($input)
         {
         if (preg_match_all(TEMPLATE_REG_SYSTEM,$input,$result)>0)
             {
-            foreach (reset($result) as $include)
+            $replaces=reset($result);
+            $vars    =next ($result);
+            foreach ($vars as $index=>$var)
                 {
-                $name=$this->extractvalue($include);
-                
                 //Zustand merken
-                $this->_system[$name]=TRUE;
+                $this->_system[$var]=TRUE;
                 
-                //Und auftreten ersetzen
-                $input = str_replace($include,"",$input);
+                //Und Auftreten ersetzen
+                $input = str_replace($replaces[$index],"",$input);
                 }
             }
-        return($input);
-        }
-        
-        
-       
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Den Wert aus einem Token extrahieren
-    function extractvalue($input)
-        {
-        $input=substr($input,strpos($input,":")+1,strlen($input) );
-        $input=substr($input,0,strpos($input,"}}"));
         return($input);
         }
     }
