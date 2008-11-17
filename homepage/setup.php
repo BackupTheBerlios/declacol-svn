@@ -22,6 +22,7 @@ $step = callmethod("request","getrequest","page",1,FILTER_NUMBER);;
 
 
 
+
 //Die Installationsschritte auswählen
 switch ($step)
     {
@@ -45,7 +46,12 @@ $loader->destroy();
 //Wilkommen
 function welcome($step)
     {
-    callmethod("unimatrix","assign","access",TRUE);
+    //Evtl. Schreibrechte anfordern
+    $access=is_writable("setup.php") && is_writable("./config/local.config.php");
+    callmethod("unimatrix","assign","access"  ,$access);
+    callmethod("unimatrix","assign","noaccess",!$access);
+    callmethod("unimatrix","assign","setup" ,!is_writable("setup.php"));
+    callmethod("unimatrix","assign","config",!is_writable("./config/local.config.php"));
 
     //Pluginseite einhängen
     callmethod("unimatrix","assign","pagefile","setup_welcome.txt");

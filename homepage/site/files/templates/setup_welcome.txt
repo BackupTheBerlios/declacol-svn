@@ -3,12 +3,17 @@ Willkommen zur Installation des RPC-Servers
 Es sind nur wenige Schritte noetig, um die Installation auszufuehren.
 <br><br>
 
-{{bool:access}}
+{{bool:noaccess}}
   <fieldset>
   Folgende Dateien benoetigen volle Zugriffsrechte :
    <ul>
-    {{bool:setup}}<li>setup.php</li>{{bool}}
-    {{abool:config}}<li>config/local.config.php</li>{{abool}}
+    {{bool:setup}}<li>setup.php</li>{{setup}}
+    {{bool:config}}<li>config/local.config.php</li>{{config}}
    </ul>
   </fieldset>
-{{bool}}
+<a href="setup.php?page={{var:step}}">nochmal pruefen</a>  
+{{noaccess}}
+
+{{bool:access}}
+<a href="setup.php?page={{var:nextstep}}">weiter</a>
+{{access}}
