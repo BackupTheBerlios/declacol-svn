@@ -1,0 +1,15 @@
+<h3>Eingabe der Mail-Server Daten</h3>
+<fieldset style="height:30px;">
+Um dem System den automatischen Versand von EMails zu erlauben, werden einige Zugangsdaten benötigt.
+</fieldset>
+<fieldset style="height:150px;">
+<table>
+  <tr><th>mailsever </th><th>:</th><td> <input type="text" name="data0" size="64"></td></tr>
+  <tr><th>username </th><th>:</th><td> <input type="text"  name="data1" size="64"></td></tr>
+  <tr><th>password </th><th>:</th><td> <input type="text"  name="data2" size="64"></td></tr>
+  <tr><th>absender </th><th>:</th><td> <input type="text"  name="data3" size="64"></td></tr>
+</table>
+<br>
+<b>Soll kein Mailversand aktiviert werden, lassen Sie die Felder einfach frei und klicken Sie auf weiter.</b>
+</fieldset>
+<a href="setup.php?page={{var:nextstep}}">weiter</a>

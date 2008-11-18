@@ -1,0 +1,7 @@
+<h3>Installation der Dateien</h3>
+<fieldset style="height:30px;">
+Es werden nun alle Dateien kopiert und für den Serverbetrieb optimiert. Diesr Vorgang kann etwas dauern.
+</fieldset>
+<fieldset style="height:150px;">
+</fieldset>
+<a href="setup.php?page={{var:nextstep}}">weiter</a>

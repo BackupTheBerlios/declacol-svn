@@ -1,0 +1,7 @@
+<h3>Fertig</h3>
+<fieldset style="height:30px;">
+Die Installation ist beendet. Melden sich sich nun zum ersten Mal als Benutzer an.
+</fieldset>
+<fieldset style="height:150px;">
+</fieldset>
+<a href="./">Seite oeffnen</a>
