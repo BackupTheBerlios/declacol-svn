@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="de">
+<head>
+{{sys:nocache}}
+<title>Setup</title>
+<style type="text/css">
+body
+    {
+     font-family : verdana;
+     background-color:silver;
+     }
+fieldset
+    {
+    border    : 1px gray solid;
+    font-size : 12px;
+    }
+hr
+    {
+    border : 1px gray solid;
+    }
+h1
+    {
+    font-size   : 18px;
+    font-weight : bold;
+    }
+h2
+    {
+    font-size   : 14px;
+    font-weight : bold;
+    }
+a
+    {
+    color : #505050;
+    text-decoration:none;
+    display : block;
+    }
+a:hover
+    {
+    background-color : #505050;
+    color             : silver;
+    }
+div.next
+    {
+    padding : 5px;
+    width  : 80px;
+    }
+th
+    {
+    text-align : left;
+    }
+</style>
+</head>
+<body>
+<h1>Setup</h1>
+<hr>
+{{varinclude:pagefile}}
+</body>
+</html>

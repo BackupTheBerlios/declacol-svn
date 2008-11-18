@@ -1,0 +1,3 @@
+<fieldset>
+  stripping files  
+</fieldset>
