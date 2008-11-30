@@ -10,7 +10,10 @@
 */
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
-/// Zugriff auf das Dateisystem
+/// Dateisystem
+///
+/// Alle Zugriffe auf Dateien sollten hierüber laufen, da die Klasse ein virtuelles
+/// Dateisystem vorgaukelt und damit bei Mehrbenutzersystemen Datensicherheit bietet.
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 require_once("conf.classes.php");
@@ -62,6 +65,89 @@ class fs
       {
       $self=&$this;
       return($self);
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Eine Pfadangabe cleanen und validieren
+    function _cleanpath($path)
+      {
+      //Traversen killen
+      $result=str_replace("\\","/",$path);  
+      $result=str_replace("..","",$result);  
+        
+      //Darf nur unterhalb des Basispfades liegen
+      if (strpos(PATH_BASE,$path)!==0)
+        {
+        $result=FALSE;
+        }
+      return($result);
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Eine Datei öffnen und eine Handle liefern
+    function open($filename,$mode)
+      {
+      $filename=$this->_cleanpath($filename);
+      $result=fopen($filename,$mode);
+      return($result);    
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen Handle schliessen
+    function close($handle)
+      {
+      if ($handle!==FALSE)
+        {
+        fclose($handle);
+        $result=TRUE;
+        }
+      else
+        {
+        $result=FALSE;
+        }
+      return($result);
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //In einen Buffer lesen
+    function read($handle,&$buffer,$size)
+      {
+      $result=FALSE;
+        
+      if ($handle!==FALSE)
+        {
+        }
+
+      return($result);
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen Buffer schreiben
+    function write($handle,$buffer,$size)
+      {
+      $result=FALSE;
+ 
+      if ($handle!==FALSE)
+        {
+        }
+        
+      return($result);
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Eine Datei kpl. einlesen
+    function readfile($filename)
+      {
+      $filename=$this->_cleanpath($filename);
+      return(file_get_contents($filename));
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Eine Datei kpl. schreiben
+    function writefile($filename,$buffer)
+      {
+      $filename=$this->_cleanpath($filename);
+      return(file_put_contents($filename,$buffer));
       }
     }
 </script>
