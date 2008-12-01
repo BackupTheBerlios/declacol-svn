@@ -1,40 +1,34 @@
 <form action="setup.php" method="post">
  <div>
+
     <fieldset>
       Willkommen zur Installation des RPC-Servers. Um das System zu aktivieren werden einige Daten benoetigt.
       Bitte geben Sie diese ein und bestaetigen Sie mit "install".
     </fieldset>
 
-{{bool:noaccess}}
-    <fieldset>
-    	folgende Dateien benötigen volle rechte (0777)
-    </fieldset>
-{{noaccess}}
-    
-{{bool:access}}
     <fieldset>
       <h1>Daten fuer den Adminzugang</h1>
         <table>
-         <tr><th>username  </th><th>:</th><td> <input type="text"  name="data4" size="64"></td></tr>
-         <tr><th>password  </th><th>:</th><td> <input type="text"  name="data5" size="64"></td></tr>
-         <tr><th>email     </th><th>:</th><td> <input type="text"  name="data6" size="64"></td></tr>
+         <tr><th>username  </th><th>:</th><td> <input type="text"  name="data5" size="64" value="{{var:data5}}"></td></tr>
+         <tr><th>password  </th><th>:</th><td> <input type="text"  name="data6" size="64" value="{{var:data6}}"></td></tr>
+         <tr><th>email     </th><th>:</th><td> <input type="text"  name="data7" size="64" value="{{var:data7}}"></td></tr>
         </table>
     </fieldset>
 
     <fieldset>
       <h1>Zugangsdaten fuer den Mailversand</h1>
-      <b>Soll kein Mailversand aktiviert werden, lassen Sie die Felder einfach frei.</b>
-      <br><br>
       <table>
-        <tr><th>mailserver</th><th>:</th><td> <input type="text" name="data0" size="64"></td></tr>
-        <tr><th>username  </th><th>:</th><td> <input type="text"  name="data1" size="64"></td></tr>
-        <tr><th>password  </th><th>:</th><td> <input type="text"  name="data2" size="64"></td></tr>
-        <tr><th>absender  </th><th>:</th><td> <input type="text"  name="data3" size="64"></td></tr>
+        <tr><td><input type="checkbox" name="data0"></td><td></td><th>Kein Mailversand</th></tr>
+        <tr><th>mailserver</th><th>:</th><td> <input type="text" name="data1"  size="64" value="{{var:data1}}"></td></tr>
+        <tr><th>username  </th><th>:</th><td> <input type="text"  name="data2" size="64" value="{{var:data2}}"></td></tr>
+        <tr><th>password  </th><th>:</th><td> <input type="text"  name="data3" size="64" value="{{var:data3}}"></td></tr>
+        <tr><th>absender  </th><th>:</th><td> <input type="text"  name="data4" size="64" value="{{var:data4}}"></td></tr>
       </table>
     </fieldset>
 
-  <br>
-  <input type="submit" value="install">
-{{access}}
+    <fieldset>
+      <input type="submit" value="install">
+    </fieldset>
+
 </div>
 </form>

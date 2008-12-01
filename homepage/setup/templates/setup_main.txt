@@ -32,7 +32,6 @@ a
     {
     color : #505050;
     text-decoration:none;
-    display : block;
     }
 a:hover
     {
@@ -48,11 +47,34 @@ th
     {
     text-align : left;
     }
+input
+    {
+    border : 1px black solid;
+    }
+input:hover
+    {
+    border : 1px black solid;
+    background-color : #d0d0d0;
+    }
+
 </style>
 </head>
 <body>
 <h1>Setup</h1>
-<hr>
-{{varinclude:pagefile}}
+{{bool:access}}
+  {{varinclude:pagefile}}
+{{access}}
+
+{{bool:noaccess}}
+<fieldset>
+Folgende Dateien brauchen Vollgriff (0777)
+<ul>
+    {{bool:setup}}<li>setup.php</li>{{setup}}
+    {{bool:config}}<li>./setup/local.config.php</li>{{config}}
+</ul>
+</fieldset>
+<a href="setup.php">reload</a>
+{{noaccess}}
+
 </body>
 </html>

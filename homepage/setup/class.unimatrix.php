@@ -264,6 +264,7 @@ class unimatrix
     //Wir lösen einfach das Token auf und ersetzen es durch {{include:variable}}
     function processvarincludes($input)
         {
+        $result=array();
         if (preg_match_all(TEMPLATE_REG_VARINCLUDE,$input,$result)>0)
             {
             $replaces=reset($result);
@@ -288,6 +289,7 @@ class unimatrix
     //Extrahiert alle include Tokens und fügt die Dateien ein
     function processincludes($input)
         {
+        $result=array();
         //Alle Includes rausholen
         if (preg_match_all(TEMPLATE_REG_INCLUDE,$input,$result)>0)
             {
@@ -319,6 +321,7 @@ class unimatrix
     //Ersetzt alle Token durch ihren Wert
     function processvars($input)
         {
+        $result=array();
         if (preg_match_all(TEMPLATE_REG_VAR,$input,$result)>0)
             {
             //Ein Replace ist angefordert
@@ -346,6 +349,7 @@ class unimatrix
     //Ersetzt alle Boolean durch ihren Wert
     function processboolean($input)
         {
+        $result=array();
         if (preg_match_all(TEMPLATE_REG_BOOL,$input,$result)>0)
             {
             //Ein Replace ist angefordert
@@ -385,6 +389,7 @@ class unimatrix
     //Verarbeitet alle Arrays
     function processarrays($input)
         {
+        $result=array();
         if (preg_match_all(TEMPLATE_REG_ARRAY,$input,$result)>0)
             {
             //Ein Replace ist angefordert
@@ -447,6 +452,7 @@ class unimatrix
     //Ersetzt alle Token durch ihren Wert
     function processsys($input)
         {
+        $result=array();
         if (preg_match_all(TEMPLATE_REG_SYSTEM,$input,$result)>0)
             {
             $replaces=reset($result);
