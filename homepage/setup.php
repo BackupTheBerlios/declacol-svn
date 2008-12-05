@@ -2,8 +2,8 @@
 define("SETUP",TRUE);
 //Nur diese Basisconfigurationen ziehen,
 //der Rest liegt in den Reg-Files
-require_once("./setup/class.unimatrix.php");
-require_once("./setup/class.configurator.php");
+require_once("./site/classes/class.unimatrix.php");
+require_once("./site/classes/class.configurator.php");
 
 $render=new unimatrix();
 $render->basepath="./setup/templates/";
