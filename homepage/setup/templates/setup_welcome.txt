@@ -2,12 +2,13 @@
  <div>
 
     <fieldset>
-      Willkommen zur Installation des RPC-Servers. Um das System zu aktivieren werden einige Daten benoetigt.
-      Bitte geben Sie diese ein und bestaetigen Sie mit "install".
+	welcome to the rpc-server-setup. please enter some information in order to create a valid installation
     </fieldset>
 
+<br><br>
+
     <fieldset>
-      <h1>Daten fuer den Adminzugang</h1>
+      <legend> [ adminuser ] </legend>
         <table>
          <tr><th>username  </th><th>:</th><td> <input type="text"  name="data5" size="64" value="{{var:data5}}"></td></tr>
          <tr><th>password  </th><th>:</th><td> <input type="text"  name="data6" size="64" value="{{var:data6}}"></td></tr>
@@ -15,20 +16,28 @@
         </table>
     </fieldset>
 
+<br><br>
+
     <fieldset>
-      <h1>Zugangsdaten fuer den Mailversand</h1>
+      <legend> [ mailserver ] </legend>
       <table>
-        <tr><td><input type="checkbox" name="data0"></td><td></td><th>Kein Mailversand</th></tr>
-        <tr><th>mailserver</th><th>:</th><td> <input type="text" name="data1"  size="64" value="{{var:data1}}"></td></tr>
-        <tr><th>username  </th><th>:</th><td> <input type="text"  name="data2" size="64" value="{{var:data2}}"></td></tr>
-        <tr><th>password  </th><th>:</th><td> <input type="text"  name="data3" size="64" value="{{var:data3}}"></td></tr>
-        <tr><th>absender  </th><th>:</th><td> <input type="text"  name="data4" size="64" value="{{var:data4}}"></td></tr>
+        <tr><td><input type="checkbox" name="data0"></td><td></td><th>disable mailsupport</th></tr>
+        <tr><th>mailserver  </th><th>:</th><td> <input type="text" name="data1"  size="64" value="{{var:data1}}"></td></tr>
+        <tr><th>username    </th><th>:</th><td> <input type="text"  name="data2" size="64" value="{{var:data2}}"></td></tr>
+        <tr><th>password    </th><th>:</th><td> <input type="text"  name="data3" size="64" value="{{var:data3}}"></td></tr>
+        <tr><th>senderemail </th><th>:</th><td> <input type="text"  name="data4" size="64" value="{{var:data4}}"></td></tr>
       </table>
     </fieldset>
 
-    <fieldset>
-      <input type="submit" value="install">
-    </fieldset>
+<br><br>
 
+    <fieldset>
+      <legend> [ options ] </legend>
+      <table>
+        <tr><td><input type="checkbox" name="data8"></td><td></td><th>shrink php-code</th></tr>
+      </table>
+    </fieldset>
+<br><br>
+    <input type="submit" value="install">
 </div>
 </form>
