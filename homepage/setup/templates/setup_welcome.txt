@@ -2,7 +2,7 @@
  <div>
 
     <fieldset>
-	welcome to the rpc-server-setup. please enter some information in order to create a valid installation
+  welcome to the rpc-server-setup. please enter some information in order to create a valid installation
     </fieldset>
 
 <br><br>

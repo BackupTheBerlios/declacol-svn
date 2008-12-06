@@ -1,9 +1,26 @@
 <script language="php">
-define("SETUP",TRUE);
-//Nur diese Basisconfigurationen ziehen,
-//der Rest liegt in den Reg-Files
+/*
+ _|    _|            _|                              _|                _|
+ _|    _|  _|_|_|        _|_|_|  _|_|      _|_|_|  _|_|_|_|  _|  _|_|      _|    _|
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|_|      _|    _|_|
+ _|    _|  _|    _|  _|  _|    _|    _|  _|    _|    _|      _|        _|  _|    _|
+   _|_|    _|    _|  _|  _|    _|    _|    _|_|_|      _|_|  _|        _|  _|    _|
+
+(c) 2008 Borg@sven-of-nine.de
+*/
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Hauptseite
+////////////////////////////////////////////////////////////////////////////////////////////////////
+if (filesize("./config/local.config.php") > 0)
+  {
+  die ("software already configured! empty local.config to restart setup");
+  }
+
+//Los gehts
+define ("SETUP",TRUE);
 require_once("./site/classes/class.unimatrix.php");
 require_once("./site/classes/class.configurator.php");
+
 
 $render=new unimatrix();
 $render->basepath="./setup/templates/";
@@ -58,9 +75,9 @@ function transferfiles()
     {
     global $render;
 
-    //Ausgabe
-    $render->assign("access"  ,TRUE);
-    $render->assign("noaccess",FALSE);
+    createconfig();
+    registerclasses();
+    createuser();
 
     $render->assign("pagefile","setup_working.txt");
     echo $render->render("egal","setup_main.txt");
@@ -114,4 +131,92 @@ function getdata($name,$default)
 
     return($result);
     }
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Salz erzeugen
+function getsalt()
+  {
+  $input =rand(9999,9999999);
+
+  //Und nun bilden wir daraus einen simplen String
+  $result="";
+  while ($input > 0)
+    {
+    //Nur Buchstaben aus dem ASCII-Satz nehmen
+    $result.=chr( ($input % 26) + 97);
+    $input=$input >> 2;
+    }
+  return($result);
+  }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Die Konfigurationsdatei erzeugen
+function createconfig()
+  {
+  //Die Config-Daten holen
+  $usemail    =getdata("data0","off")=="off";
+  $mailserver =getdata("data1","");
+  $mailuser   =getdata("data2","");
+  $mailpass   =getdata("data3","");
+  $mailfrom   =getdata("data4","");
+
+  //Die Config-Datei schreiben
+  $config=new configurator();
+  $config->open("./config/local.config.php");
+  $config->add("SALT" ,getsalt(),"global crypt salt");
+  $config->add("SALT1",getsalt(),"global crypt salt");
+  $config->add("SALT2",getsalt(),"global crypt salt");
+  $config->add("TIMEZONE","Europe/Berlin","timezone for datefunctions");
+  $config->add("EMAIL_MODE","smtp","");
+  $config->add("EMAIL_SMTP",$mailserver,"smtp server");
+  $config->add("EMAIL_POP3",$mailserver,"pop3 server");
+  $config->add("EMAIL_USER",$mailuser,"login for smtp-server");
+  $config->add("EMAIL_PASS",$mailpass,"login for smtp-server");
+  $config->add("EMAIL_FROM",$mailfrom,"email sender");
+  $config->add("EMAIL_AUTH",($mailpass!=""),"login to mailserver");
+  $config->add("EMAIL_SUPPORT",$usemail,"use mail");
+  $config->add("SETUP_DONE",TRUE,"setup successfully completed");
+
+  $config->flush();
+  $config->close();
+  $config->destroy();
+  clearstatcache();
+  print_r(file("./config/local.config.php"));
+  }
+
+function registerclasses()
+  {
+  //Config und notwendige Klassen ziehen
+  require_once("./config/config.php");
+  require_once(PATH_CLASSES."class.registry.php");
+  require_once(PATH_CLASSES."class.classinst.php");
+
+  //Alle Klassen initialisieren
+  $inst=new classinst(PATH_REGISTRY);
+  $inst->registerall(PATH_CLASSES);
+  $inst->destroy();
+  }
+
+function createuser()
+  {
+  //Config und notwendige Klassen ziehen
+  require_once("./config/config.php");
+  require_once(PATH_CLASSES."class.registry.php");
+  require_once(PATH_CLASSES."class.classload.php");
+
+  $rootuser   =getdata("data5","");
+  $rootpass   =getdata("data6","");
+  $rootmail   =getdata("data7","");
+
+  $loader=new classload(PATH_REGISTRY);
+  $loader->load();
+
+  callmethod("user","add","Administrator",$rootmail,$rootuser,$rootpass);
+
+  $loader->destroy();
+  }
+
+function stripcode()
+  {
+  $stripcode  =getdata("data8","off")=="off";
+  }
 </script>

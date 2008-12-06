@@ -22,12 +22,6 @@
 /// Daten in eine neue Datei geschrieben
 ///
 //////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////
-//Ein paar Definitionen zum leichteren Handling
-define ("CONFIG_SCRIPT_START","<script language=\x22php\x22>");
-define ("CONFIG_SCRIPT_END"  ,"<script>");
-
 if (!defined("LINEFEED"))
     {
     define ("LINEFEED","\r\n");
@@ -136,22 +130,14 @@ class configurator
             $filename=$this->internal_filename;
             }
 
-        $fp=fopen($filename,"w+");
-        if ($fp!==FALSE)
-            {
-            //Kopf
-            fwrite($fp,"<script language=\x22php\x22>".LINEFEED);
-            foreach ($this->config as $constant => $value)
-                {
-                //Eine Zeile bauen
-                $line=$this->_build($constant,$value["value"],$value["comment"]);
-                //Und schreiben
-                fwrite($fp,$line.LINEFEED);
-                }
-            //Fuﬂ
-            fwrite($fp,"</script>".LINEFEED);
-            fclose($fp);
-            }
+        $output="<script language=\x22php\x22>".LINEFEED;
+        foreach ($this->config as $constant => $value)
+          {
+          //Eine Zeile bauen
+          $output.=$this->_build($constant,$value["value"],$value["comment"]).LINEFEED;
+          }
+        $output.="</script>";
+        file_put_contents($filename,$output);
         }
 
     //Verbindungsabbau
@@ -164,20 +150,6 @@ class configurator
     function setdefault()
         {
         $this->internal_filename        =FALSE;
-        }
-
-    //Datenbank erzeugen
-    //Wird hier nicht benutzt
-    function install()
-        {
-        return(TRUE);
-        }
-
-    //Datenbank zerstˆren
-    //Wird hier nicht benutzt
-    function uninstall()
-        {
-        return(TRUE);
         }
 
     //////////////////////////////////////////////////////////////////////////
@@ -283,11 +255,15 @@ class configurator
         return(array_keys($this->config));
         }
 
-    //Den Wert einer Konstante holen und bei Erfolg TRUE ansonsten FALSE melden
-    function read($constant,&$value)
+    //Den Wert oder Default zur¸ckgeben
+    function read($constant,$default)
         {
         //Einfach das interne FIND kapseln
-        return($this->_find($constant,$value));
+        $result=FALSE;
+        if ( $this->_find($constant,$result)==FALSE )
+          {
+          $result=$default;
+          }
         }
     }
 </script>

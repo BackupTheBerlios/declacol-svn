@@ -12,19 +12,39 @@
 ///
 /// Dateisystem
 ///
+/// Der Dateiname wir jeweils um das aktuelle Salz (SALT) erweitert
+///
 /// Alle Zugriffe auf Dateien sollten hierüber laufen, da die Klasse ein virtuelles
 /// Dateisystem vorgaukelt und damit bei Mehrbenutzersystemen Datensicherheit bietet.
-///
+/// (ToDo)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 require_once("conf.classes.php");
+
+//FileMode-Konstanten
+define ("OPEN_READ"  ,"rb");
+define ("OPEN_WRITE" ,"w+b");
+define ("OPEN_APPEND","a+b");
 
 //Eigentliche Klasse
 class fs
     {
+		var $_pathobfuscator = "";
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
     function fs()
         {
+  			//Einfach eine PHP-Konstante holen
+				$this->_pathobfuscator=PHP_BINDIR.PHP_SHLIB_SUFFIX;
+
+				//Salz als erweiterung übernehmen
+				if (defined("SALT")==TRUE)
+					{
+					$this->_pathobfuscator.=SALT;
+					}
+
+				//PathSafe machen
+				$this->_pathobfuscator=abs(CRC32($this->_pathobfuscator));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,6 +100,12 @@ class fs
         {
         $result=FALSE;
         }
+			else
+				{
+				//Erweiterung anhängen
+				$result.=$this->_pathobfuscator="";
+				}
+
       return($result);
       }
 
@@ -88,7 +114,14 @@ class fs
     function open($filename,$mode)
       {
       $filename=$this->_cleanpath($filename);
-      $result=fopen($filename,$mode);
+			if (file_exists($filename)==TRUE)
+				 {
+      	 $result=fopen($filename,$mode);
+				 }
+			else
+				 {
+				 $result=FALSE;
+				 }
       return($result);    
       }
 
@@ -98,6 +131,7 @@ class fs
       {
       if ($handle!==FALSE)
         {
+				fflush($handle);
         fclose($handle);
         $result=TRUE;
         }
@@ -116,8 +150,22 @@ class fs
         
       if ($handle!==FALSE)
         {
+        $buffer=fread($fp,$size);
         }
 
+      return($result);
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Zeile in einen Buffer lesen
+    function readln($handle,&$buffer)
+      {
+      $result=FALSE;
+
+      if ($handle!==FALSE)
+        {
+        $buffer=fgets($fp);
+        }
       return($result);
       }
 
@@ -129,8 +177,34 @@ class fs
  
       if ($handle!==FALSE)
         {
+        fwrite($fp,$buffer,$size);
         }
         
+      return($result);
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Eine Datei als String kpl. einlesen
+		function readstring($filename)
+	    {
+			return($this->readfile($filename));
+			}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Eine Datei als Array kpl. einlesen
+    function readarray($filename)
+      {
+      $filename=$this->_cleanpath($filename);
+
+			if (file_exists($filename)==TRUE)
+				 {
+      	 $result=file($filename);
+				 }
+			else
+				 {
+				 $result=FALSE;
+				 }
+
       return($result);
       }
 
@@ -139,7 +213,17 @@ class fs
     function readfile($filename)
       {
       $filename=$this->_cleanpath($filename);
-      return(file_get_contents($filename));
+
+			if (file_exists($filename)==TRUE)
+				 {
+      	 $result=file_get_contents($filename);
+				 }
+			else
+				 {
+				 $result=FALSE;
+				 }
+      
+      return($result);
       }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -147,7 +231,10 @@ class fs
     function writefile($filename,$buffer)
       {
       $filename=$this->_cleanpath($filename);
-      return(file_put_contents($filename,$buffer));
+      
+      $result=file_put_contents($filename,$buffer);
+
+      return($result);
       }
     }
 </script>
