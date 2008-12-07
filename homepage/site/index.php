@@ -15,7 +15,7 @@ if (DEBUG) callmethod("debug","addlog","page","call index");
 //"Wir-Sind-Da-Cookie" setzen
 callmethod("request","setcookie","answer",EVERYTHING);
 
-//ID aus allen Requestparametern ($_POST und $_GET) erzeugen
+//ID aus allen Requestparametern ($_POST und $_GET) erzeugen um eine CacheID zu bekommen
 $id=callmethod("request","getid");
 
 //Angefragte Seite ziehen
@@ -39,6 +39,8 @@ if (callmethod("unimatrix","iscached",$id) == FALSE)
     }
 //Here we go
 echo callmethod("unimatrix","render",$id,$template);
+echo "<pre>";
+print_r($CLASSES);
 
 //callmethod("cache","clear");
 </script>

@@ -213,14 +213,20 @@ function createuser()
   require_once(PATH_CLASSES."class.registry.php");
   require_once(PATH_CLASSES."class.classload.php");
 
+  $loader=new classload(PATH_REGISTRY);
+  $loader->load();
+
+  //Und den Rootuser anlegen
   $rootuser   =getdata("data5","");
   $rootpass   =getdata("data6","");
   $rootmail   =getdata("data7","");
 
-  $loader=new classload(PATH_REGISTRY);
-  $loader->load();
+  //Alle Benutzer entfernen und nur root zufügen
+  callmethod("user","clear");
+  callmethod("user","add","root",$rootmail,$rootuser,$rootpass);
 
-  callmethod("user","add","Administrator",$rootmail,$rootuser,$rootpass);
+echo "<pre>";
+print_r($GLOBALS);
 
   $loader->destroy();
   }
@@ -255,9 +261,8 @@ function shrinkfiles($source)
                 {
                 if (substr($entry,-4,4)==".php")
                    {
-//                   echo "stripping :".$source.$entry."<br>\n";
-                   $filedata=file_get_contents($source.$entry);
-                   file_put_contents($source.$entry,php_strip_whitespace($filedata));
+                   echo "stripping :".$source.$entry."<br>\n";
+                   file_put_contents($source.$entry,php_strip_whitespace($source.$entry));
                    }
                 }
             }

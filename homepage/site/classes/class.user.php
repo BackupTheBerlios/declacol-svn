@@ -117,6 +117,13 @@ class user
       }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Die kpl. Daten der Registry löschen
+    function clear()
+      {
+      $this->_registry->clear();
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Einen User lesen (gibt ein Usreobjekt zurück)
     function read($username,$password)
         {
@@ -216,10 +223,7 @@ class user
     //Einen User entfernen
     function del($input)
         {
-        if ($this->status == USER_ADMIN)
-            {
-            $this->_registry->del("user/",$this->createid($input));
-            }
+        $this->_registry->del($this->createpath($this->createid($input)));
         }
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////
