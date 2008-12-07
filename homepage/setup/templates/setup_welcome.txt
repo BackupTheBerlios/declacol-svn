@@ -37,6 +37,7 @@
         <tr><td><input type="checkbox" name="data8"></td><td></td><th>shrink php-code</th></tr>
       </table>
     </fieldset>
+
 <br><br>
     <input type="submit" value="install">
 </div>

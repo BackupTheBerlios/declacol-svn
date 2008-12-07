@@ -25,6 +25,16 @@ require_once("./site/classes/class.configurator.php");
 $render=new unimatrix();
 $render->basepath="./setup/templates/";
 
+//Evtl. Schreibrechte anfordern
+$access=is_writable("setup.php") && is_writable("./config/local.config.php");
+$render->assign("access"  ,$access);
+$render->assign("noaccess",!$access);
+
+//Dateirechte
+$render->assign("setup" ,!is_writable("setup.php"));
+$render->assign("config",!is_writable("./config/local.config.php"));
+
+
 if (checkdata()!=TRUE)
     {
     welcome();
@@ -78,6 +88,7 @@ function transferfiles()
     createconfig();
     registerclasses();
     createuser();
+    stripcode();
 
     $render->assign("pagefile","setup_working.txt");
     echo $render->render("egal","setup_main.txt");
@@ -120,9 +131,9 @@ function checkdata()
 //Daten lesen
 function getdata($name,$default)
     {
-    if (isset($_POST[$name])==TRUE)
+    if (isset($_REQUEST[$name])==TRUE)
         {
-        $result=$_POST[$name];
+        $result=$_REQUEST[$name];
         }
     else
         {
@@ -180,7 +191,6 @@ function createconfig()
   $config->close();
   $config->destroy();
   clearstatcache();
-  print_r(file("./config/local.config.php"));
   }
 
 function registerclasses()
@@ -217,6 +227,40 @@ function createuser()
 
 function stripcode()
   {
-  $stripcode  =getdata("data8","off")=="off";
+  $stripcode  =getdata("data8","off")!="off";
+
+  if ($stripcode==TRUE)
+    {
+    shrinkfiles("./site/");
+    }
   }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Alle PHP-Dateien strippen
+function shrinkfiles($source)
+    {
+    $result=array();
+
+    $dirs=scandir($source);
+
+    foreach ($dirs as $entry)
+        {
+        //Traverse und Subversion ignorieren
+        if ( ($entry != ".") && ($entry!="..") && ($entry!=".svn") )
+            {
+            if ( is_dir($source.$entry)==TRUE )
+                {
+                shrinkfiles($source.$entry."/");
+                }
+            else
+                {
+                if (substr($entry,-4,4)==".php")
+                   {
+//                   echo "stripping :".$source.$entry."<br>\n";
+                   $filedata=file_get_contents($source.$entry);
+                   file_put_contents($source.$entry,php_strip_whitespace($filedata));
+                   }
+                }
+            }
+        }
+    }
 </script>

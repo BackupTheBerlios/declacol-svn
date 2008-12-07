@@ -1,2 +1,5 @@
 <fieldset>
+setup done
+<br>
+<a href="./">now enjoy your new software</a>
 </fieldset>
