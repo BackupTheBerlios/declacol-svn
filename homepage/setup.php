@@ -223,10 +223,12 @@ function createuser()
 
   //Alle Benutzer entfernen und nur root zufügen
   callmethod("user","clear");
-  callmethod("user","add","root",$rootmail,$rootuser,$rootpass);
+  $user=callmethod("user","add","root",$rootmail,$rootuser,$rootpass);
+  $user->status=USER_ADMIN;
+  callmethod("user","save",$user);
 
 echo "<pre>";
-print_r($GLOBALS);
+print_r($CLASSES);
 
   $loader->destroy();
   }

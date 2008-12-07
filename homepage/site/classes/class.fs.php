@@ -28,23 +28,23 @@ define ("OPEN_APPEND","a+b");
 //Eigentliche Klasse
 class fs
     {
-		var $_pathobfuscator = "";
+    var $_pathobfuscator = "";
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
     function fs()
         {
-  			//Einfach eine PHP-Konstante holen
-				$this->_pathobfuscator=PHP_BINDIR.PHP_SHLIB_SUFFIX;
+        //Einfach eine PHP-Konstante holen
+        $this->_pathobfuscator=PHP_BINDIR.PHP_SHLIB_SUFFIX;
 
-				//Salz als erweiterung übernehmen
-				if (defined("SALT")==TRUE)
-					{
-					$this->_pathobfuscator.=SALT;
-					}
+        //Salz als erweiterung übernehmen
+        if (defined("SALT")==TRUE)
+          {
+          $this->_pathobfuscator.=SALT;
+          }
 
-				//PathSafe machen
-				$this->_pathobfuscator=abs(CRC32($this->_pathobfuscator));
+        //PathSafe machen
+        $this->_pathobfuscator=abs(CRC32($this->_pathobfuscator));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,6 +70,8 @@ class fs
         $result[CLASS_INDEX_COMPRESSED]= FALSE;             //Soll die Datenbank komprimiert werden (gz)
 
         $result[CLASS_INDEX_RUNLEVEL]  = 1;                 //In welchen Runlevel soll die Klasse geladen werden
+
+        $result[CLASS_INDEX_RPC_EXPORT]= array();           //Welche Methoden der Klasse können per RPC aufgerufen werden
 
         return($result);
         }
@@ -100,11 +102,11 @@ class fs
         {
         $result=FALSE;
         }
-			else
-				{
-				//Erweiterung anhängen
-				$result.=$this->_pathobfuscator="";
-				}
+      else
+        {
+        //Erweiterung anhängen
+        $result.=$this->_pathobfuscator="";
+        }
 
       return($result);
       }
@@ -114,14 +116,14 @@ class fs
     function open($filename,$mode)
       {
       $filename=$this->_cleanpath($filename);
-			if (file_exists($filename)==TRUE)
-				 {
-      	 $result=fopen($filename,$mode);
-				 }
-			else
-				 {
-				 $result=FALSE;
-				 }
+      if (file_exists($filename)==TRUE)
+         {
+         $result=fopen($filename,$mode);
+         }
+      else
+         {
+         $result=FALSE;
+         }
       return($result);    
       }
 
@@ -131,7 +133,7 @@ class fs
       {
       if ($handle!==FALSE)
         {
-				fflush($handle);
+        fflush($handle);
         fclose($handle);
         $result=TRUE;
         }
@@ -185,10 +187,10 @@ class fs
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Eine Datei als String kpl. einlesen
-		function readstring($filename)
-	    {
-			return($this->readfile($filename));
-			}
+    function readstring($filename)
+      {
+      return($this->readfile($filename));
+      }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Eine Datei als Array kpl. einlesen
@@ -196,14 +198,14 @@ class fs
       {
       $filename=$this->_cleanpath($filename);
 
-			if (file_exists($filename)==TRUE)
-				 {
-      	 $result=file($filename);
-				 }
-			else
-				 {
-				 $result=FALSE;
-				 }
+      if (file_exists($filename)==TRUE)
+         {
+         $result=file($filename);
+         }
+      else
+         {
+         $result=FALSE;
+         }
 
       return($result);
       }
@@ -214,14 +216,14 @@ class fs
       {
       $filename=$this->_cleanpath($filename);
 
-			if (file_exists($filename)==TRUE)
-				 {
-      	 $result=file_get_contents($filename);
-				 }
-			else
-				 {
-				 $result=FALSE;
-				 }
+      if (file_exists($filename)==TRUE)
+         {
+         $result=file_get_contents($filename);
+         }
+      else
+         {
+         $result=FALSE;
+         }
       
       return($result);
       }

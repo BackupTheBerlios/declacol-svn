@@ -60,6 +60,10 @@ class crypt
         $result[CLASS_INDEX_COMPRESSED]= FALSE;              //Soll die Datenbank komprimiert werden (gz)
         $result[CLASS_INDEX_RUNLEVEL]  = 1;                //In welchen Runlevel soll die Klasse geladen werden
 
+        $result[CLASS_INDEX_RPC_EXPORT]= array("hash",   //Welche Methoden der Klasse können per RPC aufgerufen werden
+                                               "id",
+                                               "random");
+
         return($result);
         }
 

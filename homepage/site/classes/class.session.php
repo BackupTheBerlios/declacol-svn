@@ -59,6 +59,7 @@ class session
 
         $result[CLASS_INDEX_AUTOLOAD] = TRUE;           //Soll die Klasse beim Systemstart geladen werden ?
         $result[CLASS_INDEX_RUNLEVEL] = 5;                 //In welchen Runlevel soll die Klasse geladen werden
+        $result[CLASS_INDEX_RPC_EXPORT]= array();      //Welche Methoden der Klasse können per RPC aufgerufen werden
 
         return($result);
         }

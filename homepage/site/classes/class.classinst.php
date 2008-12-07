@@ -174,6 +174,9 @@ class classinst
                     $this->_registry->write($classkey,CLASS_INDEX_CLASSNAME,basename($classname));
                     $this->_registry->write($classkey,CLASS_INDEX_CLASSFILE,basename($classfile));
                     $this->_registry->write($classkey,CLASS_INDEX_INSTALLDATE,time());
+
+                    //Alle Methoden, die die Klasse exportiert
+                    $this->_registry->write("/".CLASS_INDEX_RPC_EXPORT,$classid,serialize($result[CLASS_INDEX_RPC_EXPORT]));
                     }
                 }
             //Abspeichern
@@ -193,6 +196,7 @@ class classinst
         $result[CLASS_INDEX_CLEANUP]   = $this->_checkresult($result,CLASS_INDEX_CLEANUP,FALSE);
         $result[CLASS_INDEX_AUTOLOAD]  = $this->_checkresult($result,CLASS_INDEX_AUTOLOAD,TRUE);
         $result[CLASS_INDEX_COMPRESSED]= $this->_checkresult($result,CLASS_INDEX_COMPRESSED,FALSE);
+        $result[CLASS_INDEX_RPC_EXPORT]= $this->_checkresult($result,CLASS_INDEX_RPC_EXPORT,array());
 
         return($result);
         }
