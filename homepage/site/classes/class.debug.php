@@ -34,17 +34,18 @@ class debug
     //Konstruktor
     function debug()
         {
+        //Soll im Debugmodus gestartet werden?
         if (defined("DEBUG")==TRUE)
             {
             require_once(PATH_LIBS."lib.xml.php");
 
-            $this->active=TRUE;
+            $this->active = DEBUG;
 
             //Unsere Daten holen
             $data = $this->install();
             define("DEBUG_CLASS",$data[CLASS_INDEX_ID]);
 
-            //Allen eigenen Handler einhängen
+            //Alle eigenen Handler einhängen
             set_exception_handler(array(DEBUG_CLASS,"exception"));
             set_error_handler    (array(DEBUG_CLASS,"error"));
             
@@ -56,16 +57,20 @@ class debug
     //Destruktor
     function destroy()
         {
-        if ( $this->active == TRUE )
+        if (defined("DEBUG")==TRUE)
             {
             restore_error_handler();
             restore_exception_handler();
 
-            $this->addlog("debug","ended");
+            //Wenn eine Debugsession aktiv war scheiben wir eine LogDatei
+            if ($this->active==TRUE)
+                {
+                $this->addlog("debug","ended");
 
-            //Und log als XML schreiben
-            file_put_contents(PATH_TEMP."debug_".CURRENT_TIME.".log",arraytoxml($this->log));
-            
+                //Und log als XML schreiben
+                file_put_contents(PATH_TEMP."debug_".CURRENT_TIME.".log",arraytoxml($this->log));
+                }
+                
             $this->clearlog();
             }
         unset($this);
@@ -114,9 +119,11 @@ class debug
             case E_USER_NOTICE  :  $error.="USER_NOTICE   [".$errno."] ".$errstr;
                                    $halt=FALSE;
                                    break;
+                                   
             case E_USER_WARNING :  $error.="USER_WARNING  [".$errno."] ".$errstr;
                                    $halt=TRUE;
                                    break;
+                                   
             case E_USER_ERROR   :  $error.="USER_ERROR    [".$errno."] ".$errstr;
                                    $halt=TRUE;
                                    break;
@@ -124,9 +131,11 @@ class debug
             case E_NOTICE       :  $error.="SYS_NOTICE    [".$errno."] ".$errstr;
                                    $halt=FALSE;
                                    break;
+                                   
             case E_WARNING      :  $error.="SYS_WARNING   [".$errno."] ".$errstr;
                                    $halt=TRUE;
                                    break;
+                                   
             case E_ERROR        :  $error.="SYS_ERROR     [".$errno."] ".$errstr;
                                    $halt=TRUE;
                                    break;
@@ -159,12 +168,16 @@ class debug
         if ($errno != 0)
             {
             callmethod("debug","printlog");
+            //Handbremse ziehen, wenn ein Fehler aufgetreten ist
             if ($halt==TRUE)
                 {
+                //Log als XML schreiben
+                callmethod("debug","addlog","system","halted");
+                $log=callmethod("debug","getlog");
+                file_put_contents(PATH_TEMP."debug_".CURRENT_TIME.".log",arraytoxml( $log ) );
                 die("system halted");
                 }
             }
-
         return(TRUE);
         }
 
@@ -188,10 +201,16 @@ class debug
     function printlog()
         {
         echo "<pre>";
-        print_r(arraytoxml($this->log));
+        print_r( arraytoxml( $this->getlog() ) );
         echo "</pre>";
         }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Log liefern
+    function getlog()
+        {
+        return($this->log);
+        }
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Log löschen
     function clearlog()
