@@ -9,5 +9,6 @@ del .\site\files\cache\*.* /Q
 del .\site\files\temp\*.* /Q
 
 echo. > .\site\files\cache\void
+echo. > .\site\files\temp\void
 
 pause
