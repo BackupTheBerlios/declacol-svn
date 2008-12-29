@@ -42,6 +42,10 @@ class crypt
             {
             $this->salt=SALT;
             }
+        else
+            {
+            if (DEBUG) callmethod("debug","addlog","crypt","WARNING no salt defined fallback to constsalt");
+            }
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
