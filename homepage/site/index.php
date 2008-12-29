@@ -21,7 +21,7 @@ $id=callmethod("request","getid");
 //Angefragte Seite ziehen
 $pagefile =strtolower(callmethod("request","getrequest","page","news",FILTER_ALPHANUM));
 $template ="main.txt";
-
+        
 //Die Cacheengine einhängen
 setproperty("unimatrix","cacheengine" ,callmethod("cache","getthis"));
 setproperty("unimatrix","cachetimeout",300);
@@ -39,8 +39,5 @@ if (callmethod("unimatrix","iscached",$id) == FALSE)
     }
 //Here we go
 echo callmethod("unimatrix","render",$id,$template);
-echo "<pre>";
-print_r($CLASSES);
-
 //callmethod("cache","clear");
 </script>

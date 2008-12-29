@@ -45,6 +45,9 @@ class cache
 
     var $_filebuffer = array();
 
+    //Alle exportierten Funktionen
+    var $export = array("clear"=>"clears cache");
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
     function cache()
@@ -74,9 +77,6 @@ class cache
         $result[CLASS_INDEX_AUTOLOAD]  = TRUE;         //Soll die Klasse beim Systemstart geladen werden ?
         $result[CLASS_INDEX_COMPRESSED]= FALSE;        //Soll die Datenbank komprimiert werden (gz)
         $result[CLASS_INDEX_RUNLEVEL]  = 2;            //In welchen Runlevel soll die Klasse geladen werden
-
-        $result[CLASS_INDEX_RPC_EXPORT]= array("clear");   //Welche Methoden der Klasse können per RPC aufgerufen werden
-
         return($result);
         }
 

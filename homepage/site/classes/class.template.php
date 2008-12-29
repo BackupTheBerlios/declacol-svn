@@ -22,6 +22,8 @@ class templateclass
     //Private
     var $_registry = FALSE;
 
+    //für rpc exportierte funktionen
+    var $export      = array();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
@@ -59,8 +61,6 @@ class templateclass
         $result[CLASS_INDEX_COMPRESSED]= TRUE;              //Soll die Datenbank komprimiert werden (gz)
 
         $result[CLASS_INDEX_RUNLEVEL]  = 10;                //In welchen Runlevel soll die Klasse geladen werden
-
-        $result[CLASS_INDEX_RPC_EXPORT]= array();           //Welche Methoden der Klasse können per RPC aufgerufen werden
 
         return($result);
         }

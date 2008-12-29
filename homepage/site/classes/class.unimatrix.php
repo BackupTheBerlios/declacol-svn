@@ -1,4 +1,5 @@
 <script language="php">
+
 /*
  _|    _|            _|                              _|                _|            
  _|    _|  _|_|_|        _|_|_|  _|_|      _|_|_|  _|_|_|_|  _|  _|_|      _|    _|  
@@ -104,6 +105,9 @@ class unimatrix
     var $_system  = array();
     var $_burned  = FALSE;
 
+    //für rpc exportierte funktionen
+    var $export      = array();
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
     function unimatrix()
@@ -135,7 +139,6 @@ class unimatrix
         $result[CLASS_INDEX_AUTOLOAD]  = TRUE;             //Soll die Klasse beim Systemstart geladen werden ?
         $result[CLASS_INDEX_COMPRESSED]= FALSE;            //Soll die Datenbank komprimiert werden (gz)
         $result[CLASS_INDEX_RUNLEVEL]  = 11;               //In welchen Runlevel soll die Klasse geladen werden
-        $result[CLASS_INDEX_RPC_EXPORT]= array();          //Welche Methoden der Klasse können per RPC aufgerufen werden
 
         return($result);
         }

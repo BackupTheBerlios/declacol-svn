@@ -168,6 +168,12 @@ class classload
 
         //Objekt global veröffentlichen
         $CLASSES[$classname]=$object;
+        
+        //Export sicher setzen
+        if (isset($CLASSES[$classname]->export)==FALSE)
+            {
+            $CLASSES[$classname]->export = array();
+            }
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

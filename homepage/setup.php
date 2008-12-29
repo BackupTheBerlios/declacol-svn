@@ -227,9 +227,6 @@ function createuser()
   $user->status=USER_ADMIN;
   callmethod("user","save",$user);
 
-echo "<pre>";
-print_r($CLASSES);
-
   $loader->destroy();
   }
 

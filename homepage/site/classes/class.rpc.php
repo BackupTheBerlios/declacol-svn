@@ -195,7 +195,7 @@ class rpc
                     {
                     if ( methodexists($class,$func) == TRUE )
                         {
-                        $temp = callmethod($class,$func,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9,$p10);
+                        $temp = callrpcmethod($class,$func,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9,$p10);
 
                         $data["rpc"]["result"]=$this->encodevalue(gettype($temp),$temp);
                         $this->rpcerror($data,RPC_ERROR_NONE);

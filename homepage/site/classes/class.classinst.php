@@ -174,9 +174,6 @@ class classinst
                     $this->_registry->write($classkey,CLASS_INDEX_CLASSNAME,basename($classname));
                     $this->_registry->write($classkey,CLASS_INDEX_CLASSFILE,basename($classfile));
                     $this->_registry->write($classkey,CLASS_INDEX_INSTALLDATE,time());
-
-                    //Alle Methoden, die die Klasse exportiert
-                    $this->_registry->write("/".CLASS_INDEX_RPC_EXPORT,$classid,serialize($result[CLASS_INDEX_RPC_EXPORT]));
                     }
                 }
             //Abspeichern

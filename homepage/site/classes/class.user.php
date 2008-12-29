@@ -61,6 +61,9 @@ class user
     var $_states   = array();
     var $_registry = FALSE;
 
+    //für rpc exportierte funktionen
+    var $export      = array("read" =>"read userdata");
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
     function user(&$registry)
@@ -100,8 +103,7 @@ class user
         $result[CLASS_INDEX_AUTOLOAD]  = TRUE;              //Soll die Klasse beim Systemstart geladen werden ?
         $result[CLASS_INDEX_COMPRESSED]= TRUE;              //Soll die Datenbank komprimiert werden (gzip)
         $result[CLASS_INDEX_RUNLEVEL]  = 5;                 //In welchen Runlevel soll die Klasse geladen werden
-        $result[CLASS_INDEX_RPC_EXPORT]= array("add",   //Welche Methoden der Klasse können per RPC aufgerufen werden
-                                               "save");
+
         return($result);
         }
 
@@ -296,7 +298,7 @@ class user
         }
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Den Pfad zu den User bauen
+    //Den Pfad zum User bauen
     function createpath($id)
         {
         return("user/".$id."/");

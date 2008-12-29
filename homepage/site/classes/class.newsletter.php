@@ -55,6 +55,11 @@ class newsletter
     {
     var $_registry = FALSE;
 
+    //für rpc exportierte funktionen
+    var $export      = array("add"=>"adds newsletter and feed",
+                             "addfeed"=>"adds feed",
+                             "addmail"=>"adds newsletter");
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
     function newsletter(&$registry)
@@ -92,9 +97,6 @@ class newsletter
 
         $result[CLASS_INDEX_RUNLEVEL]  = 10;            //In welchen Runlevel soll die Klasse geladen werden
 
-        $result[CLASS_INDEX_RPC_EXPORT]= array("add",   //Welche Methoden der Klasse können per RPC aufgerufen werden
-                                               "addfeed",
-                                               "addmail");
         return($result);
         }
 

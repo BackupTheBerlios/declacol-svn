@@ -37,7 +37,4 @@ define ("CLASS_INDEX_READONLY"      , "readonly");
 define ("CLASS_INDEX_COMPRESSED"    , "compressed");
 
 define ("CLASS_INDEX_RUNLEVEL"      , "runlevel");
-
-define ("CLASS_INDEX_RPC_EXPORT"    , "exports");
-
 </script>

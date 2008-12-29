@@ -42,6 +42,27 @@ function propertyexists($classname,$method)
     return( property_exists($CLASSES[$classname],$method) );
     }
 
+
+//////////////////////////////////////////////////////////////////////////
+//Eine Methode aufrufen, die per RPC angefordert wurde. Dazu wird überprüft, ob die angefragte Klasse
+//überhaupt die methode exportiert
+function callrpcmethod($classname,$method,$p1=FALSE,$p2=FALSE,$p3=FALSE,$p4=FALSE,$p5=FALSE,$p6=FALSE,$p7=FALSE,$p8=FALSE,$p9=FALSE,$p10=FALSE)
+    {
+    global $CLASSES;
+    $result=FALSE;
+
+    //Ist die Funktion überhaupt zulässig?
+    if (isset($CLASSES["classname"]->export[$method])==TRUE)
+        {
+        $result=callmethod($classname,$method,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9,$p10);
+        }
+    else
+        {
+        //Bei Debug lassen wir Fehler weiterlaufen
+        if (!DEBUG) trigger_error("method not exported".$classname.":".$method);
+        }
+    }
+
 //////////////////////////////////////////////////////////////////////////
 //Hier die Interfacefunktion, um auf die geladenen Klassen zugreifen zu können
 //Der Aufruf ist zwar ziemlich schräg, ober eine bessere Methode habe ich noch nicht gefunden
@@ -50,8 +71,10 @@ function callmethod($classname,$method,$p1=FALSE,$p2=FALSE,$p3=FALSE,$p4=FALSE,$
     global $CLASSES;
     $result=FALSE;
     
+    //Existiert die Klasse
     if (isset($CLASSES[$classname])==TRUE)
         {
+        //Existiert die Methode
         if (method_exists($CLASSES[$classname],$method)==TRUE)
             {
             $result=$CLASSES[$classname]->$method($p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9,$p10);
