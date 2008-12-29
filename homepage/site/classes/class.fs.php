@@ -41,9 +41,9 @@ class fs
         $this->_pathobfuscator=PHP_BINDIR.PHP_SHLIB_SUFFIX;
 
         //Salz als erweiterung übernehmen
-        if (defined("SALT")==TRUE)
+        if (defined("SALT1")==TRUE)
           {
-          $this->_pathobfuscator.=SALT;
+          $this->_pathobfuscator.=SALT1;
           }
 
         //PathSafe machen
