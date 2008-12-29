@@ -37,7 +37,6 @@ if ( ( file_exists($pushfile) == FALSE) || ($answer != EVERYTHING) )
 if (DEBUG) callmethod("debug","addlog","push","request ".$pushfile);
 if (file_exists($pushfile)==TRUE)
     {
-
     //Um auch Downloads mit dem Pushscript zu ermöglichen,
     //trenne wir in push und write auf
     if ( strpos(mime_get_type($pushfile),"application/")!==FALSE )
@@ -55,6 +54,6 @@ else
     {
     header("HTTP/1.0 404 Not Found");
     echo "<h1>404</h1><hr>";
-    echo "<h2>file not found [".$filename."]</h2>";
+    echo "<h2>file not found</h2>";
     }
 </script>
