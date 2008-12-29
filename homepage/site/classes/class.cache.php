@@ -43,16 +43,19 @@ class cache
     {
     var $cachepath  = PATH_CACHE;
 
-    var $_filebuffer = array();
+    var $_filebuffer  = array();
+    var $_lastcleanup = 0;
 
     //Alle exportierten Funktionen
-    var $export = array("clear"=>"clears cache");
+    var $export = array("clear"=>"clears cache",
+                        "updatecachebuffer"=>"removes old cacheentries");
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
     function cache()
         {
         //Immer den ID-Buffer initialisieren
+        $this->_lastcleanup=0;
         $this->updatecachebuffer();
         }
 
@@ -133,7 +136,7 @@ class cache
     //Daten holen
     function load($id)
         {
-        //Immer MD5 um böse Buben draußen zu halten
+        //Immer hashen um böse Buben draußen zu halten
         $id=callmethod("crypt","hash",$id);
         
         //Ist die Datei gepuffert ?
@@ -168,40 +171,51 @@ class cache
     //Alle verfügbaren Cachefiles lesen
     function updatecachebuffer()
         {
-        //Alte Daten löschen
-        $this->_filebuffer = array();
-
-        //Bestehende Dateien lesen
-        $buffer=scandir($this->cachepath);
-
-        //Und jede Datei indizieren
-        foreach ($buffer as $file)
+        //Nur alle fünf Sekunden den GarbageCollector ausführen.
+        if ($this->_lastcleanup < CURRENT_TIME)
             {
-            //Kein versteckten Dateien anfassen
-            if ($file[0]!=".")
-                {
-                $data=explode(CACHE_FILE_LIMITER,$file);
+            $this->_lastcleanup = CURRENT_TIME + 5;
             
-                //Valide Daten ablegen
-                if (end($data) > time() )
+            //Alte Daten löschen
+            $this->_filebuffer = array();
+
+            //Bestehende Dateien lesen
+            $buffer=scandir($this->cachepath);
+
+            //Und jede Datei indizieren
+            foreach ($buffer as $file)
+                {
+                //Kein versteckten Dateien anfassen
+                if ($file[0]!=".")
                     {
-                    $this->_filebuffer[reset($data)] = $file;
-                    }
-                else
-                    {
-                    //Abgelaufene Dateien entfernen
-                    if (DEBUG) callmethod("debug","addlog","cache","timeout ".$file);
-                    unlink($this->cachepath.$file);
+                    $data=explode(CACHE_FILE_LIMITER,$file);
+            
+                    //Valide Daten ablegen
+                    if ( end($data) > CURRENT_TIME )
+                        {
+                        $this->_filebuffer[reset($data)] = $file;
+                        }
+                    else
+                        {
+                        //Abgelaufene Dateien entfernen
+                        //Hiermit werden auch alte oder irrtümliche abgelegte Dateien gelöscht.
+                        //sehr praktische Angelegenheit
+                        if (DEBUG) callmethod("debug","addlog","cache","timeout ".$file);
+                        unlink($this->cachepath.$file);
+                        }
                     }
                 }
             }
         }
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Den Dateinamen für eine Bufferdatei erzeugen
+    //Den Dateinamen für eine Bufferdatei erzeugen hinter dem Treenzeichen wird der timestamp,
+    //ab wann die Datei veraltet ist angehängt. Als workaround um nicht auf filectime zurückzugreifen
+    //ist das die einfachste Möglichkeit. filectime ist unter manchen systemen die zeit, wann die datei zum letzten
+    //mal verändert wurde
     function createfilename($id,$runtime)
         {
-        return( (callmethod("crypt","hash",$id).CACHE_FILE_LIMITER.(time() + $runtime ) ) );
+        return( (callmethod("crypt","hash",$id).CACHE_FILE_LIMITER.( time() + $runtime ) ) );
         }
     }
 </script>
