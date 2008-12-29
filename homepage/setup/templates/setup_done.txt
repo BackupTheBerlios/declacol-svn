@@ -1,4 +1,0 @@
-<fieldset>
- <h2>fertig</h>
- <a href="./">Seite oeffnen</a>
-</fieldset>
