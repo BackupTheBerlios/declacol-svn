@@ -47,7 +47,7 @@ class fs
           }
 
         //PathSafe machen
-        $this->_pathobfuscator=abs(CRC32($this->_pathobfuscator));
+        $this->_pathobfuscator="#-".abs(CRC32($this->_pathobfuscator))."-#";
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,9 +106,8 @@ class fs
       else
         {
         //Erweiterung anhängen
-        $result.=$this->_pathobfuscator="";
+        $result.=$this->_pathobfuscator;
         }
-
       return($result);
       }
 
