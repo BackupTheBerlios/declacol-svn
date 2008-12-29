@@ -29,7 +29,7 @@ class debug
     var $active      = FALSE;
 
     //für rpc exportierte funktionen
-    var $export      = array();
+    var $export      = array("addlog"=>"add a log entry");
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
     function debug()
@@ -164,17 +164,18 @@ class debug
         //Abspeichern
         callmethod("debug","addlog","system",$error);
 
-        //Wir killen bei jedem Fehler oder Problem
+        //Handbremse ziehen, wenn ein Fehler aufgetreten ist
         if ($errno != 0)
             {
             callmethod("debug","printlog");
-            //Handbremse ziehen, wenn ein Fehler aufgetreten ist
             if ($halt==TRUE)
                 {
-                //Log als XML schreiben
                 callmethod("debug","addlog","system","halted");
+
+                //Log als XML schreiben
                 $log=callmethod("debug","getlog");
                 file_put_contents(PATH_TEMP."debug_".CURRENT_TIME.".log",arraytoxml( $log ) );
+
                 die("system halted");
                 }
             }
@@ -211,6 +212,7 @@ class debug
         {
         return($this->log);
         }
+        
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Log löschen
     function clearlog()
