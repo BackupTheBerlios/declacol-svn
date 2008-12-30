@@ -12,8 +12,13 @@ if (DEBUG) callmethod("debug","addlog","page","call index");
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Hauptseite
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//"Wir-Sind-Da-Cookie" setzen
-callmethod("request","setcookie","answer",EVERYTHING);
+//Session starten
+callmethod("session","start",callmethod("request","getcookie","session",ID_NONE));
+callmethod("session","start",callmethod("crypt","id"));
+
+//"Wir-Sind-Da-Cookies" setzen
+callmethod("request","setcookie","answer" ,EVERYTHING);
+callmethod("request","setcookie","session",getproperty("session","id",ID_NONE));
 
 //ID aus allen Requestparametern ($_POST und $_GET) erzeugen um eine CacheID zu bekommen
 $id=callmethod("request","getid");
@@ -21,15 +26,16 @@ $id=callmethod("request","getid");
 //Angefragte Seite ziehen
 $pagefile =strtolower(callmethod("request","getrequest","page","news",FILTER_ALPHANUM));
 $template ="main.txt";
-        
+       
 //Die Cacheengine einhängen
 setproperty("unimatrix","cacheengine" ,callmethod("cache","getthis"));
 setproperty("unimatrix","cachetimeout",300);
 
 //Seite nur erzeugen, wenn sie nicht gepuffert ist
+setproperty("unimatrix","cacheengine",FALSE);
 if (callmethod("unimatrix","iscached",$id) == FALSE)
     {
-    callmethod("unimatrix","assign","pagetitle",$pagefile);
+    callmethod("unimatrix","assign","pagetitle",getproperty("session","id",ID_NONE));
     callmethod("unimatrix","assign","sitename","Guru-Meditation");
     callmethod("unimatrix","assign","pagefile",$pagefile.".txt");
     callmethod("unimatrix","assign","pagelink",callmethod("request","getlink"));

@@ -19,6 +19,7 @@ require_once("conf.classes.php");
 define ("CRYPT_PROVIDER_MD5"    ,1);
 define ("CRYPT_PROVIDER_SHA1"   ,2);
 define ("CRYPT_PROVIDER_CUSTOM" ,3);
+define ("CRYPT_HASH_PREFIX"     ,"%GUID%");
 define ("CRYPT_MAX_RAND",mt_getrandmax());
 
 //Eigentliche Klasse
@@ -114,6 +115,23 @@ class crypt
         return($result);
         }
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen Hash so erzeugen, das er nicht zweimal gehasht wird.
+    //Prefix ist eine Konstante die den Hash identifiziert z.B. %USERID%
+    function singlehash($input,$prefix=CRYPT_HASH_PREFIX)
+        {
+        if (strpos($input,$prefix)===0)
+            {
+            $result=$input;
+            }
+        else
+            {
+            $result=$prefix.$this->hash($input);
+            }
+        return ($result);
+        }
+       
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Eine ID erzeugen
     function id()
@@ -127,7 +145,9 @@ class crypt
         return($result);
         }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
     //"Zufallszahl erzeugen"
     function _id()
         {

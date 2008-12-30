@@ -84,6 +84,7 @@ class request
         //Alle zugelassenen Daten eintragen
         $registry->write("/","allowedrequests",array( "cmd", "cmdid", "folder", "details", "admin", "name", "selected","id","page","action",
                                                       "data","data0","data1","data2","data3","data4","data5","data6","data7","data8","data9",
+                                                      "sid"
                                                        ));
         }
 

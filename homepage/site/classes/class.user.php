@@ -128,38 +128,45 @@ class user
       }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Einen User lesen (gibt ein Usreobjekt zurück)
-    function read($username,$password)
+    //Einen User lesen (gibt ein User zurück)
+    function readbyid($id)
         {
-        $user=FALSE;
-        //Existiert der Benutzer ?
-        $id=$this->createid($username);
+        $user=$this->createuserobject();
         if ($this->exists($id)==TRUE)
             {
             $path=$this->createpath($id);
 
-            //Stimmt das Kennwort ?
-            $password=$this->createpass($password);
-            $pass=$this->_registry->read($path,"password",ID_NONE);
-            if ( $pass == $password )
-                {
-                //Userobjekt bauen
-                $user=$this->createuserobject();
-                $user->id       = $id;
-                $user->realname = $this->_registry->read($path,"realname","");
-                $user->username = $this->_registry->read($path,"username","");
-                $user->password = $this->_registry->read($path,"password","");
-                $user->email    = $this->_registry->read($path,"email","");
-                $user->status   = $this->_registry->read($path,"status",USER_GUEST);
-                $user->groups   = $this->_registry->enum($path."groups");
-                $user->data     = $this->_registry->read($path,"data",array());
-                $user->active   = TRUE;
+            //Userobjekt bauen
+            $user->id       = $id;
+            $user->realname = $this->_registry->read($path,"realname","");
+            $user->username = $this->_registry->read($path,"username","");
+            $user->password = $this->_registry->read($path,"password","");
+            $user->email    = $this->_registry->read($path,"email","");
+            $user->status   = $this->_registry->read($path,"status",USER_GUEST);
+            $user->groups   = $this->_registry->enum($path."groups");
+            $user->data     = $this->_registry->read($path,"data",array());
+            $user->active   = TRUE;
                 
-                //Die ID merken wir uns um Manipulation zu vermeiden
-                $this->_idbuffer[$user->id]=$user->id;
-                }
+            //Die ID merken wir uns um Manipulation zu vermeiden
+            $this->_idbuffer[$user->id]=$user->id;
             }
         return($user);
+        }
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen User lesen (gibt ein Userobjekt zurück)
+    function read($username,$password)
+        {
+        $user=$this->readbyid ( $this->createid($username) );
+        
+        //Stimmt das Kennwort?
+        $password=$this->createpass($password);
+        if ($user->password != $password)
+            {
+            //Nein => Standarduserobject liefern
+            unset($user);
+            $user=$this->createuserobject();
+            }
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -271,15 +278,7 @@ class user
     //Ist es schon eine ID wird diese direkt zurückgegeben
     function createid($input)
         {
-        if (strpos($input,USER_PREFIX)===0)
-            {
-            $result=$input;
-            }
-        else
-            {
-            $result=USER_PREFIX.callmethod("crypt","hash",($input));
-            }
-        return ($result);
+        return(callmethod("crypt","singlehash",$input,USER_PREFIX));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -292,7 +291,7 @@ class user
             }
         else
             {
-            $result=PASS_PREFIX.callmethod("crypt","passhash",($input));
+            $result=PASS_PREFIX.callmethod("crypt","passhash",$input);
             }
         return ($result);
         }

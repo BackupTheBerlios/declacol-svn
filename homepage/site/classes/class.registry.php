@@ -204,6 +204,8 @@ class registry
         
         $result=array();
 
+//        print_r($pointer);
+
         //Alles durchgehen
         foreach ($pointer as $key => $value)
             {

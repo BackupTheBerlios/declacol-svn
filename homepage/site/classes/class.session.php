@@ -13,13 +13,20 @@
 /// Sessionverwaltung
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+if (defined("SESSION_TIMEOUT")==FALSE)
+    {
+    define ("SESSION_TIMEOUT" , 60 * 15);
+    }
+
 
 //Eigentliche Klasse
 class session
     {
     //Public
+    var $id       = ID_NONE;
     var $user     = FALSE;
-    var $data     = FALSE;
+    var $data     = array();
+    var $start    = CURRENT_TIME;
     
     //Private
     var $_registry = FALSE;
@@ -31,7 +38,7 @@ class session
     //Konstruktor
     function session(&$registry)
         {
-        //Unsere Registrieung intern ablegen
+        //Unsere Registrierung intern ablegen
         $this->_registry=$registry;
         }
 
@@ -39,8 +46,10 @@ class session
     //Destruktor
     function destroy()
         {
+        $this->stop();
         if ( $this->_registry !== FALSE )
             {
+            $this->clean();
             $this->_registry->flush();
             unset($this->_registry);
             }
@@ -79,11 +88,79 @@ class session
       }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Eine Session starten
-    function start($id)
+    //Eine Session starten und die dazugehörige Datei erzeugen
+    function start($id=ID_NONE)
         {
-        //Gibt es die Session schon ?
-        echo $id;
+        //Zur Sicherheit immer hashen
+        $id=$this->createid($id);
+        $path="sessions/".$id;
+        
+        //Wenn es die ID noch nicht gibt, legen wir eine neue an
+        if ($this->_registry->exists($path,"userid")==FALSE)
+            {
+            $this->_registry->write($path,"userid",callmethod("crypt","id"));
+            $this->_registry->write($path,"data"  ,array());
+            $this->_registry->write($path,"start" ,CURRENT_TIME);
+            }
+            
+        //User lesen
+        //ReadByID gibt im Fehlerfall ein Standarduserobjekt ohne Rechte zurück
+        $userid=$this->_registry->read($path,"userid",ID_NONE);
+        $user=callmethod("user","readbyid",$userid);
+        //Bei einem Anonymous eine UserID erzwingen
+        $user->id=$userid;
+
+        //Userdaten aus der Registry lesen
+        $this->data =$this->_registry->read($path,"data" ,array());
+        $this->start=$this->_registry->read($path,"start",CURRENT_TIME);
+        
+        //Timeout um 15 Minuten verlängern
+        $this->_registry->write($path,"timeout",CURRENT_TIME + SESSION_TIMEOUT );
+        
+        //Daten freigeben
+        $this->user=$user;        
+        $this->id=$id;
+
+        //und fertig
+        return($id);
         }
+        
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Session beenden
+    function stop()
+        {
+        $this->user=FALSE;
+        $this->data=array();
+        $this->id=ID_NONE;
+        }
+        
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Alte Sessions aus der Datenbank werfen
+    function clean()
+        {
+        $sessions=$this->_registry->enum("sessions");
+
+        foreach ($sessions as $session=>$dummy)
+            {
+            $time=$this->_registry->read("sessions/".$session,"timeout",0);
+            if ($time < CURRENT_TIME)
+                {
+                $this->_registry->del("sessions/",$session);
+                }
+            }
+        }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Die ID eines Benutzers erzeugen
+    //Ist es schon eine ID wird diese direkt zurückgegeben
+    function createid($input)
+        {
+        if ($input===ID_NONE)
+            {
+            $input=callmethod("crypt","id");
+            }
+            
+        return ( callmethod("crypt","singlehash",$input,"@") );
+        }
+        
     }
 </script>
