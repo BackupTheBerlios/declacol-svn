@@ -101,7 +101,7 @@ class rssfeed
         {
         //Kopf des Kanals
         $channelpath=$this->_basedir.$channelid;
-        $channel=unserialize($this->_registry->read($channelpath,"data",""));
+        $channel=$this->_registry->read($channelpath,"data","");
 
         $rss.=" <channel>\n";
         $rss.=arraytoxml($channel,"  ");
@@ -112,7 +112,7 @@ class rssfeed
         krsort($items);
         foreach($items as $itemid => $item)
             {
-            $item=unserialize($this->_registry->read($itempath,$itemid,""));
+            $item=$this->_registry->read($itempath,$itemid,"");
             
             $rss.="  <item>\n";
             $rss.=arraytoxml($item,"   ");
@@ -136,11 +136,11 @@ class rssfeed
             {
             $this->_registry->write($this->_basedir.$channelid,
                                     "data",
-                                    serialize(array("title"=>$title,
-                                                    "link"=>$link,
-                                                    "description"=>$description,
-                                                    "pubDate"=>$this->_feeddate(CURRENT_TIME)
-                                                    )));
+                                    array("title"=>$title,
+                                          "link"=>$link,
+                                          "description"=>$description,
+                                          "pubDate"=>$this->_feeddate(CURRENT_TIME)
+                                                    ));
             }
         }
         
@@ -178,7 +178,7 @@ class rssfeed
         $item["guid"]       = $sec.$usec;
 
         //Abspeichern
-        $this->_registry->write($this->_basedir.$channelid."/items/",$item["guid"],serialize($item) );
+        $this->_registry->write($this->_basedir.$channelid."/items/",$item["guid"],$item );
         $result=TRUE;
         }
       else
@@ -248,7 +248,7 @@ class rssfeed
       while (count($items) > $this->maxcount)
         {
         //ID rausholen
-        $item = unserialize(array_shift($items));
+        $item = array_shift($items);
         $item = $item["guid"];
 
         //Eintrag aus der Registry nehmen

@@ -152,7 +152,7 @@ class user
                 $user->email    = $this->_registry->read($path,"email","");
                 $user->status   = $this->_registry->read($path,"status",USER_GUEST);
                 $user->groups   = $this->_registry->enum($path."groups");
-                $user->data     = unserialize( $this->_registry->read($path,"data",serialize( array() ) ) );
+                $user->data     = $this->_registry->read($path,"data",array());
                 $user->active   = TRUE;
                 
                 //Die ID merken wir uns um Manipulation zu vermeiden
@@ -219,7 +219,7 @@ class user
                 $this->_registry->write($path,"username",$user->username);
                 $this->_registry->write($path,"password",$this->createpass($user->password));
                 $this->_registry->write($path,"email"   ,$user->email);
-                $this->_registry->write($path,"data"    ,serialize($user->email));
+                $this->_registry->write($path,"data"    ,array());
                 $result=TRUE;
                 }
             }

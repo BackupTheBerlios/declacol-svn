@@ -20,7 +20,7 @@ class request
     {
     var $requests   = array();
     var $filebuffer = array();
-    var $cookies    = FALSE;
+    var $cookies    = array();
     
     //Alle zugelassenen Variablennamen
     var $allowed_requests = array();
@@ -38,7 +38,7 @@ class request
 
         //Zugelassene Requests aktivieren und einlesen
         $this->_registry=$registry;
-        $this->allowed_requests=unserialize($this->_registry->read("","allowedrequests",""));
+        $this->allowed_requests=$this->_registry->read("","allowedrequests",array());
         $this->initrequests();
         $this->initcookies();
 
@@ -82,9 +82,9 @@ class request
     function preset(&$registry)
         {
         //Alle zugelassenen Daten eintragen
-        $registry->write("","allowedrequests",serialize(array( "cmd", "cmdid", "folder", "details", "admin", "name", "selected","id","page","action",
+        $registry->write("","allowedrequests",array( "cmd", "cmdid", "folder", "details", "admin", "name", "selected","id","page","action",
                                                                "data","data0","data1","data2","data3","data4","data5","data6","data7","data8","data9",
-                                                       )));
+                                                       ));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

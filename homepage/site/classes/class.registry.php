@@ -400,14 +400,14 @@ class registry
     //Werte encodieren
     function _encodevalue($value)
         {
-        return( base64_encode($value) );
+        return( base64_encode( serialize( $value ) ) );
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Werte decodieren
     function _decodevalue($value)
         {
-        return( base64_decode($value) );
+        return( unserialize( base64_decode( $value ) ) );
         }
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////

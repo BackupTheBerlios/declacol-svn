@@ -92,7 +92,7 @@ class sendmail
         
         //Mail zusammenbauen
         $id=md5($subject.$body);
-        $mail=serialize(array("sender"=>$mailfrom,"subject"=>$subject,"body"=>$body,"delay"=>(time() + $delay)));
+        $mail=array("sender"=>$mailfrom,"subject"=>$subject,"body"=>$body,"delay"=>(time() + $delay));
         
         //Und ablegen
         foreach ($mailto as $address)
@@ -113,8 +113,6 @@ class sendmail
             $mails=$this->_registry->enum("mails/".$address."/");
             foreach ($mails as $mail)
                 {
-                $mail=unserialize($mail);
-
                 //Abschicken, wenn es soweit ist
                 if ($mail["delay"] < time())
                     {
