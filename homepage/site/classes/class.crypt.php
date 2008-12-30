@@ -44,7 +44,7 @@ class crypt
             }
         else
             {
-            if (DEBUG) callmethod("debug","addlog","crypt","WARNING no salt defined fallback to constsalt");
+            if (DEBUG) callmethod("debug","addlog","crypt","WARNING no salt defined! fallback to constsalt");
             }
         }
 
@@ -148,14 +148,14 @@ class crypt
     //Salted MD5
     function _md5($input)
         {
-        return (md5($input.$this->salt));
+        return (md5($input.$this->salt.$input));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Salted SHA1
     function _sha1($input)
         {
-        return(sha1($input.$this->salt));
+        return(sha1($input.$this->salt.$input));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +163,7 @@ class crypt
     function _custom($input)
         {
         //CRC32 draus machen
-        $input=abs(crc32($input.$input.$this->salt));
+        $input=abs(crc32($input.$input.$this->salt.$input));
 
         //Und nun bilden wir daraus einen simplen String
         $result="";
