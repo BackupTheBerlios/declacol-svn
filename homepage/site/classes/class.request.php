@@ -38,7 +38,7 @@ class request
 
         //Zugelassene Requests aktivieren und einlesen
         $this->_registry=$registry;
-        $this->allowedrequests=$this->_registry->read("","allowedrequests",array());
+        $this->allowedrequests=$this->_registry->read("/","allowedrequests",array());
         $this->initrequests();
         $this->initcookies();
 
@@ -94,7 +94,6 @@ class request
       $self=&$this;
       return($self);
       }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Einen Requestidentifier zufügen, der ausgelesen werden kann. Damit können andere Module einen
