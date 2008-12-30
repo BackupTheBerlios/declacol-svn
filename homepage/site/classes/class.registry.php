@@ -26,7 +26,7 @@
 ///$wert=$reg->read("basispfad/unterverzeichnis/unterverzeichnis/","wertenamen2","defaultwert");
 ///
 /////Alle Wert in einem Verzeichnis ausgeben
-/////Arrays bezeichnen Unterveichnisse
+/////Arrays bezeichnen Unterverzeichnisse
 ///$values=$reg->enum("basispfad/unterverzeichnis/unterverzeichnis/");
 ///
 ///$reg->flush();    // Änderungen in die Datei Abspeichern
