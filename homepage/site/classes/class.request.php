@@ -23,7 +23,7 @@ class request
     var $cookies    = array();
     
     //Alle zugelassenen Variablennamen
-    var $allowed_requests = array();
+    var $allowedrequests = array();
     var $_registry = FALSE;
 
     //für rpc exportierte funktionen
@@ -38,7 +38,7 @@ class request
 
         //Zugelassene Requests aktivieren und einlesen
         $this->_registry=$registry;
-        $this->allowed_requests=$this->_registry->read("","allowedrequests",array());
+        $this->allowedrequests=$this->_registry->read("","allowedrequests",array());
         $this->initrequests();
         $this->initcookies();
 
@@ -82,8 +82,8 @@ class request
     function preset(&$registry)
         {
         //Alle zugelassenen Daten eintragen
-        $registry->write("","allowedrequests",array( "cmd", "cmdid", "folder", "details", "admin", "name", "selected","id","page","action",
-                                                               "data","data0","data1","data2","data3","data4","data5","data6","data7","data8","data9",
+        $registry->write("/","allowedrequests",array( "cmd", "cmdid", "folder", "details", "admin", "name", "selected","id","page","action",
+                                                      "data","data0","data1","data2","data3","data4","data5","data6","data7","data8","data9",
                                                        ));
         }
 
@@ -95,13 +95,26 @@ class request
       return($self);
       }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Einen Requestidentifier zufügen, der ausgelesen werden kann. Damit können andere Module einen
+    //eigenen Transportweg für Daten registrieren
+    function addrequestidentifier($identifier)
+        {
+        $this->allowedrequests[]=$identifier;
+            
+        $this->_registry->write("/","allowedrequests",$this->allowedrequests);
+        
+        return(in_array($identifier,$this->allowedrequests));
+        }
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Alle Requests lesen und nur erlaubte zulassen
     function initrequests()
         {
         foreach ($_REQUEST as $name => $value)
             {
-            if (in_array($name,$this->allowed_requests)==TRUE)
+            if (in_array($name,$this->allowedrequests)==TRUE)
                 {
                 $this->requests[$name]=$value;
                 }

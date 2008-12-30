@@ -68,10 +68,10 @@ class registry
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Einen Zeiger auf This liefern
     function getthis()
-      {
-      $self=&$this;
-      return($self);
-      }
+        {
+        $self=&$this;
+        return($self);
+        }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Alles freigeben
@@ -98,7 +98,6 @@ class registry
             {
             $this->_file=$filename;
             }
-
         return ($this->_flush());
         }
 
@@ -144,36 +143,28 @@ class registry
     //ist die Erzeugung eine Pfades notwendig
     function write($path,$name,$value)
         {
-        //Arrays speichern wir nicht ab
-        if ( is_array($value) === FALSE )
+        //Pointer auf unseren Reg-Zweig holen
+        $pointer=&$this->_getregpointer($path);
+
+        //Daten nur speichern, wenn sie sich geändert haben
+        $value=$this->_encodevalue($value);
+
+        if ( isset($pointer[$name]) === FALSE )
             {
-            //Pointer auf unseren Reg-Zweig holen
-            $pointer=&$this->_getregpointer($path);
-
-            //Daten nur speichern, wenn sie sich geändert haben
-            $value=$this->_encodevalue($value);
-
-            if ( isset($pointer[$name]) == FALSE )
+            $pointer[$name]=$value;
+            $this->_burn(TRUE);
+            }
+        else
+            {
+            if ( $value !== $pointer[$name] )
                 {
                 $pointer[$name]=$value;
                 $this->_burn(TRUE);
                 }
-            else
-                {
-                if ( $value !== $pointer[$name] )
-                    {
-                    $pointer[$name]=$value;
-                    $this->_burn(TRUE);
-                    }
-                }
-            $result=TRUE;
             }
-        else
-            {
-            $result=FALSE;
-            }
-        
-        return ($result);
+
+        //Funktioniert immer
+        return (TRUE);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +230,8 @@ class registry
     //Einen Pfad in ein Array auflösen
     function &_getregpointer($path)
         {
-        //Den Pfad zerlegen
+        //Den Pfad zerlegen und normieren
+        $path=($path==""?"/":$path);
         $path=str_replace("//","/",$path);
         $patharray=explode("/",$path);
 
@@ -271,20 +263,22 @@ class registry
     //Datenbank laden und in den Speicher ziehen
     function _open($filename)
         {
-        $result=FALSE;
-
         if ( ( file_exists($filename) == TRUE) && (is_readable($filename) == TRUE) )
             {
             $this->_reg=$this->_decode(file_get_contents($filename));
-            
-            //Schreibstatus setzen
-            $this->readonly=!is_writable($filename);
             $this->_burn(FALSE);
-            $result=TRUE;
+            }
+        else
+            {
+            //Datei erzwingen
+            @file_put_contents($filename,"");
             }
 
+        //Schreibstatus setzen
+        $this->readonly=!is_writable($filename);
 
-        return($result);
+        //War OK?
+        return(file_exists($filename));
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -292,7 +286,6 @@ class registry
     function _flush()
         {
         $result=FALSE;
-
 
         //Nur abspeichern, wenn sich etwas geändert hat und wir nicht
         //im ReadOnly-Modus sind
@@ -400,14 +393,14 @@ class registry
     //Werte encodieren
     function _encodevalue($value)
         {
-        return( base64_encode( serialize( $value ) ) );
+        return( serialize( $value ) );
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Werte decodieren
     function _decodevalue($value)
         {
-        return( unserialize( base64_decode( $value ) ) );
+        return( unserialize( $value ) );
         }
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////
