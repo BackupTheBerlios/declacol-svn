@@ -26,6 +26,21 @@ function classexists($classname)
 
 //////////////////////////////////////////////////////////////////////////
 //Prüfen, ob eine Methode existiert
+function rpcmethodexists($classname,$method)
+    {
+    global $CLASSES;
+    $result=FALSE;
+   
+    if ( methodexists($classname,$method)==TRUE)
+        {
+        //Ist die Funktion überhaupt zulässig?
+        $result=isset($CLASSES[$classname]->export[$method]);
+        }
+    return($result);
+    }
+
+//////////////////////////////////////////////////////////////////////////
+//Prüfen, ob eine RPCMethode existiert
 function methodexists($classname,$method)
     {
     global $CLASSES;
@@ -52,7 +67,7 @@ function callrpcmethod($classname,$method,$p1=FALSE,$p2=FALSE,$p3=FALSE,$p4=FALS
     $result=FALSE;
 
     //Ist die Funktion überhaupt zulässig?
-    if (isset($CLASSES["classname"]->export[$method])==TRUE)
+    if (isset($CLASSES[$classname]->export[$method])==TRUE)
         {
         $result=callmethod($classname,$method,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9,$p10);
         }

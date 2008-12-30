@@ -175,7 +175,7 @@ class rpc
             {
             if ($this->rpcaccess($data["rpc"]["accessid"]) >= $this->userstatus)
                 {
-                //Das der Klassenaufruf ein wenig ungelenkt ist,
+                //Da der Klassenaufruf ein wenig ungelenkt ist,
                 //sieht auch der Aufbau der Parameter doof aus
                 $class=$data["rpc"]["call"]["class"];
                 $func =$data["rpc"]["call"]["function"];
@@ -191,23 +191,16 @@ class rpc
                 $p10 = $this->decodevalue(next ( $data["rpc"]["call"]["parameter"] ) );
 
                 //Alle möglichen Probleme abfangen
-                if ( classexists($class) == TRUE )
+                if ( rpcmethodexists($class,$func) == TRUE )
                     {
-                    if ( methodexists($class,$func) == TRUE )
-                        {
-                        $temp = callrpcmethod($class,$func,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9,$p10);
+                    $temp = callrpcmethod($class,$func,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9,$p10);
 
-                        $data["rpc"]["result"]=$this->encodevalue(gettype($temp),$temp);
-                        $this->rpcerror($data,RPC_ERROR_NONE);
-                        }
-                    else
-                        {
-                        $this->rpcerror($data,RPC_ERROR_INVALID_FUNCTION);
-                        }
+                    $data["rpc"]["result"]=$this->encodevalue(gettype($temp),$temp);
+                    $this->rpcerror($data,RPC_ERROR_NONE);
                     }
                 else
                     {
-                    $this->rpcerror($data,RPC_ERROR_INVALID_CLASS);
+                    $this->rpcerror($data,RPC_ERROR_INVALID_FUNCTION);
                     }
                 }
             else
@@ -233,7 +226,6 @@ class rpc
         {
         return (callmethod("user","exists",USER_PREFIX.$id));
         }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Fehler dem Paket zufügen
