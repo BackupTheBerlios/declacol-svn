@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls,ShellAPI;
+  Dialogs, StdCtrls,ShellAPI,unit_password;
 
 type
   TMyOwnDodger = class(TForm)
@@ -31,11 +31,7 @@ var
   sURL   : string;
   sEMail : string;
 begin
-  sEMail:=IntToStr(random(99999)) +
-          'mail'+
-           IntToStr(random(99999999)) +
-           IntToStr(random(99999999));
-  sEMail:=copy(sEMail,1,16);
+  sEMail:=Pass_CreateSyntheticString(14,5);
   edEMail.Text:=sEMail + '@dodgit.com';
 
   if (cbClipboard.Checked) then

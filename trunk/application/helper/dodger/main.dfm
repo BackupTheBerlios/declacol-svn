@@ -2,7 +2,7 @@ object MyOwnDodger: TMyOwnDodger
   Left = 369
   Top = 243
   BorderStyle = bsToolWindow
-  Caption = 'MyOwnDodger'
+  Caption = 'SpamDodger'
   ClientHeight = 86
   ClientWidth = 263
   Color = clBtnFace
