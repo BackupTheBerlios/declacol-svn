@@ -16,18 +16,22 @@ var
   sFilename : longstring;
   sTemp     : longstring;
   u8Mode    : unsigned8;
+  brename   : boolean;
 
 procedure showhelp();
 begin
   writeln('hashcalc 0.1 (c) 2009 Borg@Sven-of-Nine.de');
   writeln('usage :');
-  writeln('  hashcalc filename [mode]');
+  writeln('  hashcalc filename [mode] [options]');
   writeln('mode :');
-  writeln('  crc32 (default)');
-  writeln('  adler32');
-  writeln('  md5');
+  writeln('  --crc32 (default)');
+  writeln('  --adler32');
+  writeln('  --md5');
+  writeln('options :');
+  writeln('  --rename');
   writeln('example');
-  writeln('  hashcalc myfile.bin md5');
+  writeln('  hashcalc myfile.bin --md5');
+  writeln('  hashcalc myfile.bin --md5 --rename');
 end;
 
 function calchash(filename:longstring;Mode : unsigned8):Longstring;
@@ -70,16 +74,32 @@ begin
 
   u8Mode:=cCRC32;
   sTemp:=LowerCase(ParamStr(2));
-  if (sTemp='adler32') then u8Mode:=cADLER32;
-  if (sTemp='md5')     then u8Mode:=cMD5;
+  if (sTemp='--adler32') then u8Mode:=cADLER32;
+  if (sTemp='--md5')     then u8Mode:=cMD5;
+
+  brename:=(ParamStr(2)='--rename') OR (ParamStr(3)='--rename');
+
 
   if (sFilename<>'') then
     begin
       sTemp:=CalcHash(sFilename,u8Mode);
       if (sTemp<>'?') then
         begin
-          writeln(LowerCase(sTemp));
+          write(LowerCase(sTemp));
           ExitCode:=0;
+
+          if (bRename=TRUE) then
+            begin
+              sTemp:=extractfilepath(sFilename)+'\'+sTemp;
+              renamefile(sFilename,sTemp);
+              if (fileexists(sTemp)=FALSE) then
+                begin
+                  writeln('');
+                  writeln('unable to rename file');
+                  ExitCode:=2;
+                end;
+            end;
+
         end
       else
         begin

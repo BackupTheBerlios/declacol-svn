@@ -53,7 +53,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 begin
      mm:=TMonsterMaker.Create();
 
-     m1:=mm.createmonster(Player,nil);
+     m1:=mm.createmonster(Bear,nil);
      m2:=mm.createmonster(Zombie,nil);
 
      mm.free();
