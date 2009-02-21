@@ -5,13 +5,15 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, IdBaseComponent, IdComponent, IdTCPConnection, IdTCPClient,
-  IdTelnet, StdCtrls, ScktComp;
+  IdTelnet, StdCtrls, ScktComp, ExtCtrls;
 
 type
   TForm1 = class(TForm)
     Button1: TButton;
     ClientSocket: TClientSocket;
     Memo1: TMemo;
+    cbAutoswitch: TCheckBox;
+    Timer1: TTimer;
     procedure Button1Click(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure ClientSocketConnect(Sender: TObject;
@@ -20,6 +22,7 @@ type
     procedure SendText(text:string);
     procedure ClientSocketError(Sender: TObject; Socket: TCustomWinSocket;
       ErrorEvent: TErrorEvent; var ErrorCode: Integer);
+    procedure Timer1Timer(Sender: TObject);
   private
     { Private-Deklarationen }
   public
@@ -45,6 +48,7 @@ end;
 
 procedure TForm1.FormActivate(Sender: TObject);
 begin
+  Randomize();
   if (ParamStr(1)<>'') then
     begin
       bDone:=FALSE;
@@ -107,6 +111,22 @@ procedure TForm1.ClientSocketError(Sender: TObject;
   var ErrorCode: Integer);
 begin
   bDone:=TRUE;
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+var
+  u32time : cardinal;
+begin
+  if (cbAutoSwitch.Checked = TRUE) and
+     (bDone = FALSE) then
+    begin
+          bDone:=TRUE;
+          Button1Click(Self);
+          //Zufällig warten
+          u32Time:=Random( 5 * 60 * 1000 ) + (1 * 60 * 1000);
+          Timer1.Interval := u32Time;
+          Memo1.Lines.Add('next switch in '+IntToStr(u32Time div 1000) + 'sec');
+    end;
 end;
 
 end.

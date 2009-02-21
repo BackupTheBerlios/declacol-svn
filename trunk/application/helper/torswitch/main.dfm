@@ -1,9 +1,9 @@
 object Form1: TForm1
-  Left = 621
-  Top = 564
+  Left = 447
+  Top = 247
   BorderStyle = bsToolWindow
-  Caption = 'Form1'
-  ClientHeight = 139
+  Caption = 'TorSwitch'
+  ClientHeight = 168
   ClientWidth = 395
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -20,7 +20,7 @@ object Form1: TForm1
     Top = 8
     Width = 75
     Height = 25
-    Caption = 'Button1'
+    Caption = 'Switch'
     TabOrder = 0
     OnClick = Button1Click
   end
@@ -28,8 +28,16 @@ object Form1: TForm1
     Left = 8
     Top = 40
     Width = 377
-    Height = 89
+    Height = 121
     TabOrder = 1
+  end
+  object cbAutoswitch: TCheckBox
+    Left = 160
+    Top = 8
+    Width = 97
+    Height = 17
+    Caption = 'Autoswitch'
+    TabOrder = 2
   end
   object ClientSocket: TClientSocket
     Active = False
@@ -39,6 +47,11 @@ object Form1: TForm1
     OnRead = ClientSocketRead
     OnError = ClientSocketError
     Left = 96
+    Top = 8
+  end
+  object Timer1: TTimer
+    OnTimer = Timer1Timer
+    Left = 320
     Top = 8
   end
 end
