@@ -131,7 +131,7 @@ class request
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Aus alle aktuellen Requests einen Link bauen        
+    //Aus allen aktuellen Requests einen Link bauen        
     function getlink($baseurl="./")
         {
         $temp=array();
@@ -161,7 +161,7 @@ class request
             //Auf Wunsch Eintrag entfernen
             if ($remove == TRUE)
               {
-              unset($this->requests[$name]);
+              $this->delrequest($name);
               }
             }
         return($result);
