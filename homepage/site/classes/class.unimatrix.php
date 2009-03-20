@@ -181,7 +181,7 @@ class unimatrix
     function iscached($id)
         {
         $result=FALSE;
-        if ($this->cacheengine!=FALSE)
+        if ($this->cacheengine != FALSE)
             {
             $result=$this->cacheengine->iscached($id);
             }

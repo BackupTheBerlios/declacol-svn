@@ -159,7 +159,7 @@ class session
             $input=callmethod("crypt","id");
             }
             
-        return ( callmethod("crypt","singlehash",$input,"@") );
+        return ( callmethod("crypt","singlehash",$input,"%SID%") );
         }
         
     }
