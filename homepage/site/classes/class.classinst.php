@@ -193,7 +193,6 @@ class classinst
         $result[CLASS_INDEX_CLEANUP]   = $this->_checkresult($result,CLASS_INDEX_CLEANUP,FALSE);
         $result[CLASS_INDEX_AUTOLOAD]  = $this->_checkresult($result,CLASS_INDEX_AUTOLOAD,TRUE);
         $result[CLASS_INDEX_COMPRESSED]= $this->_checkresult($result,CLASS_INDEX_COMPRESSED,FALSE);
-        $result[CLASS_INDEX_RPC_EXPORT]= $this->_checkresult($result,CLASS_INDEX_RPC_EXPORT,array());
 
         return($result);
         }
