@@ -21,9 +21,9 @@
 /// $pageid="indexpage"
 /// $cache=new cache();
 /// $cache->cachepath="./cache/";           //Hier werden alle Cachedateien abgelegt
-/// if ( $cache->iscached($page) != TRUE)   //Daten sind noch nicht gepuffert ?
+/// if ( $cache->iscached($pageid) != TRUE) //Daten sind noch nicht gepuffert ?
 ///    {
-///    $output=createpage($pageid);         //Hier würde der Inhalt erzeugen
+///    $output=createpage($pageid);         //Hier würde der Inhalt erzeugt
 ///    $cache->save($pageid,3600,$output);  //in den Pufer speichern
 ///    }
 /// else
