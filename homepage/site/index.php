@@ -21,6 +21,7 @@ callmethod("request","setcookie","answer" ,EVERYTHING);
 callmethod("request","setcookie","session",getproperty("session","id",ID_NONE));
 
 //ID aus allen Requestparametern ($_POST und $_GET) erzeugen um eine CacheID zu bekommen
+//damit können auch Suchabfragen gecached werden
 $id=callmethod("request","getid");
 
 //Angefragte Seite ziehen
@@ -32,7 +33,6 @@ setproperty("unimatrix","cacheengine" ,callmethod("cache","getthis"));
 setproperty("unimatrix","cachetimeout",300);
 
 //Seite nur erzeugen, wenn sie nicht gepuffert ist
-setproperty("unimatrix","cacheengine",FALSE);
 if (callmethod("unimatrix","iscached",$id) == FALSE)
     {
     callmethod("unimatrix","assign","pagetitle",getproperty("session","id",ID_NONE));
