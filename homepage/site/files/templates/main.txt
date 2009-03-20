@@ -2,7 +2,7 @@
 <div style="position:obsolute; top:0px; left:0px; height:100%; width:100%">
 {{include:header.txt}}
 {{include:menu.txt}}
-<div style="width:100%; background-color:green;">
+<div style="width:100%; background-color:silver;">
 {{var:sitename}}>>{{var:pagetitle}}
 <hr/>
 {{varinclude:pagefile}}

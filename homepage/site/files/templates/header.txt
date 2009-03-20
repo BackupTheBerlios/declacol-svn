@@ -1,4 +1,4 @@
-<div style="width:100%; background-color:black; text-align:center; font-weight:bold; color:green;">
+<div style="width:100%; background-color:white; text-align:center; font-weight:bold; color:black;">
 <pre>
  ______   _    _   ______   _    _      _________   ______  _____   _____ _______  ______  _______ _____  ______   ______  
 | | ____ | |  | | | |  | \ | |  | |    | | | | | \ | |     | | \ \   | |    | |   | |  | |   | |    | |  / |  | \ | |  \ \ 
