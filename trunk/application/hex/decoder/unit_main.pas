@@ -27,8 +27,6 @@ type
     { Private-Deklarationen }
     Reader  : TFilestream;
     Decoder : TDecoderXOR;
-
-    function compare(pData1 : Pointer; pData2 : Pointer; u32Size:unsigned32):Boolean;
   public
     { Public-Deklarationen }
   end;
@@ -94,7 +92,7 @@ begin
             repeat
               u32Size:=Reader.Read(aTemp[u32Pointer],1);
               aTemp[u32Pointer]:=Decoder.decode(aTemp[u32Pointer]);
-            until (Self.Compare(@aTemp[u32Pointer],@aSearch[u32Pointer],u32Size)) or (u32Size = 0);
+            until ( aTemp[u32Pointer] = aSearch[u32Pointer] ) or (u32Size = 0);
 
             pbProgress.Position:=integer(Reader.Position);
             Application.ProcessMessages();
@@ -107,7 +105,7 @@ begin
                   inc(u32Pointer);
                   u32Size:=Reader.Read(aTemp[u32Pointer],1);
                   aTemp[u32Pointer]:=Decoder.decode(aTemp[u32Pointer]);
-                  bFound:=Self.Compare(@aTemp[u32Pointer],@aSearch[u32Pointer],u32Size);
+                  bFound:= aTemp[u32Pointer] = aSearch[u32Pointer];
                 until (bFound = FALSE) or
                       (u32Size = 0) or
                       (u32Pointer + 1 >= unsigned32(Length(aSearch)));
@@ -138,29 +136,5 @@ begin
       Reader.Free();
     end;
 end;
-
-function TForm1.compare(pData1 : Pointer; pData2 : Pointer; u32Size:unsigned32):Boolean;
-var
-  pByte1 : ^Byte;
-  pByte2 : ^Byte;
-begin
-
-  //In Bytepointer zwingen
-  pByte1:=pData1;
-  pByte2:=pData2;
-
-  //Und vergleichen
-  result:=TRUE;
-  while (u32Size > 0) AND (result=TRUE) do
-    begin
-      result := (pByte1^ = pByte2^);
-
-      inc(pByte1);
-      inc(pByte2);
-
-      dec(u32Size);
-    end;
-end;
-
 
 end.
