@@ -95,6 +95,14 @@ object Form1: TForm1
       TabOrder = 0
       OnClick = btGoClick
     end
+    object pbProgress: TProgressBar
+      Left = 88
+      Top = 16
+      Width = 270
+      Height = 25
+      Smooth = True
+      TabOrder = 1
+    end
   end
   object mmLog: TMemo
     Left = 8

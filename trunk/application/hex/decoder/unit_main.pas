@@ -20,6 +20,7 @@ type
     rbChainedXOR: TRadioButton;
     odInput: TOpenDialog;
     mmLog: TMemo;
+    pbProgress: TProgressBar;
     procedure btBrowseClick(Sender: TObject);
     procedure btGoClick(Sender: TObject);
   private
@@ -71,6 +72,8 @@ begin
     begin
       Reader:=TFileStream.Create(edSource.Text,fmOpenRead OR fmShareDenyNone	);
 
+      pbProgress.Max:= integer(Reader.Size);
+
       //Straight-Decoder initilisieren
       Decoder:=TDecoderXOR.Create();
       Decoder.init();
@@ -82,6 +85,7 @@ begin
 
         mmLog.Lines.Add('scanning code '+Decoder.code);
         u32Hits:=0;
+        pbProgress.Position:=0;
 
           //Die ganze Datei durchsuchen
           repeat
@@ -91,6 +95,9 @@ begin
               u32Size:=Reader.Read(aTemp[u32Pointer],1);
               aTemp[u32Pointer]:=Decoder.decode(aTemp[u32Pointer]);
             until (Self.Compare(@aTemp[u32Pointer],@aSearch[u32Pointer],u32Size)) or (u32Size = 0);
+
+            pbProgress.Position:=integer(Reader.Position);
+            Application.ProcessMessages();
 
             //Gefunden ?
             if (u32Size > 0) then
