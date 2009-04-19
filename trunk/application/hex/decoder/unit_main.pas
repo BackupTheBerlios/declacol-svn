@@ -21,6 +21,7 @@ type
     odInput: TOpenDialog;
     mmLog: TMemo;
     pbProgress: TProgressBar;
+    cbUTF: TCheckBox;
     procedure btBrowseClick(Sender: TObject);
     procedure btGoClick(Sender: TObject);
   private
@@ -59,9 +60,20 @@ var
   u32Hits   : unsigned32;
 begin
   //Sucharrays initialisieren
-  SetLength(aTemp  ,Length(edSearch.Text));
-  SetLength(aSearch,Length(edSearch.Text));
-  copymemory(addr(aSearch[0]),addr(edSearch.Text[1]),Length(aSearch));
+  //Welche Kodierung soll benutzt werden?
+  if (cbUTF.Checked=FALSE) then
+    begin
+      SetLength(aSearch,Length(edSearch.Text));
+      copymemory(addr(aSearch[0]),addr(edSearch.Text[1]),Length(aSearch));
+    end
+  else
+    begin
+      SetLength(aSearch,(Length(edSearch.Text) * 2) + 1);
+      StringToWideChar(edSearch.Text,@aSearch[0],Length(aSearch));
+      SetLength(aSearch,(Length(edSearch.Text) * 2));
+    end;
+
+  SetLength(aTemp  ,Length(aSearch));
 
   //Ausgabe initialisieren
   MMLog.Clear();

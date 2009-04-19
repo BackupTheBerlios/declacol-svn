@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 192
-  Top = 107
+  Left = 195
+  Top = 106
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsToolWindow
   Caption = 'Form1'
@@ -32,8 +32,8 @@ object Form1: TForm1
     object edSearch: TEdit
       Left = 64
       Top = 16
-      Width = 289
-      Height = 17
+      Width = 241
+      Height = 21
       TabOrder = 0
     end
     object rbSimpleXor: TRadioButton
@@ -53,6 +53,14 @@ object Form1: TForm1
       Height = 17
       Caption = 'chained XOR'
       TabOrder = 2
+    end
+    object cbUTF: TCheckBox
+      Left = 312
+      Top = 16
+      Width = 41
+      Height = 17
+      Caption = 'UTF'
+      TabOrder = 3
     end
   end
   object gbFiles: TGroupBox
