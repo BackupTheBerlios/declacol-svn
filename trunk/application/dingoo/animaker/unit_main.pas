@@ -16,8 +16,14 @@ type
     btAbout: TButton;
     dgSaveAni: TSaveDialog;
     dgOpenBitmap: TOpenPictureDialog;
+    btSoften: TButton;
+    btGrayscale: TButton;
     procedure btOpenBitmapClick(Sender: TObject);
     procedure btSaveAniClick(Sender: TObject);
+    procedure btSoftenClick(Sender: TObject);
+    procedure btGrayscaleClick(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+    procedure btAboutClick(Sender: TObject);
   private
     { Private-Deklarationen }
   public
@@ -26,8 +32,12 @@ type
 
 var
   Form1: TForm1;
+  bLoaded : Boolean = FALSE;
+  clText  : TColor  = clWhite;
 
 implementation
+
+uses unit_about;
 
 {$R *.dfm}
 
@@ -53,7 +63,7 @@ begin
              end;
 
           //bitmap_changeto16bit(bitmap);
-          bitmap_changeto16bit(Bitmap);
+          bitmap_changecolordeepth(Bitmap,16);
           imPreview.Picture.Bitmap.Assign(Bitmap);
           imPreview.Picture.Bitmap.PixelFormat:=pf16Bit;
 
@@ -68,10 +78,8 @@ end;
 procedure TForm1.btSaveAniClick(Sender: TObject);
 var
   u32Y      : unsigned32;
-  u32X      : unsigned32;
   StreamOut : TFileStream;
   pLine     : pWordArray;
-  u16Pixel  : unsigned16;
 begin
   with (dgSaveAni) do
     begin
@@ -104,5 +112,33 @@ begin
 end;
 
 
+
+procedure TForm1.btSoftenClick(Sender: TObject);
+begin
+  bitmap_blur(imPreview.Picture.Bitmap);
+  bitmap_changecolordeepth(imPreview.Picture.Bitmap,16);
+  imPreview.Invalidate();
+end;
+
+procedure TForm1.btGrayscaleClick(Sender: TObject);
+begin
+  bitmap_grayscale(imPreview.Picture.Bitmap);
+  bitmap_changecolordeepth(imPreview.Picture.Bitmap,16);
+  imPreview.Invalidate();
+end;
+
+procedure TForm1.FormActivate(Sender: TObject);
+begin
+  if (not bLoaded) then
+    begin
+      bLoaded:=TRUE;
+    end;
+end;
+
+
+procedure TForm1.btAboutClick(Sender: TObject);
+begin
+  fmAbout.SHowModal();
+end;
 
 end.
