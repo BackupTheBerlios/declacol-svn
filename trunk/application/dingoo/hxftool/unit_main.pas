@@ -61,6 +61,8 @@ type
     btThemepatch: TButton;
     cbBrightness: TComboBox;
     Label4: TLabel;
+    pmLanguage: TPopupMenu;
+    dumptofile1: TMenuItem;
     procedure mOpenClick(Sender: TObject);
     procedure mCloseClick(Sender: TObject);
     procedure lockfunctions();
@@ -92,6 +94,7 @@ type
     procedure btDisabelAutoRunProtectionClick(Sender: TObject);
     procedure btThemepatchClick(Sender: TObject);
     procedure cbBrightnessChange(Sender: TObject);
+    procedure dumptofile1Click(Sender: TObject);
 
   private
     hxf     : Thxfreader;
@@ -509,6 +512,14 @@ begin
     end;
 end;
 
+//Die Textlist abspeichern
+procedure TfmMain.dumptofile1Click(Sender: TObject);
+begin
+  try
+    lbLanguage.Items.SaveToFile('language_dump.txt');
+  except
+  end;
+end;
 
 /////////////////////////////////////////////////////////////////////////////////
 /// Defaults
@@ -697,6 +708,7 @@ procedure TfmMain.About1Click(Sender: TObject);
 begin
   fmAbout.ShowModal();
 end;
+
 
 
 end.

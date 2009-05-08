@@ -23,7 +23,7 @@ object fmMain: TfmMain
     Top = 0
     Width = 505
     Height = 377
-    ActivePage = tsPatches
+    ActivePage = tsLanguage
     TabOrder = 0
     object tsFiles: TTabSheet
       Caption = 'Files'
@@ -14660,12 +14660,13 @@ object fmMain: TfmMain
           Font.Style = []
           ItemHeight = 13
           ParentFont = False
+          PopupMenu = pmLanguage
           TabOrder = 0
           OnClick = lbLanguageClick
         end
         object btSaveWord: TButton
           Left = 440
-          Top = 316
+          Top = 312
           Width = 51
           Height = 21
           Caption = 'Replace'
@@ -14845,5 +14846,13 @@ object fmMain: TfmMain
     Filter = 'Bitmaps (*.bmp)|*.bmp'
     Left = 456
     Top = 43
+  end
+  object pmLanguage: TPopupMenu
+    Left = 452
+    Top = 160
+    object dumptofile1: TMenuItem
+      Caption = 'dump to file'
+      OnClick = dumptofile1Click
+    end
   end
 end
