@@ -1,9 +1,9 @@
 object fmMain: TfmMain
-  Left = 235
-  Top = 212
+  Left = 218
+  Top = 124
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsToolWindow
-  Caption = 'Dingoo Patcher v0.1'
+  Caption = 'Dingoo Patcher v0.2'
   ClientHeight = 377
   ClientWidth = 506
   Color = clBtnFace
@@ -23,7 +23,7 @@ object fmMain: TfmMain
     Top = 0
     Width = 505
     Height = 377
-    ActivePage = tsDefaults
+    ActivePage = tsPatches
     TabOrder = 0
     object tsFiles: TTabSheet
       Caption = 'Files'
@@ -37,7 +37,7 @@ object fmMain: TfmMain
         object lbFiles: TListBox
           Left = 8
           Top = 12
-          Width = 289
+          Width = 265
           Height = 325
           ItemHeight = 13
           Sorted = True
@@ -45,24 +45,35 @@ object fmMain: TfmMain
           OnClick = lbFilesClick
         end
         object sgHex: TStringGrid
-          Left = 304
+          Left = 280
           Top = 12
-          Width = 170
+          Width = 194
           Height = 325
-          ColCount = 8
-          DefaultColWidth = 20
-          DefaultRowHeight = 16
+          ColCount = 9
+          DefaultColWidth = 15
+          DefaultRowHeight = 15
+          Enabled = False
           FixedCols = 0
-          RowCount = 19
+          RowCount = 20
           FixedRows = 0
-          Font.Charset = DEFAULT_CHARSET
+          Font.Charset = OEM_CHARSET
           Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Courier'
+          Font.Height = -8
+          Font.Name = 'Terminal'
           Font.Style = []
           ParentFont = False
           ScrollBars = ssNone
           TabOrder = 1
+          ColWidths = (
+            15
+            15
+            15
+            15
+            15
+            15
+            15
+            15
+            61)
         end
         object sbHex: TScrollBar
           Left = 472
@@ -70,14 +81,16 @@ object fmMain: TfmMain
           Width = 16
           Height = 325
           Kind = sbVertical
+          LargeChange = 8
           PageSize = 0
+          SmallChange = 8
           TabOrder = 2
+          OnChange = sbHexChange
         end
       end
     end
     object tsPatches: TTabSheet
       Caption = 'Patches'
-      Enabled = False
       ImageIndex = 1
       object gbPatches: TGroupBox
         Left = 0
@@ -91,9 +104,38 @@ object fmMain: TfmMain
           Top = 16
           Width = 305
           Height = 25
+          Hint = 'all systemdirectories are created in lowercase'
           Caption = 'Convert Default Directories to Lowercase'
+          ParentShowHint = False
+          ShowHint = True
           TabOrder = 0
           OnClick = btDirNamesToLowerClick
+        end
+        object btDisabelAutoRunProtection: TButton
+          Left = 8
+          Top = 48
+          Width = 305
+          Height = 25
+          Hint = 'disable the automatic renaming of autorun.inf to autorun.txt'
+          Caption = 'Disable Autorun Protection'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 1
+          OnClick = btDisabelAutoRunProtectionClick
+        end
+        object btThemepatch: TButton
+          Left = 8
+          Top = 80
+          Width = 305
+          Height = 25
+          Hint = 
+            'patch firmware to use external themes like in teamdingo firmware' +
+            ' '
+          Caption = 'Patch to use external themes'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 2
+          OnClick = btThemepatchClick
         end
       end
     end
@@ -14611,7 +14653,13 @@ object fmMain: TfmMain
           Top = 12
           Width = 481
           Height = 277
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = 15
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
           ItemHeight = 13
+          ParentFont = False
           TabOrder = 0
           OnClick = lbLanguageClick
         end
@@ -14630,6 +14678,7 @@ object fmMain: TfmMain
           Width = 425
           Height = 21
           TabOrder = 2
+          OnKeyPress = edLanguageKeyPress
         end
       end
     end
@@ -14642,7 +14691,7 @@ object fmMain: TfmMain
         Top = 0
         Width = 497
         Height = 345
-        Caption = 'Default Seetings'
+        Caption = 'Default Settings'
         TabOrder = 0
         object Label1: TLabel
           Left = 16
@@ -14652,7 +14701,7 @@ object fmMain: TfmMain
           Caption = 'Language'
         end
         object Label2: TLabel
-          Left = 16
+          Left = 176
           Top = 72
           Width = 67
           Height = 13
@@ -14660,10 +14709,17 @@ object fmMain: TfmMain
         end
         object Label3: TLabel
           Left = 16
-          Top = 120
+          Top = 72
           Width = 33
           Height = 13
           Caption = 'Theme'
+        end
+        object Label4: TLabel
+          Left = 176
+          Top = 24
+          Width = 49
+          Height = 13
+          Caption = 'Brightness'
         end
         object cbLanguage: TComboBox
           Left = 16
@@ -14679,7 +14735,7 @@ object fmMain: TfmMain
             'English')
         end
         object cbPoweroff: TComboBox
-          Left = 16
+          Left = 176
           Top = 88
           Width = 145
           Height = 21
@@ -14694,7 +14750,7 @@ object fmMain: TfmMain
         end
         object cbTheme: TComboBox
           Left = 16
-          Top = 136
+          Top = 88
           Width = 145
           Height = 21
           ItemHeight = 13
@@ -14705,6 +14761,21 @@ object fmMain: TfmMain
             'Theme two'
             'Theme three'
             'Theme four')
+        end
+        object cbBrightness: TComboBox
+          Left = 176
+          Top = 40
+          Width = 145
+          Height = 21
+          ItemHeight = 13
+          TabOrder = 3
+          OnChange = cbBrightnessChange
+          Items.Strings = (
+            '1'
+            '2'
+            '3'
+            '4'
+            '5')
         end
       end
     end
@@ -14723,7 +14794,13 @@ object fmMain: TfmMain
           Top = 12
           Width = 481
           Height = 325
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Courier'
+          Font.Style = []
           ItemHeight = 13
+          ParentFont = False
           TabOrder = 0
         end
       end
@@ -14753,6 +14830,7 @@ object fmMain: TfmMain
       end
       object mExit: TMenuItem
         Caption = 'Exit'
+        OnClick = mExitClick
       end
     end
     object N2: TMenuItem

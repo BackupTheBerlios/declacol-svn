@@ -5,7 +5,7 @@ interface
 uses
   unit_typedefs,unit_strings,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls,unit_filefunctions,unit_filesystem,class_hxf, ComCtrls,
-  Grids, Menus, ExtCtrls, ExtDlgs,unit_grafix,class_language, Mask;
+  Grids, Menus, ExtCtrls, ExtDlgs,unit_grafix,class_language, Mask,unit_hex;
 
 type
   TfmMain = class(TForm)
@@ -57,17 +57,16 @@ type
     cbTheme: TComboBox;
     gbPatches: TGroupBox;
     btDirNamesToLower: TButton;
+    btDisabelAutoRunProtection: TButton;
+    btThemepatch: TButton;
+    cbBrightness: TComboBox;
+    Label4: TLabel;
     procedure mOpenClick(Sender: TObject);
     procedure mCloseClick(Sender: TObject);
     procedure lockfunctions();
     procedure unlockfunctions();
-    procedure setconfig(offset:unsigned32; data : byte);
-    procedure sar(filename : longstring; search : array of byte; replace : array of byte);
-
-
 
     procedure lbFilesClick(Sender: TObject);
-
 
     procedure loadscreen(Filename : longstring; Bitmap:TBitmap);
     procedure savescreen(Filename : longstring; BitmapFile:longstring);
@@ -87,6 +86,12 @@ type
     procedure cbThemeChange(Sender: TObject);
     procedure btDirNamesToLowerClick(Sender: TObject);
     procedure About1Click(Sender: TObject);
+    procedure sbHexChange(Sender: TObject);
+    procedure mExitClick(Sender: TObject);
+    procedure edLanguageKeyPress(Sender: TObject; var Key: Char);
+    procedure btDisabelAutoRunProtectionClick(Sender: TObject);
+    procedure btThemepatchClick(Sender: TObject);
+    procedure cbBrightnessChange(Sender: TObject);
 
   private
     hxf     : Thxfreader;
@@ -94,6 +99,11 @@ type
 
     { Private-Deklarationen }
     procedure addlog(txt : longstring);
+    procedure setconfig(offset:unsigned32; data : byte);
+    procedure sar (filename : longstring; search : longstring; replace : longstring); overload;
+    procedure sar(filename : longstring; search : array of byte; replace : array of byte); overload;
+    procedure addsignature();
+
   public
     { Public-Deklarationen }
   end;
@@ -136,6 +146,19 @@ begin
 
           //Alles analysieren und Dateien listen
           hxf:=thxfreader.create(filename);
+
+          if (hxf.createchecksum() <> hxf.crc) then
+            begin
+              if (hxf.ignoreerrors=TRUE) then
+                begin
+                  addlog('checksum invalid but reading anyway');
+                end
+              else
+                begin
+                  addlog('checksum invalid');
+                end;
+            end;
+
           bOK:=hxf.getfirst(data);
           while (bOK=TRUE) do
             begin
@@ -155,17 +178,29 @@ begin
             begin
               mCloseClick(Self);
             end;
-
         end;
     end;
 end;
 
 procedure TfmMain.mCloseClick(Sender: TObject);
 begin
+  lockfunctions();
+
+  addsignature();
+
   hxf.free();
   addlog('hxf closed');
-  lockfunctions();
 end;
+
+procedure TfmMain.mExitClick(Sender: TObject);
+begin
+  if (mClose.Enabled) then
+    begin
+      mCloseClick(Self);
+    end;
+  Close();
+end;
+
 
 procedure TfmMain.lockfunctions();
 begin
@@ -195,6 +230,21 @@ begin
   tsLanguage.TabVisible    := hxf.exists('system\nls\Ó¢ÎÄ.dlx');
   tsDefaults.TabVisible    := hxf.exists('user_data\ccpmp.cfg') and
                               hxf.exists('user_data\default.cfg');
+
+  addlog('');
+  if (tsPatches.TabVisible)     then addlog('firmware found');
+  if (tsBootscreens.TabVisible) then addlog('bootscreens found');
+  if (tsLanguage.TabVisible)    then addlog('english languagefile found');
+  if (tsDefaults.TabVisible)    then addlog('defaultconfiguration found');
+
+  addlog('');
+  addlog('header data');
+  addlog('id        : '+ hxf.header.id);
+  addlog('version   : '+ hxf.header.version);
+  addlog('timestamp : '+ hxf.header.timestamp);
+  addlog('size      : '+ inttostr(hxf.header.size));
+  addlog('checksum  : '+ inttohex(hxf.header.crc,12));
+  addlog('');
 end;
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -211,6 +261,33 @@ begin
     begin
       if (hxf.get(lbfiles.ItemIndex,hxfdata)=TRUE) then
         begin
+          sbHex.Max:=hxfdata.size;
+          sbHexChange(Self);
+        end;
+    end;
+end;
+
+procedure TfmMain.sbHexChange(Sender: TObject);
+var
+  u32Index : unsigned32;
+  u32row   : unsigned32;
+  u32col   : unsigned32;
+  sTemp    : longstring;
+begin
+  u32row := 0;
+  u32col := 0;
+  for u32Index:=sbHex.Position to sbHex.Position + ((sgHex.ColCount * sgHex.RowCount)-1)  do
+    begin
+      sgHex.Cells[u32Col,u32Row]:=inttohex(hxfdata.buffer[u32Index],2);
+      stemp:=stemp + chr(hxfdata.buffer[u32Index]);
+
+      inc(u32col);
+      if (u32col >= unsigned32(sgHex.ColCount) - 1) then
+        begin
+          sgHex.Cells[u32Col,u32Row]:=stemp;
+          u32col:=0;
+          stemp:='';
+          inc(u32row);
         end;
     end;
 end;
@@ -352,6 +429,7 @@ procedure TfmMain.tsLanguageShow(Sender: TObject);
 begin
   enumlanguage();
   edLanguage.Text:='';
+  btSaveWordClick(Self);
 end;
 
 procedure TfmMain.lbLanguageClick(Sender: TObject);
@@ -417,6 +495,20 @@ begin
     end;
 end;
 
+//Bei Return speichern und den nächsten Eintrag holen
+procedure TfmMain.edLanguageKeyPress(Sender: TObject; var Key: Char);
+begin
+  if (Key = chr(13)) then
+    begin
+      btSaveWordClick(Self);
+      if (lbLanguage.Items.Count > lbLanguage.Itemindex - 1) then
+        begin
+          lbLanguage.Itemindex:=lbLanguage.Itemindex + 1;
+          lbLanguageClick(Self);
+        end;
+    end;
+end;
+
 
 /////////////////////////////////////////////////////////////////////////////////
 /// Defaults
@@ -429,6 +521,7 @@ begin
     begin
       cbLanguage.ItemIndex:=aTemp.buffer[$2e];
       cbPoweroff.ItemIndex:=aTemp.buffer[$1b];
+      cbBrightness.ItemIndex:=aTemp.buffer[$2f];
     end;
 end;
 
@@ -440,6 +533,11 @@ end;
 procedure TfmMain.cbPoweroffChange(Sender: TObject);
 begin
   setconfig($1b,cbLanguage.ItemIndex);
+end;
+
+procedure TfmMain.cbBrightnessChange(Sender: TObject);
+begin
+  setconfig($2f,cbBrightness.ItemIndex);
 end;
 
 procedure TfmMain.cbThemeChange(Sender: TObject);
@@ -470,50 +568,113 @@ end;
 /////////////////////////////////////////////////////////////////////////////////
 procedure TfmMain.btDirNamesToLowerClick(Sender: TObject);
 begin
-// sar('ccpmp.bin','A:\MUSIC','a:\music');
+  sar('ccpmp.bin','A:\GAME'   ,'a:\game');
+  sar('ccpmp.bin','A:\FLASH'  ,'a:\flash');
+  sar('ccpmp.bin','A:\MUSIC'  ,'a:\music');
+  sar('ccpmp.bin','A:\PICTURE','a:\picture');
+  sar('ccpmp.bin','A:\RECORD' ,'a:\record');
+  sar('ccpmp.bin','A:\TXT'    ,'a:\txt');
+  sar('ccpmp.bin','A:\VIDEO'  ,'a:\video');
+
+  sar('ccpmp.bin','a:\GAME'   ,'a:\game');
+  sar('ccpmp.bin','a:\FLASH'  ,'a:\flash');
+  sar('ccpmp.bin','a:\MUSIC'  ,'a:\music');
+  sar('ccpmp.bin','a:\PICTURE','a:\picture');
+  sar('ccpmp.bin','a:\RECORD' ,'a:\record');
+  sar('ccpmp.bin','a:\TXT'    ,'a:\txt');
+  sar('ccpmp.bin','a:\VIDEO'  ,'a:\video');
+
+  sar('ccpmp.bin','A:\game'   ,'a:\game');
+  sar('ccpmp.bin','A:\flash'  ,'a:\flash');
+  sar('ccpmp.bin','A:\music'  ,'a:\music');
+  sar('ccpmp.bin','A:\picture','a:\picture');
+  sar('ccpmp.bin','A:\record' ,'a:\record');
+  sar('ccpmp.bin','A:\txt'    ,'a:\txt');
+  sar('ccpmp.bin','A:\video'  ,'a:\video');
+end;
+
+procedure TfmMain.btDisabelAutoRunProtectionClick(Sender: TObject);
+begin
+  sar('ccpmp.bin','a:\autorun.txt'  ,'a:\autorin.inf');
+  sar('ccpmp.bin','b:\autorun.txt'  ,'b:\autorin.inf');
+end;
+
+procedure TfmMain.btThemepatchClick(Sender: TObject);
+var
+  aTemp   : thxfrecord;
+  stemp   : longstring;
+  u32pos1 : unsigned32;
+  u32pos2 : unsigned32;
+  u32pos3 : unsigned32;
+begin
+  sar('ccpmp.bin','z:\system\res\clock.bmp'    ,'a:\system\res\clock.bmp');
+  sar('ccpmp.bin','z:\system\res\warning.bmp'  ,'a:\system\res\warning.bmp');
+  sar('ccpmp.bin','z:\system\res\didian_1.bmp' ,'a:\system\res\didian_1.bmp');
+  sar('ccpmp.bin','z:\system\res\didian_2.bmp' ,'a:\system\res\didian_2.bmp');
+  sar('ccpmp.bin','z:\system\res\didian_3.bmp' ,'a:\system\res\didian_3.bmp');
+  sar('ccpmp.bin','z:\system\res\didian_4.bmp' ,'a:\system\res\didian_4.bmp');
+  sar('ccpmp.bin','z:\system\res\guanji_1.bmp' ,'a:\system\res\guanji_1.bmp');
+  sar('ccpmp.bin','z:\system\res\guanji_2.bmp' ,'a:\system\res\guanji_2.bmp');
+  sar('ccpmp.bin','z:\system\res\guanji_3.bmp' ,'a:\system\res\guanji_3.bmp');
+  sar('ccpmp.bin','z:\system\res\guanji_4.bmp' ,'a:\system\res\guanji_4.bmp');
+  sar('ccpmp.bin','z:\system\res\demo.tar'     ,'a:\system\res\demo.tar');
+
+  sar('ccpmp.bin','z:\system\font\'+#00        ,'a:\system\font\'+#00);
+  sar('ccpmp.bin','z:\system\res\'+#00         ,'a:\system\res\'+#00);
+
+  sTemp:=string_append(getcurrentdir(),'\');
+  sTemp:=sTemp + 'hxf_dump\';
+  //Dateien exportieren
+  if (hxf.getfirst(aTemp)=TRUE) then
+    begin
+      repeat
+        //Buffer schreiben wenn es die passenden Dateien sind
+        u32pos1:=pos('system\res\' ,aTemp.filename);
+        u32pos2:=pos('system\font\',aTemp.filename);
+        u32pos3:=pos('emulator'    ,aTemp.filename);
+
+
+        if (( u32pos1 > 0) and (u32pos1 < 2)) or
+           (( u32pos2 > 0) and (u32pos2 < 2)) or
+           (( u32pos3 > 0) and (u32pos3 < 2)) then
+           begin
+            hextofile(sTemp + aTemp.filename,addr(aTemp.buffer[0]),aTemp.size);
+           end;
+      until hxf.getnext(aTemp)=FALSE;
+    end;
+
+  messagebox(0,'files exported to hxf_dump. after the firmware update copy the contents of hxf_dump into the rootdir of your dingoo.','info',MB_OK); 
+end;
+
+procedure TfmMain.sar(filename : longstring; search : longstring; replace : longstring);
+var
+  aSearch  : array of byte;
+  aReplace : array of Byte;
+begin
+  setlength(aSearch,length(search));
+  move(search[1],aSearch[0],length(search));
+
+  setlength(aReplace,length(Replace));
+  move(replace[1],aReplace[0],length(replace));
+
+  sar(filename,aSearch,aReplace);
 end;
 
 procedure TfmMain.sar(filename : longstring; search : array of byte; replace : array of byte);
 var
-  aTemp    : thxfrecord;
-  u32Hay   : unsigned32;
-  u32Needle: unsigned32;
-  u32Found : unsigned32;
+  aTemp     : thxfrecord;
 begin
+  screen.Cursor:=crHourglass;
+
+  //Datei holen und Längenfeler abfangen
   if (hxf.get(filename,aTemp)=TRUE) then
     begin
-      u32Hay:=0;
-      //Das ganze Heu durchsuchen
-      while (u32Hay < aTemp.size) do
-        begin
-          u32Needle:=0;
-          //Vergleichen
-          if (aTemp.buffer[u32Hay] = search[u32Needle]) then
-            begin
-              //Anfang gefunden
-              u32Found:=u32Hay;
+      searchandreplace(aTemp.buffer,search,replace);
 
-              //Stimmt auch der Rest?
-              while (aTemp.buffer[u32Hay] = search[u32Needle]) and
-                    (u32Needle < unsigned32(length(search))) and
-                    (u32Hay    < aTemp.size) do
-                    begin
-                      inc(u32Hay);
-                      inc(u32Needle);
-                    end;
-
-              //Was gefunden?
-              if (u32Needle = unsigned32(Length(Search))) then
-                begin
-
-                end;
-            end;
-          inc(u32Hay);
-          inc(u32Needle);
-        end;
-      //Speichern
+      //Und abspeichern
       hxf.put(aTemp);
     end;
+  screen.Cursor:=crDefault;
 end;
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -525,23 +686,18 @@ begin
   application.processmessages();
 end;
 
-
-
-
-
-
-
-
-
-
-
-
+//ein kleine Signatur in die Firmware schreiben
+procedure tfmmain.addsignature();
+begin
+  sar('ccpmp.bin','VERDOR ID','SO9 v0.2 ');
+end;
 
 
 procedure TfmMain.About1Click(Sender: TObject);
 begin
   fmAbout.ShowModal();
 end;
+
 
 end.
 

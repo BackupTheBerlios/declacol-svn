@@ -10,15 +10,31 @@ uses unit_typedefs,sysutils,windows;
 
 const
   HEADER_SIZE = 64;
-  HEADER_ID   = 'WAD';
+  HEADER_ID   = 'WADF';
+  HEADER_ID1  = 'Chinachip PMP firmware V1.0';
+
+  HXF_ERROR_NONE      = NO_ERROR;
+  HXF_ERROR_NO_HANDLE = INVALID_HANDLE_VALUE;
+  HXF_ERROR_NO_ID     = 1024;
+  HXF_ERROR_NO_CRC    = 2048;
 
 ////////////////////////////////////////////////////////////////////////////////
+type Thxfheader = packed record
+  id       : array[0..3] of char;
+  version  : array[0..3] of char; //?
+  timestamp: array[0..11] of char;
+  size     : unsigned32;
+  crc      : unsigned32;
+  a1       : unsigned32;
+  id1      : array[0..31] of char;
+end;
+
 type Thxfrecord = record
   id       : unsigned32;    //Unique ID
   filename : longstring;    //relative Filename in HXF-Package
   offset   : unsigned32;    //Offset in HXF-Package
-  buffer   : array of byte; //Data
   size     : unsigned32;    //Size of Buffer
+  buffer   : array of byte; //Data
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -28,8 +44,11 @@ type Thxfreader = class (TObject)
     u32FatSize : unsigned32;
     u32FatIndex: unsigned32; 
     hFile      : THandle;
-    aHeader    : array [0..HEADER_SIZE - 1] of Byte;
+    aHeader    : Thxfheader;
     u32hxfsize : unsigned32;
+    u32hxfcrc  : unsigned32;
+    u32Error   : unsigned32;
+    bIgnoreErrors : boolean;
   protected
 
   public
@@ -44,8 +63,16 @@ type Thxfreader = class (TObject)
     function    get(filename : longstring; var data : Thxfrecord):boolean; overload;
     function    put(data : Thxfrecord):boolean;
 
+    function    createchecksum():unsigned32;
+    function    writeheader():boolean;
+
     property    count : unsigned32 read u32FATSize;
     property    size  : unsigned32 read u32HXFSize;
+    property    crc   : unsigned32 read u32HXFCrc;
+    property    error : unsigned32 read u32Error;
+
+    property    ignoreerrors : boolean read bIgnoreErrors write bIgnoreErrors;
+    property    header : thxfheader read aheader;
 end;
 
 implementation
@@ -56,17 +83,57 @@ implementation
 constructor Thxfreader.create(filename : longstring);
 begin
   self.u32FATSize:=0;
+  bIgnoreErrors:=TRUE;
 
   hFile:=fileopen(filename,fmOpenReadWrite);
 
-  Self.analyze();
+  if (hFile = INVALID_HANDLE_VALUE) then
+    begin
+      u32Error:=HXF_ERROR_NO_HANDLE;
+    end
+  else
+    begin
+      u32Error:=HXF_ERROR_NONE;
+      self.u32hxfcrc:=createchecksum();
+      Self.analyze();
+    end;
+
 end;
 
 destructor  Thxfreader.free();
 begin
   if (hFile <> INVALID_HANDLE_VALUE) then
     begin
+      writeheader();
       closehandle(hFile);
+    end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+/// Checksumme bilden
+/// Einfach alle DoubleWords aufaddieren
+////////////////////////////////////////////////////////////////////////////////
+function    thxfreader.createchecksum():unsigned32;
+var
+  u32Read  : unsigned32;
+  u32Index : unsigned32;
+  aBuffer  : array[0..8191] of unsigned32;
+begin
+  result:=0;
+  if (hFile <> INVALID_HANDLE_VALUE) then
+    begin
+      fileseek(hFile,SizeOf(aHeader),0);
+
+      repeat
+        u32read:=fileread(hFile,aBuffer[0],SizeOf(aBuffer));
+
+        u32Index:=0;
+        while (u32Index <  (u32read shr 2)) do
+          begin
+            inc(result,aBuffer[u32Index]);
+            inc(u32Index);
+          end;
+      until u32Read=0;
     end;
 end;
 
@@ -94,54 +161,71 @@ begin
 
   if (hFile <> INVALID_HANDLE_VALUE) then
     begin
-      u32size:=fileseek(hFile,0,0);
-      fileread(hFile,aHeader[0],HEADER_SIZE - u32size);
-
       u32HXFSize:=getfilesize(hFile,nil);
+      u32HXFCrc:=createchecksum();
+
+      fileseek(hFile,0,0);
+      fileread(hFile,aHeader,sizeof(aHeader));
 
       //Ist der Header OK?
-      if ( aHeader[0]=ord(HEADER_ID[1])) and
-         ( aHeader[1]=ord(HEADER_ID[2])) and
-         ( aHeader[2]=ord(HEADER_ID[3])) then
+      if (aHeader.id  = HEADER_ID ) then
         begin
-          // bis zum ende der Datei analysieren
-          u32Pos:=0;
-          while (u32Pos < u32HXFSize) do
+          if (aHeader.crc = u32HXFCrc) OR (IgnoreErrors=TRUE) then
             begin
-              //Datensatz vorbereiten
-              aData.id:=length(aFAT);
-              aData.filename:='';
-              setlength(aData.buffer,0);
-
-              //SizeOf Name holen
-              FileRead(hFile,u32Size,4);
-
-              while (FileRead(hFile,u8Temp,1) = 1) and
-                    (u32Size > 0) do
+              // bis zum ende der Datei analysieren
+              u32Pos:=0;
+              while (u32Pos < u32HXFSize) do
                 begin
-                  aData.filename:=aData.filename + Chr(u8Temp);
-                  dec(u32Size);
+                 //Datensatz vorbereiten
+                 aData.id:=length(aFAT);
+                 aData.filename:='';
+                 setlength(aData.buffer,0);
+
+                 //SizeOf Name holen
+                 FileRead(hFile,u32Size,4);
+
+                 while (FileRead(hFile,u8Temp,1) = 1) and
+                       (u32Size > 0) do
+                   begin
+                     aData.filename:=aData.filename + Chr(u8Temp);
+                     dec(u32Size);
+                   end;
+
+                 //Immer kleinschrift
+                 aData.filename:=LowerCase(aData.filename);
+
+                 //Dateigröße lesen
+                 Fileread(hFile,aData.Size,4);
+
+                 //Unsere Position holen
+                 aData.offset:=FileSeek(hFile,0,1);
+
+                 SetLength(aFAT,aData.id + 1);
+                 aFAT[aData.id]:=aData;
+
+                 //Daten überspringen
+                 u32Pos:=FileSeek(hFile,aData.size,1);
                 end;
-
-              //Immer kleinschrift
-              aData.filename:=LowerCase(aData.filename);
-
-              //Dateigröße lesen
-              Fileread(hFile,aData.size,4);
-
-              //Unsere Position holen
-              aData.offset:=FileSeek(hFile,0,1);
-
-              SetLength(aFAT,aData.id + 1);
-              aFAT[aData.id]:=aData;
-
-              //Daten überspringen
-              u32Pos:=FileSeek(hFile,aData.size,1);
+            end
+          else
+            begin
+              //Checksummenfehler
+              u32Error:=HXF_ERROR_NO_CRC;
+            end;
+          end
+        else
+          begin
+              //HeaderID falsch
+              u32Error:=HXF_ERROR_NO_ID;
           end;
-        end;
-    end;
+      end
+    else
+      begin
+        //Keine Datei geöffnet
+        u32Error:=HXF_ERROR_NO_HANDLE;
+      end;
 
-  //Anzah der Einträge merken
+  //Anzahl der Einträge merken
   u32FatSize:=length(aFat);
 
   //Was gefunden?
@@ -230,6 +314,36 @@ begin
           u32write:=filewrite(hFile,data.buffer[0],data.size);
           result:=u32write = data.size;
         end;
+    end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+// Rebuild Header
+////////////////////////////////////////////////////////////////////////////////
+function    Thxfreader.writeheader():boolean;
+var
+  sTemp : longstring;
+begin
+  //Headerdaten setzen
+  fillmemory(addr(aHeader),SizeOf(aHeader),0);
+
+  aHeader.id:=HEADER_ID;
+  aHeader.version:='0100';
+  DateTimeToString(sTemp,'yyyymmddhhnn',Now());
+  move(sTemp[1],aHeader.timestamp[0],SizeOf(aHeader.timestamp));
+  aHeader.crc:=createchecksum();
+  aHeader.size:=getfilesize(hFile,nil);
+  aHeader.id1:=HEADER_ID1;
+
+  if (hFile <> INVALID_HANDLE_VALUE) then
+    begin
+      fileseek(hFile,0,0);
+      filewrite(hFile,aHeader,SizeOf(aHeader));
+      result:=TRUE;
+    end
+  else
+    begin
+      result:=FALSE;
     end;
 end;
 

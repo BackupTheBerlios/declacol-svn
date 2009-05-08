@@ -6,7 +6,8 @@ uses
   class_hxf in 'class_hxf.pas',
   class_language in 'class_language.pas',
   unit_patches in 'unit_patches.pas',
-  unit_about in 'unit_about.pas' {fmAbout};
+  unit_about in 'unit_about.pas' {fmAbout},
+  unit_hex in '..\..\..\libraries\unit_hex.pas';
 
 {$R *.res}
 
