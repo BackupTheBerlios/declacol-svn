@@ -39,7 +39,7 @@ Author: Sven Lorenz / Borg@Sven-of-Nine.de
 unit Unit_Grafix;
 
 interface
-uses Windows,Graphics,Forms,Unit_ScreenFunctions;
+uses Windows, unit_typedefs,Graphics,Forms,Unit_ScreenFunctions,sysutils;
 
 type PBitmap=^TBitmap;
      //Kleines Arry zum schnelleren Zugriff auf Bitmaps
@@ -128,7 +128,7 @@ procedure Bitmap_FillScanLineRandom(Source:PLine;rLevel,gLevel,bLevel:Byte;Size:
 /////////////////////////////////////////////////////////////////////////////////
 // Diverse Funktionen zum vereinfachten Umgang mit Farben
 /////////////////////////////////////////////////////////////////////////////////
-procedure Bitmap_ReduceColorDeepth(var BM:TBitmap;Bits:byte); //Noch in Arbeit
+procedure Bitmap_ChangeColorDeepth(BM:TBitmap;Bits:byte); //Noch in Arbeit
 
 //Liegt eine Farbe um den LEVEL von der anderen entfernt ?
 function Color_IsNear(Color1, Color2: TRGBQUAD; Level: Byte): Boolean;
@@ -575,8 +575,8 @@ end;
 // mit den RGB-Leveln l‰sst sich der Farbanteil des Rauschens bestimmen
 Function Bitmap_Noise(Source:TBitmap;RLevel,GLevel,BLevel:Byte):Boolean;
 var
-   Line:PLine;
-   x,y  :Integer;
+   Line : PLine;
+   y    : unsigned32;
 begin
      //Alles muﬂ 32 Bit sein
      Source.PixelFormat:=pf32Bit;
@@ -584,7 +584,7 @@ begin
      //Zufall initialisieren
      Randomize();
      //Allle Zeilen
-     for y:=0 to Source.Height-1 do
+     for y:=0 to unsigned32(Source.Height-1) do
          begin
               //Scanline lesen
               Line:=Source.ScanLine[y];
@@ -1010,11 +1010,44 @@ end;
 /////////////////////////////////////////////////////////////////////////////////
 //  Farbfunktionen
 /////////////////////////////////////////////////////////////////////////////////
-procedure Bitmap_ReduceColorDeepth(var BM:TBitmap;Bits:byte);
+procedure Bitmap_ChangeColorDeepth(BM:TBitmap;Bits:byte);
+var
+  u32X     : unsigned32;
+  u32Y     : unsigned32;
+  Bitmap   : TBitmap;
+  pLineIn  : pScanline;
+  pLineOut : pWordArray;
 begin
-//ToDo
-//     BM.PixelFormat:=pf8Bit;
+  Bitmap:=TBitmap.Create();
+  Bitmap.Width :=BM.Width;
+  Bitmap.Height:=BM.Height;
+  Bitmap.PixelFormat:=pf16Bit;
+
+  BM.PixelFormat :=pf24Bit;
+
+  case (Bits) of
+    1  : Bitmap.PixelFormat:=pf1Bit; //todo
+    8  : Bitmap.PixelFormat:=pf8Bit; //todo
+    16 : Bitmap.PixelFormat:=pf16Bit;
+    24 : Bitmap.PixelFormat:=pf24Bit;
+  end;
+
+  for u32Y:=0 to Bitmap.Height - 1 do
+    begin
+      pLineIn := BM.ScanLine [u32Y];
+      pLineOut:= pWordArray(Bitmap.ScanLine[u32Y]);
+
+      for u32X:=0 to Bitmap.Width - 1 do
+        begin
+          //Beim Pixelzugriff wird das Farbformat automatisch getauscht
+          Bitmap.Canvas.Pixels[u32x,u32y] := BM.Canvas.Pixels[u32x,u32y];
+        end;
+      end;
+    BM.Assign(Bitmap);
+    Bitmap.Free();
 end;
+
+
 /////////////////////////////////////////////////////////////////////////////////
 //Konvertierfunktionen
 //Color in RGB konvertieren
