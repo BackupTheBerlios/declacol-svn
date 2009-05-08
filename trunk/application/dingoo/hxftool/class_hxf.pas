@@ -266,7 +266,6 @@ var
   u32Index : unsigned32;
 begin
   result:=FALSE;
-
   u32Index:=0;
   while (u32Index < u32FatSize) and (result=FALSE) do
     begin
@@ -286,7 +285,6 @@ var
   u32Index : unsigned32;
 begin
   result:=FALSE;
-
   u32Index:=0;
   while (u32Index < u32FatSize) and (result=FALSE) do
     begin
@@ -331,6 +329,7 @@ begin
   aHeader.version:='0100';
   DateTimeToString(sTemp,'yyyymmddhhnn',Now());
   move(sTemp[1],aHeader.timestamp[0],SizeOf(aHeader.timestamp));
+  aHeader.timestamp:='200801291107';
   aHeader.crc:=createchecksum();
   aHeader.size:=getfilesize(hFile,nil);
   aHeader.id1:=HEADER_ID1;

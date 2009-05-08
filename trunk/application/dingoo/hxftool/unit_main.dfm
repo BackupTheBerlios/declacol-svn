@@ -3,7 +3,7 @@ object fmMain: TfmMain
   Top = 124
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsToolWindow
-  Caption = 'Dingoo Patcher v0.2'
+  Caption = 'Dingoo Patcher v0.3'
   ClientHeight = 377
   ClientWidth = 506
   Color = clBtnFace

@@ -24,7 +24,7 @@ type tlngheader = packed record
   count     : unsigned32;
   marker    : unsigned32;
   stringoff : unsigned32;
-  filename  : array[0..11] of byte;
+  filename  : array[0..11] of char;
 end;
 
 type tlngrecord = packed record
@@ -61,11 +61,13 @@ var
   sTemp   : Widestring;
 begin
   //Die Datemetriken bestimmen
+  fillmemory(addr(header),sizeof(header),0);
   header.id        :=HEADER_ID;
   header.version   :=HEADER_VERSION;
   header.count     :=strings.count;
   header.marker    :=LNG_MARKER;
   header.stringoff :=sizeof(header) + (sizeof(entry) * header.count);
+  header.filename  :='Ó¢ÎÄ';
 
   //Benötigten Platz bestimmen
   u32Size:=header.stringoff;
@@ -131,6 +133,8 @@ var
   u32Size : unsigned32;
   u32Index: unsigned32;
   aTemp   : array of widechar;
+  u32Slice: unsigned32;
+  sTemp   : string;
 begin
   result:=FALSE;
 
@@ -150,7 +154,22 @@ begin
 
           //Rauskopieren und in der Tabelle ablegen
           copymemory(addr(aTemp[0]),addr(data[header.stringoff+entry.offset]),entry.size);
-          strings.Add(WideCharLenToString(addr(aTemp[0]),entry.size shr 1));
+
+          sTemp:=WideCharLenToString(addr(aTemp[0]),entry.size shr 1);
+
+          //Dank TeamDingo nullen am Ende eines Strings entfernen
+          u32slice:=length(sTemp);
+          if (u32SLice > 0) then
+            begin
+              while (sTemp[u32Slice]=#0) do
+                begin
+                  dec(u32slice);
+                  sTemp:=copy(sTemp,1,u32Slice);
+                end;
+            end;
+
+          strings.Add(sTemp);
+
 
           inc(u32index,sizeof(entry));
           dec(u32Size);

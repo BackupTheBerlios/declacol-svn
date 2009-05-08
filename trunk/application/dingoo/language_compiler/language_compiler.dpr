@@ -511,5 +511,4 @@ begin
         end;
       compile(sIn,sOut);
     end;
-  readln;
 end.
