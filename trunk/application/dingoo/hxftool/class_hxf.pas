@@ -40,6 +40,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 type Thxfreader = class (TObject)
   private
+    sFilename  : longstring;
     aFAT       : array of Thxfrecord;
     u32FatSize : unsigned32;
     u32FatIndex: unsigned32; 
@@ -65,6 +66,8 @@ type Thxfreader = class (TObject)
 
     function    createchecksum():unsigned32;
     function    writeheader():boolean;
+
+    property    hxffile : longstring read sfilename;
 
     property    count : unsigned32 read u32FATSize;
     property    size  : unsigned32 read u32HXFSize;
@@ -96,8 +99,12 @@ begin
       u32Error:=HXF_ERROR_NONE;
       self.u32hxfcrc:=createchecksum();
       Self.analyze();
-    end;
 
+      if (hFile <> INVALID_HANDLE_VALUE) then
+        begin
+          sFilename:=filename;
+        end;
+    end;
 end;
 
 destructor  Thxfreader.free();
@@ -107,6 +114,7 @@ begin
       writeheader();
       closehandle(hFile);
     end;
+  sFilename:='';
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -230,6 +238,12 @@ begin
 
   //Was gefunden?
   result:=u32FatSize > 0;
+
+  if (result=FALSE) then
+    begin
+      closehandle(hFile);
+      hFile:=INVALID_HANDLE_VALUE;
+    end;
 end;
 
 
@@ -311,6 +325,9 @@ begin
           //Und Buffer schreiben
           u32write:=filewrite(hFile,data.buffer[0],data.size);
           result:=u32write = data.size;
+
+          //Ein ein flushing zu erzwingen bewegen wir den Dateizeiger
+          fileseek(hFile,0,0);
         end;
     end;
 end;
@@ -329,7 +346,7 @@ begin
   aHeader.version:='0100';
   DateTimeToString(sTemp,'yyyymmddhhnn',Now());
   move(sTemp[1],aHeader.timestamp[0],SizeOf(aHeader.timestamp));
-  aHeader.timestamp:='200801291107';
+//  aHeader.timestamp:='200801291107';
   aHeader.crc:=createchecksum();
   aHeader.size:=getfilesize(hFile,nil);
   aHeader.id1:=HEADER_ID1;

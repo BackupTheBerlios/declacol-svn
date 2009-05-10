@@ -1,9 +1,9 @@
 object fmMain: TfmMain
-  Left = 218
-  Top = 124
+  Left = 274
+  Top = 178
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsToolWindow
-  Caption = 'Dingoo Patcher v0.3'
+  Caption = 'Dingoo Patcher v0.5'
   ClientHeight = 377
   ClientWidth = 506
   Color = clBtnFace
@@ -15,6 +15,7 @@ object fmMain: TfmMain
   Menu = mmMain
   OldCreateOrder = False
   Position = poScreenCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -23,7 +24,7 @@ object fmMain: TfmMain
     Top = 0
     Width = 505
     Height = 377
-    ActivePage = tsLanguage
+    ActivePage = tsPatches
     TabOrder = 0
     object tsFiles: TTabSheet
       Caption = 'Files'
@@ -90,8 +91,9 @@ object fmMain: TfmMain
       end
     end
     object tsPatches: TTabSheet
-      Caption = 'Patches'
+      Caption = 'Firmware Patches'
       ImageIndex = 1
+      OnShow = tsPatchesShow
       object gbPatches: TGroupBox
         Left = 0
         Top = 0
@@ -99,6 +101,27 @@ object fmMain: TfmMain
         Height = 345
         Caption = 'Patches'
         TabOrder = 0
+        object Label5: TLabel
+          Left = 8
+          Top = 296
+          Width = 115
+          Height = 13
+          Caption = 'Available Language one'
+        end
+        object Label6: TLabel
+          Left = 160
+          Top = 296
+          Width = 114
+          Height = 13
+          Caption = 'Available Language two'
+        end
+        object Label7: TLabel
+          Left = 312
+          Top = 296
+          Width = 121
+          Height = 13
+          Caption = 'Available Language three'
+        end
         object btDirNamesToLower: TButton
           Left = 8
           Top = 16
@@ -136,6 +159,57 @@ object fmMain: TfmMain
           ShowHint = True
           TabOrder = 2
           OnClick = btThemepatchClick
+        end
+        object cbAvLanguage1: TComboBox
+          Left = 8
+          Top = 312
+          Width = 145
+          Height = 21
+          ItemHeight = 13
+          TabOrder = 3
+          OnChange = cbAvLanguage1Change
+          Items.Strings = (
+            'Chinese'
+            'Chinese (bold)'
+            'English'
+            'German'
+            'Italien'
+            'Spanish'
+            'Polish')
+        end
+        object cbAvLanguage2: TComboBox
+          Left = 160
+          Top = 312
+          Width = 145
+          Height = 21
+          ItemHeight = 13
+          TabOrder = 4
+          OnChange = cbAvLanguage2Change
+          Items.Strings = (
+            'Chinese'
+            'Chinese (bold)'
+            'English'
+            'German'
+            'Italien'
+            'Spanish'
+            'Polish')
+        end
+        object cbAvLanguage3: TComboBox
+          Left = 312
+          Top = 312
+          Width = 145
+          Height = 21
+          ItemHeight = 13
+          TabOrder = 5
+          OnChange = cbAvLanguage3Change
+          Items.Strings = (
+            'Chinese'
+            'Chinese (bold)'
+            'English'
+            'German'
+            'Italien'
+            'Spanish'
+            'Polish')
         end
       end
     end
@@ -14631,7 +14705,7 @@ object fmMain: TfmMain
       end
     end
     object tsLanguage: TTabSheet
-      Caption = 'Language'
+      Caption = 'Translation'
       ImageIndex = 3
       OnShow = tsLanguageShow
       object GroupBox1: TGroupBox
@@ -14731,9 +14805,9 @@ object fmMain: TfmMain
           TabOrder = 0
           OnChange = cbLanguageChange
           Items.Strings = (
-            'Simplyfied Chinese (Bold)'
-            'Simplyfied Chinese'
-            'English')
+            'Language One'
+            'Language Two'
+            'Language Three')
         end
         object cbPoweroff: TComboBox
           Left = 176

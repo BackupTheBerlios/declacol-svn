@@ -63,6 +63,12 @@ type
     Label4: TLabel;
     pmLanguage: TPopupMenu;
     dumptofile1: TMenuItem;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    cbAvLanguage1: TComboBox;
+    cbAvLanguage2: TComboBox;
+    cbAvLanguage3: TComboBox;
     procedure mOpenClick(Sender: TObject);
     procedure mCloseClick(Sender: TObject);
     procedure lockfunctions();
@@ -95,6 +101,11 @@ type
     procedure btThemepatchClick(Sender: TObject);
     procedure cbBrightnessChange(Sender: TObject);
     procedure dumptofile1Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure tsPatchesShow(Sender: TObject);
+    procedure cbAvLanguage1Change(Sender: TObject);
+    procedure cbAvLanguage2Change(Sender: TObject);
+    procedure cbAvLanguage3Change(Sender: TObject);
 
   private
     hxf     : Thxfreader;
@@ -114,6 +125,8 @@ type
 var
   fmMain: TfmMain;
   bHXF : boolean = FALSE;
+  aLanguageConfig   : array[0..2] of unsigned32;
+  aLanguagePosition : array[0..2] of unsigned32;
 
 implementation
 
@@ -197,10 +210,6 @@ end;
 
 procedure TfmMain.mExitClick(Sender: TObject);
 begin
-  if (mClose.Enabled) then
-    begin
-      mCloseClick(Self);
-    end;
   Close();
 end;
 
@@ -249,6 +258,16 @@ begin
   addlog('checksum  : '+ inttohex(hxf.header.crc,12));
   addlog('');
 end;
+
+procedure TfmMain.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  //Datei auf jeden Fall immer schließen
+  if (mClose.Enabled) then
+    begin
+      mCloseClick(Self);
+    end;
+end;
+
 
 /////////////////////////////////////////////////////////////////////////////////
 // Hexviewer
@@ -457,7 +476,7 @@ begin
     end;
 
   //Und abspeichern
-  if (hxf.get(LNG_ENGLISH,aTemp)=TRUE) then
+  if (hxf.get(FILE_ENGLISH1,aTemp)=TRUE) then
     begin
       lng:=tlanguageencoder.Create();
       if (lng.pack(aTemp.buffer,TStringList(lbLanguage.items))=TRUE) then
@@ -485,7 +504,7 @@ var
   lng      : tlanguageencoder;
   strings  : TStringlist;
 begin
-  if (hxf.get(LNG_ENGLISH,aTemp)=TRUE) then
+  if (hxf.get(FILE_ENGLISH1,aTemp)=TRUE) then
     begin
       strings:=tStringlist.Create;
       lng:=tlanguageencoder.Create();
@@ -577,6 +596,146 @@ end;
 /////////////////////////////////////////////////////////////////////////////////
 /// Vorgegebene Patches
 /////////////////////////////////////////////////////////////////////////////////
+procedure TfmMain.tsPatchesShow(Sender: TObject);
+var
+  u32LNG      : unsigned32;
+  u32Index    : unsigned32;
+  u32FoundPos : unsigned32;
+  u32FoundLNG : unsigned32;
+  aTemp       : thxfrecord;
+  aLanguage   : array[0..3*sizeof(aLangConf[ID_ENGLISH1])] of byte;
+begin
+
+  hxf.get('ccpmp.bin',aTemp);
+  //Da die Sprachverknüpfungen nicht immer am selben Platz liegen,
+  //suchen wir die erste und die beiden anderen sind hinten dran
+  u32foundPos:=high(unsigned32);
+  u32FoundLNG:=0;
+  u32LNG:=0;
+
+  cbAVLanguage1.Clear();
+  cbAVLanguage2.Clear();
+  cbAVLanguage3.Clear();
+
+  while (u32LNG < ID_LNG_MAX) do
+    begin
+      //Auf die Harte Tour die erste Sprache suche
+      if (search(aTemp.buffer,aLangConf[u32LNG],u32Index)=TRUE) and
+         (u32Index < u32foundpos) then
+        begin
+          u32foundpos:=u32Index;
+          u32foundlng:=u32lng;
+        end;
+
+      //Sprachbezeichner einfügen
+      cbAVLanguage1.Items.Add(aLangName[u32Lng]);
+      cbAVLanguage2.Items.Add(aLangName[u32Lng]);
+      cbAVLanguage3.Items.Add(aLangName[u32Lng]);
+
+      inc(u32LNG);
+    end;
+
+  //Den Sprachblock holen
+  move (aTemp.buffer[u32foundpos],aLanguage,SizeOf(aLanguage));
+  cbAVLanguage1.ItemIndex:=u32foundlng;
+
+  //Adressen merken
+  aLanguagePosition[0]:=u32foundpos;
+  aLanguagePosition[1]:=u32foundpos + sizeof(aLangConf[ID_ENGLISH1]);
+  aLanguagePosition[2]:=u32foundpos + sizeof(aLangConf[ID_ENGLISH1]) + sizeof(aLangConf[ID_ENGLISH1]);
+
+  //Und die Dropdownboxen setzen
+  u32LNG:=0;
+  while (u32LNG < ID_LNG_MAX) do
+    begin
+      if (search(aLanguage,aLangConf[u32LNG],u32foundpos)=TRUE) then
+        begin
+          case (u32foundpos div sizeof(aLangConf[u32LNG])) of
+            0 : aLanguageConfig[0]:=u32LNG;
+            1 : aLanguageConfig[1]:=u32LNG;
+            2 : aLanguageConfig[2]:=u32LNG;
+          end;
+        end;
+      inc(u32LNG);
+    end;
+
+  cbAVLanguage1.ItemIndex:=aLanguageConfig[0];
+  cbAVLanguage2.ItemIndex:=aLanguageConfig[1];
+  cbAVLanguage3.ItemIndex:=aLanguageConfig[2];
+
+end;
+
+procedure TfmMain.cbAvLanguage1Change(Sender: TObject);
+var
+  s32LNG : signed32;
+  aTemp : Thxfrecord;
+  u32index : unsigned32;
+begin
+  //Neue Sprachkonfiguration schreibem
+  s32LNG:=cbAvLanguage1.ItemIndex;
+  if (s32LNG >= 0) then
+    begin
+      hxf.get('ccpmp.bin',aTemp);
+
+      u32index:=0;
+      while (u32index < sizeof(aLangConf[s32LNG])) do
+        begin
+          aTemp.buffer[aLanguagePosition[0] + u32Index] := aLangConf[s32LNG][u32INdex];
+          inc(u32index);
+        end;
+
+      hxf.put(aTemp);
+      addlog('changing language one to '+aLangName[s32LNG]);
+    end;
+end;
+
+procedure TfmMain.cbAvLanguage2Change(Sender: TObject);
+var
+  s32LNG : signed32;
+  aTemp : Thxfrecord;
+  u32index : unsigned32;
+begin
+  //Neue Sprachkonfiguration schreibem
+  s32LNG:=cbAvLanguage2.ItemIndex;
+  if (s32LNG >= 0) then
+    begin
+      hxf.get('ccpmp.bin',aTemp);
+
+      u32index:=0;
+      while (u32index < sizeof(aLangConf[s32LNG])) do
+        begin
+          aTemp.buffer[aLanguagePosition[1] + u32Index] := aLangConf[s32LNG][u32INdex];
+          inc(u32index);
+        end;
+      hxf.put(aTemp);
+      addlog('changing language two to '+aLangName[s32LNG]);
+    end;
+end;
+
+procedure TfmMain.cbAvLanguage3Change(Sender: TObject);
+var
+  s32LNG : signed32;
+  aTemp : Thxfrecord;
+  u32index : unsigned32;
+begin
+  //Neue Sprachkonfiguration schreibem
+  s32LNG:=cbAvLanguage3.ItemIndex;
+  if (s32LNG >= 0) then
+    begin
+      hxf.get('ccpmp.bin',aTemp);
+
+      u32index:=0;
+      while (u32index < sizeof(aLangConf[s32LNG])) do
+        begin
+          aTemp.buffer[aLanguagePosition[2] + u32Index] := aLangConf[s32LNG][u32INdex];
+          inc(u32index);
+        end;
+      hxf.put(aTemp);
+      addlog('changing language three to '+aLangName[s32LNG]);
+    end;
+end;
+
+
 procedure TfmMain.btDirNamesToLowerClick(Sender: TObject);
 begin
   sar('ccpmp.bin','A:\GAME'   ,'a:\game');
@@ -633,7 +792,7 @@ begin
   sar('ccpmp.bin','z:\system\font\'+#00        ,'a:\system\font\'+#00);
   sar('ccpmp.bin','z:\system\res\'+#00         ,'a:\system\res\'+#00);
 
-  sTemp:=string_append(getcurrentdir(),'\');
+  sTemp:=string_append(extractfilepath(hxf.hxffile),'\');
   sTemp:=sTemp + 'hxf_dump\';
   //Dateien exportieren
   if (hxf.getfirst(aTemp)=TRUE) then
@@ -645,9 +804,9 @@ begin
         u32pos3:=pos('emulator'    ,aTemp.filename);
 
 
-        if (( u32pos1 > 0) and (u32pos1 < 2)) or
-           (( u32pos2 > 0) and (u32pos2 < 2)) or
-           (( u32pos3 > 0) and (u32pos3 < 2)) then
+        if (( u32pos1 > 0) and (u32pos1 <= 2)) or
+           (( u32pos2 > 0) and (u32pos2 <= 2)) or
+           (( u32pos3 > 0) and (u32pos3 <= 2)) then
            begin
             hextofile(sTemp + aTemp.filename,addr(aTemp.buffer[0]),aTemp.size);
            end;
@@ -700,7 +859,7 @@ end;
 //ein kleine Signatur in die Firmware schreiben
 procedure tfmmain.addsignature();
 begin
-  sar('ccpmp.bin','VERDOR ID','SO9 v0.2 ');
+  sar('ccpmp.bin','VERDOR ID','SO9 v0.5 ');
 end;
 
 
@@ -708,6 +867,13 @@ procedure TfmMain.About1Click(Sender: TObject);
 begin
   fmAbout.ShowModal();
 end;
+
+
+
+
+
+
+
 
 
 

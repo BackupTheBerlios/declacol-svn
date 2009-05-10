@@ -1,0 +1,57 @@
+Zeichenkodierungen
+
+语言.dlx indexfile
+
+filename      Language    encoding
+简体中文.dlx  Chinese one a8 03
+繁体中文.dlx  Chinese two b6 03
+英文.dlx      English     b6 03
+波兰语.dlx    Polish      e2 04
+法语.dlx      French      e4 04  
+德语.dlx      German      e4 04
+意大利语.dlx  Italien     e4 04
+西班牙.dlx    Spanish     e4 04
+
+
+entry format 
+
+filename array[0..15] of char
+encoding unsigned32
+
+
+
+b5 01 ASCII ASC_16x8.bmf
+b5 01 ASCII ASC_20x10.bmf
+
+6a 03 THAI cp874_16.bmf
+6a 03 THAI cp874_20.bmf
+
+a8 03 GBK GBK_16x16.bmf
+a8 03 GBK GBK_20x20.bmf
+
+a4 03 SHIFTJIS cp932_16.bmf
+a4 03 SHIFTJIS cp932_20.bmf
+
+b5 03 HANGUL cp949_16.bmf
+b5 03 HANGUL cp949_20.bmf
+
+b6 03 CHINESEBIG5 BIG5_16x16.bmf
+b6 06 CHINESEBIG5 BIG5_20x20.bmf
+
+e2 04 EASTEUROPE cp1250_16.bmf
+e2 04 EASTEUROPE cp1250_20.bmf
+
+e3 04 RUSSIAN cp1251_16.bmf
+e3 04 RUSSIAN cp1251_20.bmf
+
+e4 04 ANSI cp1252_16.bmf
+e4 04 ANSI cp1252_20.bmf
+
+e5 04 GREEK cp1253_16.bmf
+e5 04 GREEK cp1253_20.bmf
+
+e6 04 TURKISH cp1254_16.bmf
+e6 04 TURKISH cp1254_20.bmf
+
+e8 04 ARABIC cp1256_16.bmf
+e8 04 ARABIC cp1256_20.bmf
