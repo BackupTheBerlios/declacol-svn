@@ -9,14 +9,87 @@ interface
 uses unit_typedefs,sysutils,classes,windows;
 
 const
+  //IDs für die Sprachen MUß mit dem LanguageNameArray synchron sein!!!!!
+  ID_ENGLISH1      = 0;
+  ID_ENGLISH2      = 1;
+  ID_CHINESE1      = 2;
+  ID_CHINESE2      = 3;
+  ID_POLISH        = 4;
+  ID_FRENCH        = 5;
+  ID_GERMAN        = 6;
+  ID_ITALIAN       = 7;
+  ID_SPANISH       = 8;
+  ID_RUSSIAN       = 9;
+  LANGUAGE_COUNT   = 10;
+
+  SIZEOF_ENCODING  = 4;
+  SIZEOF_CONFIG    = 20;
+type
+  TLanguageData = record
+    id       : unsigned32;
+    realname : longstring;
+    filename : longstring;
+    dlxname  : longstring;
+    filepath : longstring;
+    encoding : array[0..SIZEOF_ENCODING-1] of char;
+    config   : array[0..SIZEOF_CONFIG - 1] of char;
+    configb  : array[0..SIZEOF_CONFIG - 1] of byte;
+  end;
+
+
+var
+  //Array mit allen relevanten Daten (wird zur Laufzeit initialisiert)
+  LanguageData  : array[0..LANGUAGE_COUNT - 1] of TLanguageData;
+
+  //Namen aller Sprachen
+  LanguageNames : array[0..LANGUAGE_COUNT - 1] of longstring =
+      (
+      'english (ascii)',
+      'english (utf)',
+      'chinese 1',
+      'chinese 2',
+      'polish',
+      'french',
+      'german',
+      'italian',
+      'spanish',
+      'russian'
+      );
+
+  LanguageFiles : array[0..LANGUAGE_COUNT - 1] of longstring =
+      (
+      'Ó¢ÎÄ',         // english
+      'Ó¢ÎÄ',         // english
+      '¼òÌåÖÐÎÄ',     // chinese 1
+      '·±ÌåÖÐÎÄ',     // chinese 2
+      '²¨À¼Óï',       // polish
+      '·¨Óï',         // french
+      'µÂÓï',         // german
+      'Òâ´óÀûÓï',     // italian
+      'Î÷°àÑÀ',       // spanish
+      '¶íÓï'          // russian
+      );
+
+  LanguageEncoding : array[0..LANGUAGE_COUNT - 1] of array[0..3] of char =
+      (
+      #$b6 + #$03 + #$00 + #$00,    //English 1
+      #$e4 + #$04 + #$00 + #$00,    //English 2
+      #$a8 + #$03 + #$00 + #$00,    //Chinese 1
+      #$b6 + #$03 + #$00 + #$00,    //Chinese 2
+      #$e2 + #$04 + #$00 + #$00,    //Polish
+      #$e4 + #$04 + #$00 + #$00,    //French
+      #$e4 + #$04 + #$00 + #$00,    //German
+      #$e4 + #$04 + #$00 + #$00,    //Italian
+      #$e4 + #$04 + #$00 + #$00,    //Spanish
+      #$e3 + #$04 + #$00 + #$00     //Russian
+      );
+
+
+const
   HEADER_SIZE    = 32;
   HEADER_ID      = $2d584c44; // => DLX-
   HEADER_VERSION = $00000001; //?
   LNG_MARKER     = $19811108; //?
-
-  ID_ENGLISH     = 'Ó¢ÎÄ';
-
-  LNG_ENGLISH = 'system\nls\'+ID_ENGLISH+'.dlx';
 
 type tlngheader = packed record
   id        : unsigned32;
@@ -47,6 +120,8 @@ end;
 
 implementation
 
+var
+  u32index : unsigned32;
 ////////////////////////////////////////////////////////////////////////////////
 // Aus einer Stringliste einen validen Sprachfile machen
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +195,7 @@ begin
       result:=FALSE;
     end;
 
-    
+
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -177,4 +252,42 @@ begin
       result:=TRUE;
     end;
 end;
+
+initialization
+
+  //Die Datenarrays für die Sprachen füllen
+  u32index:=0;
+  while (u32index < unsigned32(length(LanguageNames))) do
+    begin
+      fillmemory(Addr(LanguageData[u32Index]),SizeOf(LanguageData[u32Index]),0);
+
+      //Hilfreiche Infos
+      LanguageData[u32Index].id:=u32Index;
+      LanguageData[u32Index].realname:=LanguageNames[u32Index];
+      LanguageData[u32Index].filename:=LanguageFiles[u32Index];
+      LanguageData[u32Index].dlxname:=LanguageFiles[u32Index]+'.dlx';
+      LanguageData[u32Index].filepath:='system\nls\'+LanguageFiles[u32Index]+'.dlx';
+
+      //UTF-Encoding als CharArray
+      LanguageData[u32Index].encoding[0]:=LanguageEncoding[u32Index][0];
+      LanguageData[u32Index].encoding[1]:=LanguageEncoding[u32Index][1];
+      LanguageData[u32Index].encoding[2]:=LanguageEncoding[u32Index][2];
+      LanguageData[u32Index].encoding[3]:=LanguageEncoding[u32Index][3];
+
+      //UTF-Config-Sequenz als CharArray
+      move(LanguageData[u32Index].dlxname[1],LanguageData[u32Index].config[0],Length(LanguageData[u32Index].dlxname));
+      LanguageData[u32Index].config[16]:=LanguageEncoding[u32Index][0];
+      LanguageData[u32Index].config[17]:=LanguageEncoding[u32Index][1];
+      LanguageData[u32Index].config[18]:=LanguageEncoding[u32Index][2];
+      LanguageData[u32Index].config[19]:=LanguageEncoding[u32Index][3];
+
+      //UTF-Config-Sequenz als ByteArray
+      move(LanguageData[u32Index].config[0],LanguageData[u32Index].configb[0],Length(LanguageData[u32Index].configb));
+
+
+      inc(u32Index);
+    end;
+
+
+
 end.
