@@ -3,7 +3,7 @@ object fmMain: TfmMain
   Top = 178
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsToolWindow
-  Caption = 'Dingoo Patcher v0.5'
+  Caption = 'Dingoo Patcher v0.6'
   ClientHeight = 377
   ClientWidth = 506
   Color = clBtnFace
@@ -24,7 +24,7 @@ object fmMain: TfmMain
     Top = 0
     Width = 505
     Height = 377
-    ActivePage = tsPatches
+    ActivePage = tsDefaults
     TabOrder = 0
     object tsFiles: TTabSheet
       Caption = 'Files'
@@ -14708,12 +14708,12 @@ object fmMain: TfmMain
       Caption = 'Translation'
       ImageIndex = 3
       OnShow = tsLanguageShow
-      object GroupBox1: TGroupBox
+      object gbLanguages: TGroupBox
         Left = 0
         Top = 0
         Width = 497
         Height = 345
-        Caption = 'Log'
+        Caption = 'Language'
         TabOrder = 0
         object lbLanguageSize: TLabel
           Left = 8
@@ -14724,9 +14724,9 @@ object fmMain: TfmMain
         end
         object lbLanguage: TListBox
           Left = 8
-          Top = 12
+          Top = 40
           Width = 481
-          Height = 277
+          Height = 249
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = 15
@@ -14754,6 +14754,15 @@ object fmMain: TfmMain
           Height = 21
           TabOrder = 2
           OnKeyPress = edLanguageKeyPress
+        end
+        object cbLanguages: TComboBox
+          Left = 8
+          Top = 16
+          Width = 145
+          Height = 21
+          ItemHeight = 0
+          TabOrder = 3
+          OnChange = cbLanguagesChange
         end
       end
     end

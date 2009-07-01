@@ -50,6 +50,7 @@ type Thxfreader = class (TObject)
     u32hxfcrc  : unsigned32;
     u32Error   : unsigned32;
     bIgnoreErrors : boolean;
+    bBurned    : boolean;
   protected
 
   public
@@ -111,7 +112,10 @@ destructor  Thxfreader.free();
 begin
   if (hFile <> INVALID_HANDLE_VALUE) then
     begin
-      writeheader();
+      if (bBurned=TRUE) then
+        begin
+          writeheader();
+        end;
       closehandle(hFile);
     end;
   sFilename:='';
@@ -244,6 +248,8 @@ begin
       closehandle(hFile);
       hFile:=INVALID_HANDLE_VALUE;
     end;
+
+  bBurned:=FALSE;
 end;
 
 
@@ -328,6 +334,10 @@ begin
 
           //Ein ein flushing zu erzwingen bewegen wir den Dateizeiger
           fileseek(hFile,0,0);
+
+          //Headeranpassung beim Schlieﬂen erzwingen
+          bBurned:=TRUE;
+
         end;
     end;
 end;

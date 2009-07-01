@@ -34,14 +34,21 @@ uses unit_typedefs,unit_filesystem,sysutils,windows;
 //Zurückgegeben wir die Anzahl der Ersetzungen
 function searchandreplace(var data : array of byte; search : array of byte; replace : array of byte):unsigned32;
 
-function search(var data : array of byte; search : array of byte; var found : unsigned32):boolean;
+//In einem Array suchen
+function hexsearch(var data : array of byte; search : array of byte; offset : unsigned32; var found : unsigned32):boolean;
 
+//Eine Hexdatei abspeichern
 function hextofile(filename : longstring; data : pointer; size : unsigned32):boolean;
+//Eine Hexdatei laden
+function filetohex(filename : longstring; var data : array of byte; var size :unsigned32):boolean;
+
+//Zwischen zwei arrays kopieren
+function hexcopy(var source : array of byte; var target : array of byte; start : unsigned32; size : unsigned32):unsigned32;
 
 implementation
 
 //Nach eine Bytefolge suchen
-function search(var data : array of byte; search : array of byte; var found : unsigned32):boolean;
+function hexsearch(var data : array of byte; search : array of byte; offset : unsigned32; var found : unsigned32):boolean;
 var
   u32SLen   : unsigned32;
   u32HLen   : unsigned32;
@@ -59,7 +66,7 @@ begin
   //Längenfeler abfangen
   if (u32HLen > 0) and (u32SLen > 0) then
     begin
-      u32HIndex:=0;
+      u32HIndex:=offset;
 
       //Eins abziehen da wir das Offset brauchen
       dec(u32SLen);
@@ -194,9 +201,67 @@ begin
     begin
       result:=FALSE;
     end;
-
-
 end;
 
+function filetohex(filename : longstring; var data : array of byte; var size :unsigned32):boolean;
+var
+  hFile : THandle;
+begin
+  size:=0;
+
+  hFile:=fileopen(Filename,fmOPENREAD);
+
+  if (hFile <> INVALID_HANDLE_VALUE) then
+    begin
+      //Dateigröße holen
+      size:=fileseek(hFile,0,2);
+      fileseek(hFile,0,0);
+
+      if ( size <= unsigned32(length(data)) ) then
+        begin
+          size:=fileread(hFile,data[0],length(data));
+          result:=TRUE;
+        end
+      else
+        begin
+          result:=FALSE;
+        end;
+      closehandle(hFile);
+    end
+  else
+    begin
+      result:=FALSE;
+    end;
+end;
+
+
+
+function hexcopy(var source : array of byte; var target : array of byte; start : unsigned32; size : unsigned32):unsigned32;
+var
+  u32source : unsigned32;
+  u32target : unsigned32;
+begin
+  //Fehler abfangen
+  if (start + size > unsigned32(length(source))) then
+    begin
+      size:=unsigned32(Length(source)) -  start;
+    end;
+
+  if (unsigned32(length(target)) < size) then
+    begin
+      size:=length(target);
+    end;
+
+  result:=size;
+  u32source:=start;
+  u32target:=0;
+  while (size > 0) do
+    begin
+      target[u32target]:=source[u32source];
+      inc(u32source);
+      inc(u32target);
+      dec(size);
+    end;
+end;
 
 end.

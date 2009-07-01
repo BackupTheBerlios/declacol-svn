@@ -43,7 +43,7 @@ type
     dgOpenBitmap: TOpenPictureDialog;
     N2: TMenuItem;
     About1: TMenuItem;
-    GroupBox1: TGroupBox;
+    gbLanguages: TGroupBox;
     lbLanguage: TListBox;
     btSaveWord: TButton;
     lbLanguageSize: TLabel;
@@ -69,6 +69,7 @@ type
     cbAvLanguage1: TComboBox;
     cbAvLanguage2: TComboBox;
     cbAvLanguage3: TComboBox;
+    cbLanguages: TComboBox;
     procedure mOpenClick(Sender: TObject);
     procedure mCloseClick(Sender: TObject);
     procedure lockfunctions();
@@ -84,7 +85,7 @@ type
     procedure tsLogonShow(Sender: TObject);
     procedure tsLogoffShow(Sender: TObject);
 
-    procedure enumlanguage();
+    procedure enumlanguage(filename : string);
     procedure tsLanguageShow(Sender: TObject);
     procedure lbLanguageClick(Sender: TObject);
     procedure btSaveWordClick(Sender: TObject);
@@ -104,12 +105,14 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure tsPatchesShow(Sender: TObject);
     procedure cbAvLanguage1Change(Sender: TObject);
+    procedure cbLanguagesChange(Sender: TObject);
     procedure cbAvLanguage2Change(Sender: TObject);
     procedure cbAvLanguage3Change(Sender: TObject);
 
   private
-    hxf     : Thxfreader;
-    hxfdata : thxfrecord;
+    hxf       : Thxfreader;
+    hxfdata   : thxfrecord;
+    sLangfile : longstring;
 
     { Private-Deklarationen }
     procedure addlog(txt : longstring);
@@ -117,6 +120,7 @@ type
     procedure sar (filename : longstring; search : longstring; replace : longstring); overload;
     procedure sar(filename : longstring; search : array of byte; replace : array of byte); overload;
     procedure addsignature();
+    procedure savelanguagesettings(langindex : unsigned32; languageid : unsigned32);
 
   public
     { Public-Deklarationen }
@@ -125,8 +129,8 @@ type
 var
   fmMain: TfmMain;
   bHXF : boolean = FALSE;
-  aLanguageConfig   : array[0..2] of unsigned32;
-  aLanguagePosition : array[0..2] of unsigned32;
+  aLangID  : array of unsigned32;
+  aLangPos : array of unsigned32;
 
 implementation
 
@@ -405,7 +409,7 @@ begin
       if (Bitmap.Width <> 320) AND (Bitmap.Height <> 240) then
         begin
           bitmap_resample(Bitmap,320,240);
-          addlog('resampling bitmap'); 
+          addlog('resampling bitmap');
         end;
       bitmap_changecolordeepth(Bitmap,16);
 
@@ -448,10 +452,60 @@ end;
 // Languageviewer
 /////////////////////////////////////////////////////////////////////////////////
 procedure TfmMain.tsLanguageShow(Sender: TObject);
+var
+  u32Index : unsigned32;
 begin
-  enumlanguage();
-  edLanguage.Text:='';
-  btSaveWordClick(Self);
+  //Sprachen enumerieren
+  cbLanguages.Clear();
+
+  u32Index:=0;
+  while (u32Index < unsigned32(length(LanguageData))) do
+    begin
+      if (hxf.exists(LanguageData[u32Index].filepath)=TRUE) then
+        begin
+          cbLanguages.items.add(LanguageData[u32Index].realname);
+        end;
+      inc(u32Index);
+    end;
+
+  //Und alles klarmachen
+  if (cbLanguages.Items.count > 0) then
+    begin
+      cbLanguages.ItemIndex:=0;
+      cbLanguagesChange(Self);
+      gbLanguages.Enabled:=TRUE;
+    end
+  else
+    begin
+      gbLanguages.Enabled:=FALSE;
+    end;
+end;
+
+procedure TfmMain.cbLanguagesChange(Sender: TObject);
+var
+  sLang    : longstring;
+  u32Index : unsigned32;
+begin
+    if (cbLanguages.ItemIndex >=0) then
+      begin
+        sLang:=cbLanguages.Items[cbLanguages.ItemIndex];
+      end;
+
+    u32Index:=0;
+    while(u32Index < unsigned32(length(LanguageData))) do
+      begin
+        if (sLang = LanguageData[u32Index].realname) then
+          begin
+            //Sprache laden
+            enumlanguage(LanguageData[u32Index].filepath);
+            edLanguage.Text:='';
+            btSaveWordClick(Self);
+
+            //Und abbrechen
+            u32Index:=Length(LanguageData);
+          end;
+        inc(u32Index);
+      end;
 end;
 
 procedure TfmMain.lbLanguageClick(Sender: TObject);
@@ -476,7 +530,7 @@ begin
     end;
 
   //Und abspeichern
-  if (hxf.get(FILE_ENGLISH1,aTemp)=TRUE) then
+  if (hxf.get(sLangfile,aTemp)=TRUE) then
     begin
       lng:=tlanguageencoder.Create();
       if (lng.pack(aTemp.buffer,TStringList(lbLanguage.items))=TRUE) then
@@ -497,14 +551,17 @@ begin
     end;
 end;
 
+
 //Alle Einträge ablegen
-procedure tfmMain.enumlanguage();
+procedure tfmMain.enumlanguage(filename:string);
 var
   aTemp    : Thxfrecord;
   lng      : tlanguageencoder;
   strings  : TStringlist;
 begin
-  if (hxf.get(FILE_ENGLISH1,aTemp)=TRUE) then
+  sLangfile:='?';
+
+  if (hxf.get(filename,aTemp)=TRUE) then
     begin
       strings:=tStringlist.Create;
       lng:=tlanguageencoder.Create();
@@ -514,6 +571,8 @@ begin
       lbLanguage.Clear();
       lbLanguage.Items.AddStrings(strings);
       strings.free();
+
+      sLangfile:=filename;
     end;
 end;
 
@@ -598,140 +657,116 @@ end;
 /////////////////////////////////////////////////////////////////////////////////
 procedure TfmMain.tsPatchesShow(Sender: TObject);
 var
-  u32LNG      : unsigned32;
   u32Index    : unsigned32;
   u32FoundPos : unsigned32;
-  u32FoundLNG : unsigned32;
+  u32Temp     : unsigned32;
   aTemp       : thxfrecord;
-  aLanguage   : array[0..3*sizeof(aLangConf[ID_ENGLISH1])] of byte;
 begin
-
-  hxf.get('ccpmp.bin',aTemp);
-  //Da die Sprachverknüpfungen nicht immer am selben Platz liegen,
-  //suchen wir die erste und die beiden anderen sind hinten dran
-  u32foundPos:=high(unsigned32);
-  u32FoundLNG:=0;
-  u32LNG:=0;
-
+  //Alles löschen
+  setlength(aLangPos,0);
+  setlength(aLangID,0);
   cbAVLanguage1.Clear();
   cbAVLanguage2.Clear();
   cbAVLanguage3.Clear();
 
-  while (u32LNG < ID_LNG_MAX) do
+  //Firmware laden
+  hxf.get('ccpmp.bin',aTemp);
+
+
+  //Da die Sprachverknüpfungen nicht immer am selben Platz liegen,
+  //suchen wir sie
+  u32Index:=0;
+  while (u32Index < unsigned32(length(LanguageData))) do
     begin
       //Auf die Harte Tour die erste Sprache suche
-      if (search(aTemp.buffer,aLangConf[u32LNG],u32Index)=TRUE) and
-         (u32Index < u32foundpos) then
+      if (hexsearch(aTemp.buffer,LanguageData[u32Index].Configb,0,u32FoundPos)=TRUE) then
         begin
-          u32foundpos:=u32Index;
-          u32foundlng:=u32lng;
+          //Array erweitern und Sprache/ID ablegen
+          setlength(aLangPos,Length(aLangPos)+1);
+          aLangPos[Length(aLangPos)-1]:=u32foundpos;
+
+          setlength(aLangID,Length(aLangID)+1);
+          aLangID[Length(aLangID)-1]:=LanguageData[u32Index].id;
         end;
 
-      //Sprachbezeichner einfügen
-      cbAVLanguage1.Items.Add(aLangName[u32Lng]);
-      cbAVLanguage2.Items.Add(aLangName[u32Lng]);
-      cbAVLanguage3.Items.Add(aLangName[u32Lng]);
-
-      inc(u32LNG);
+      //Sprachbezeichner in die Komboboxen kopieren
+      cbAVLanguage1.Items.Add(LanguageData[u32Index].realname);
+      cbAVLanguage2.Items.Add(LanguageData[u32Index].realname);
+      cbAVLanguage3.Items.Add(LanguageData[u32Index].realname);
+      inc(u32Index);
     end;
 
-  //Den Sprachblock holen
-  move (aTemp.buffer[u32foundpos],aLanguage,SizeOf(aLanguage));
-  cbAVLanguage1.ItemIndex:=u32foundlng;
-
-  //Adressen merken
-  aLanguagePosition[0]:=u32foundpos;
-  aLanguagePosition[1]:=u32foundpos + sizeof(aLangConf[ID_ENGLISH1]);
-  aLanguagePosition[2]:=u32foundpos + sizeof(aLangConf[ID_ENGLISH1]) + sizeof(aLangConf[ID_ENGLISH1]);
-
-  //Und die Dropdownboxen setzen
-  u32LNG:=0;
-  while (u32LNG < ID_LNG_MAX) do
+  //Jetzt haben wir alle vergebenen Sprachen in aLanguages
+  //Kurz sortieren
+  u32Index:=0;
+  while (u32Index < unsigned32(Length(aLangPos))) do
     begin
-      if (search(aLanguage,aLangConf[u32LNG],u32foundpos)=TRUE) then
+      u32FoundPos:=0;
+      while (u32Foundpos < unsigned32(Length(aLangPos)-1)) do
         begin
-          case (u32foundpos div sizeof(aLangConf[u32LNG])) of
-            0 : aLanguageConfig[0]:=u32LNG;
-            1 : aLanguageConfig[1]:=u32LNG;
-            2 : aLanguageConfig[2]:=u32LNG;
-          end;
+          if (aLangPos[u32FoundPos] > aLangPos[u32FoundPos+1]) then
+            begin
+              u32Temp:=aLangPos[u32FoundPos+1];
+              aLangPos[u32FoundPos+1]:=aLangPos[u32FoundPos];
+              aLangPos[u32FoundPos]:=u32temp;
+
+              u32Temp:=aLangID[u32FoundPos+1];
+              aLangID[u32FoundPos+1]:=aLangID[u32FoundPos];
+              aLangID[u32FoundPos]:=u32temp;
+            end;
+          inc(u32Foundpos);
         end;
-      inc(u32LNG);
+      inc(u32Index);
     end;
 
-  cbAVLanguage1.ItemIndex:=aLanguageConfig[0];
-  cbAVLanguage2.ItemIndex:=aLanguageConfig[1];
-  cbAVLanguage3.ItemIndex:=aLanguageConfig[2];
+  //Comboboxen zuordnen
+  cbAVLanguage1.ItemIndex:=aLangID[0];
+  cbAVLanguage2.ItemIndex:=aLangID[1];
+  cbAVLanguage3.ItemIndex:=aLangID[2];
 
 end;
 
-procedure TfmMain.cbAvLanguage1Change(Sender: TObject);
+procedure TfmMain.savelanguagesettings(langindex : unsigned32; languageid : unsigned32);
 var
-  s32LNG : signed32;
   aTemp : Thxfrecord;
   u32index : unsigned32;
 begin
   //Neue Sprachkonfiguration schreibem
-  s32LNG:=cbAvLanguage1.ItemIndex;
-  if (s32LNG >= 0) then
+  if (hxf.get('ccpmp.bin',aTemp)=TRUE) then
     begin
-      hxf.get('ccpmp.bin',aTemp);
-
       u32index:=0;
-      while (u32index < sizeof(aLangConf[s32LNG])) do
+      while (u32index < sizeof(LanguageData[0].Configb)) do
         begin
-          aTemp.buffer[aLanguagePosition[0] + u32Index] := aLangConf[s32LNG][u32INdex];
+          aTemp.buffer[aLangPos[langindex] + u32Index] := LanguageData[languageid].configb[u32Index];
           inc(u32index);
         end;
-
       hxf.put(aTemp);
-      addlog('changing language one to '+aLangName[s32LNG]);
+      addlog('changing language to '+LanguageData[languageid].realname);
+    end;
+end;
+
+
+procedure TfmMain.cbAvLanguage1Change(Sender: TObject);
+begin
+  if (cbAVLanguage1.ItemIndex >= 0) then
+    begin
+      savelanguagesettings(0,cbAVLanguage1.ItemIndex);
     end;
 end;
 
 procedure TfmMain.cbAvLanguage2Change(Sender: TObject);
-var
-  s32LNG : signed32;
-  aTemp : Thxfrecord;
-  u32index : unsigned32;
 begin
-  //Neue Sprachkonfiguration schreibem
-  s32LNG:=cbAvLanguage2.ItemIndex;
-  if (s32LNG >= 0) then
+  if (cbAVLanguage2.ItemIndex >= 0) then
     begin
-      hxf.get('ccpmp.bin',aTemp);
-
-      u32index:=0;
-      while (u32index < sizeof(aLangConf[s32LNG])) do
-        begin
-          aTemp.buffer[aLanguagePosition[1] + u32Index] := aLangConf[s32LNG][u32INdex];
-          inc(u32index);
-        end;
-      hxf.put(aTemp);
-      addlog('changing language two to '+aLangName[s32LNG]);
+      savelanguagesettings(1,cbAVLanguage2.ItemIndex);
     end;
 end;
 
 procedure TfmMain.cbAvLanguage3Change(Sender: TObject);
-var
-  s32LNG : signed32;
-  aTemp : Thxfrecord;
-  u32index : unsigned32;
 begin
-  //Neue Sprachkonfiguration schreibem
-  s32LNG:=cbAvLanguage3.ItemIndex;
-  if (s32LNG >= 0) then
+  if (cbAVLanguage3.ItemIndex >= 0) then
     begin
-      hxf.get('ccpmp.bin',aTemp);
-
-      u32index:=0;
-      while (u32index < sizeof(aLangConf[s32LNG])) do
-        begin
-          aTemp.buffer[aLanguagePosition[2] + u32Index] := aLangConf[s32LNG][u32INdex];
-          inc(u32index);
-        end;
-      hxf.put(aTemp);
-      addlog('changing language three to '+aLangName[s32LNG]);
+      savelanguagesettings(2,cbAVLanguage3.ItemIndex);
     end;
 end;
 
@@ -859,7 +894,7 @@ end;
 //ein kleine Signatur in die Firmware schreiben
 procedure tfmmain.addsignature();
 begin
-  sar('ccpmp.bin','VERDOR ID','SO9 v0.5 ');
+  sar('ccpmp.bin','VERDOR ID','SO9 v0.6 ');
 end;
 
 
@@ -867,14 +902,6 @@ procedure TfmMain.About1Click(Sender: TObject);
 begin
   fmAbout.ShowModal();
 end;
-
-
-
-
-
-
-
-
 
 
 end.

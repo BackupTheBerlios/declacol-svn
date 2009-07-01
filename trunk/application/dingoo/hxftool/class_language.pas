@@ -9,12 +9,7 @@ interface
 uses unit_typedefs,sysutils,classes,windows;
 
 const
-  HEADER_SIZE    = 32;
-  HEADER_ID      = $2d584c44; // => DLX-
-  HEADER_VERSION = $00000001; //?
-  LNG_MARKER     = $19811108; //?
-
-  //IDs für die Sprachen
+  //IDs für die Sprachen MUß mit dem LanguageNameArray synchron sein!!!!!
   ID_ENGLISH1      = 0;
   ID_ENGLISH2      = 1;
   ID_CHINESE1      = 2;
@@ -24,56 +19,77 @@ const
   ID_GERMAN        = 6;
   ID_ITALIAN       = 7;
   ID_SPANISH       = 8;
-  ID_LNG_MAX       = 9;
+  ID_RUSSIAN       = 9;
+  LANGUAGE_COUNT   = 10;
 
-  //Die Dateinamen
-  NAME_ENGLISH     = 'Ó¢ÎÄ';
-  NAME_CHINESE1    = '¼òÌåÖÐÎÄ';
-  NAME_CHINESE2    = '·±ÌåÖÐÎÄ';
-  NAME_POLISH      = '²¨À¼Óï';
-  NAME_FRENCH      = '·¨Óï';
-  NAME_GERMAN      = 'µÂÓï';
-  NAME_ITALIAN     = 'Òâ´óÀûÓï';
-  NAME_SPANISH     = 'Î÷°àÑÀ';
+  SIZEOF_ENCODING  = 4;
+  SIZEOF_CONFIG    = 20;
+type
+  TLanguageData = record
+    id       : unsigned32;
+    realname : longstring;
+    filename : longstring;
+    dlxname  : longstring;
+    filepath : longstring;
+    encoding : array[0..SIZEOF_ENCODING-1] of char;
+    config   : array[0..SIZEOF_CONFIG - 1] of char;
+    configb  : array[0..SIZEOF_CONFIG - 1] of byte;
+  end;
 
-  //Die zugehörige Kodierung der BMF-Dateien
-  ENC_ENGLISH1   = #$b6 + #$03 + #$00 + #$00;
-  ENC_ENGLISH2   = #$e4 + #$04 + #$00 + #$00;
-  ENC_CHINESE1   = #$a8 + #$03 + #$00 + #$00;
-  ENC_CHINESE2   = #$b6 + #$03 + #$00 + #$00;
-  ENC_POLISH     = #$e2 + #$04 + #$00 + #$00;
-  ENC_FRENCH     = #$e4 + #$04 + #$00 + #$00;
-  ENC_GERMAN     = #$e4 + #$04 + #$00 + #$00;
-  ENC_ITALIAN    = #$e4 + #$04 + #$00 + #$00;
-  ENC_SPANISH    = #$e4 + #$04 + #$00 + #$00;
-
-  //Pfad zur Sprachdatie
-  FILE_ENGLISH1   = 'system\nls\'+NAME_ENGLISH+'.dlx';
-  FILE_ENGLISH2   = 'system\nls\'+NAME_ENGLISH+'.dlx';
-  FILE_CHINESE1   = 'system\nls\'+NAME_CHINESE1+'.dlx';
-  FILE_CHINESE2   = 'system\nls\'+NAME_CHINESE2+'.dlx';
-  FILE_POLISH     = 'system\nls\'+NAME_POLISH+'.dlx';
-  FILE_FRENCH     = 'system\nls\'+NAME_FRENCH+'.dlx';
-  FILE_GERMAN     = 'system\nls\'+NAME_GERMAN+'.dlx';
-  FILE_ITALIAN    = 'system\nls\'+NAME_ITALIAN+'.dlx';
-  FILE_SPANISH    = 'system\nls\'+NAME_SPANISH+'.dlx';
-
-  //Identifikationsarray in ccpmp.bin
-  CFG_ENGLISH1    = 'Ó¢ÎÄ.dlx' + #0 + #0 + #0 + #0 + #0 + #0 + #0 + #0 + ENC_ENGLISH1;
-  CFG_ENGLISH2    = 'Ó¢ÎÄ.dlx' + #0 + #0 + #0 + #0 + #0 + #0 + #0 + #0 + ENC_ENGLISH2;
-  CFG_CHINESE1    = '¼òÌåÖÐÎÄ.dlx'  + #0 + #0 + #0 + #0 + ENC_CHINESE1;
-  CFG_CHINESE2    = '·±ÌåÖÐÎÄ.dlx'  + #0 + #0 + #0 + #0 + ENC_CHINESE2;
-  CFG_POLISH      = '²¨À¼Óï.dlx'    + #0 + #0 + #0 + #0 + #0 + #0 + ENC_POLISH;
-  CFG_FRENCH      = '·¨Óï.dlx' + #0 + #0 + #0 + #0 + #0 + #0 + #0 + #0 + ENC_FRENCH;
-  CFG_GERMAN      = 'µÂÓï.dlx' + #0 + #0 + #0 + #0 + #0 + #0 + #0 + #0 + ENC_GERMAN;
-  CFG_ITALIAN     = 'Òâ´óÀûÓï.dlx'  + #0 + #0 + #0 + #0 + ENC_ITALIAN;
-  CFG_SPANISH     = 'Î÷°àÑÀ.dlx'    + #0 + #0 + #0 + #0 + #0 + #0 + ENC_SPANISH;
 
 var
-  //Konfiguration der Sprachen
-  aLangConf : array [0..8] of array[0..19] of byte;
-  //Namen der Sprachen
-  aLangName : array [0..8] of string;
+  //Array mit allen relevanten Daten (wird zur Laufzeit initialisiert)
+  LanguageData  : array[0..LANGUAGE_COUNT - 1] of TLanguageData;
+
+  //Namen aller Sprachen
+  LanguageNames : array[0..LANGUAGE_COUNT - 1] of longstring =
+      (
+      'english (ascii)',
+      'english (utf)',
+      'chinese 1',
+      'chinese 2',
+      'polish',
+      'french',
+      'german',
+      'italian',
+      'spanish',
+      'russian'
+      );
+
+  LanguageFiles : array[0..LANGUAGE_COUNT - 1] of longstring =
+      (
+      'Ó¢ÎÄ',         // english
+      'Ó¢ÎÄ',         // english
+      '¼òÌåÖÐÎÄ',     // chinese 1
+      '·±ÌåÖÐÎÄ',     // chinese 2
+      '²¨À¼Óï',       // polish
+      '·¨Óï',         // french
+      'µÂÓï',         // german
+      'Òâ´óÀûÓï',     // italian
+      'Î÷°àÑÀ',       // spanish
+      '¶íÓï'          // russian
+      );
+
+  LanguageEncoding : array[0..LANGUAGE_COUNT - 1] of array[0..3] of char =
+      (
+      #$b6 + #$03 + #$00 + #$00,    //English 1
+      #$e4 + #$04 + #$00 + #$00,    //English 2
+      #$a8 + #$03 + #$00 + #$00,    //Chinese 1
+      #$b6 + #$03 + #$00 + #$00,    //Chinese 2
+      #$e2 + #$04 + #$00 + #$00,    //Polish
+      #$e4 + #$04 + #$00 + #$00,    //French
+      #$e4 + #$04 + #$00 + #$00,    //German
+      #$e4 + #$04 + #$00 + #$00,    //Italian
+      #$e4 + #$04 + #$00 + #$00,    //Spanish
+      #$e3 + #$04 + #$00 + #$00     //Russian
+      );
+
+
+const
+  HEADER_SIZE    = 32;
+  HEADER_ID      = $2d584c44; // => DLX-
+  HEADER_VERSION = $00000001; //?
+  LNG_MARKER     = $19811108; //?
 
 type tlngheader = packed record
   id        : unsigned32;
@@ -104,6 +120,8 @@ end;
 
 implementation
 
+var
+  u32index : unsigned32;
 ////////////////////////////////////////////////////////////////////////////////
 // Aus einer Stringliste einen validen Sprachfile machen
 ////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +195,7 @@ begin
       result:=FALSE;
     end;
 
-    
+
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -236,28 +254,39 @@ begin
 end;
 
 initialization
-  //Die dynamische Sprachtabelle aufbauen
-  move(CFG_ENGLISH1[1],aLangConf[ID_ENGLISH1][0],length(aLangConf[ID_ENGLISH1]));
-  move(CFG_ENGLISH2[1],aLangConf[ID_ENGLISH2][0],length(aLangConf[ID_ENGLISH2]));
-  move(CFG_CHINESE1[1],aLangConf[ID_CHINESE1][0],length(aLangConf[ID_CHINESE1]));
-  move(CFG_CHINESE2[1],aLangConf[ID_CHINESE2][0],length(aLangConf[ID_CHINESE2]));
-  move(CFG_GERMAN[1],aLangConf[ID_GERMAN][0],length(aLangConf[ID_GERMAN]));
-  move(CFG_POLISH[1],aLangConf[ID_POLISH][0],length(aLangConf[ID_POLISH]));
-  move(CFG_SPANISH[1],aLangConf[ID_SPANISH][0],length(aLangConf[ID_SPANISH]));
-  move(CFG_ITALIAN[1],aLangConf[ID_ITALIAN][0],length(aLangConf[ID_ITALIAN]));
-  move(CFG_FRENCH[1],aLangConf[ID_FRENCH][0],length(aLangConf[ID_FRENCH]));
 
-  aLangName[ID_ENGLISH1]:='english (ascii)';
-  aLangName[ID_ENGLISH2]:='english (utf)';
-  aLangName[ID_CHINESE1]:='chinese 1';
-  aLangName[ID_CHINESE2]:='chinese 2';
-  aLangName[ID_GERMAN]:='german';
-  aLangName[ID_POLISH]:='polish';
-  aLangName[ID_FRENCH]:='french';
-  aLangName[ID_SPANISH]:='spanish';
-  aLangName[ID_ITALIAN]:='italian';
+  //Die Datenarrays für die Sprachen füllen
+  u32index:=0;
+  while (u32index < unsigned32(length(LanguageNames))) do
+    begin
+      fillmemory(Addr(LanguageData[u32Index]),SizeOf(LanguageData[u32Index]),0);
+
+      //Hilfreiche Infos
+      LanguageData[u32Index].id:=u32Index;
+      LanguageData[u32Index].realname:=LanguageNames[u32Index];
+      LanguageData[u32Index].filename:=LanguageFiles[u32Index];
+      LanguageData[u32Index].dlxname:=LanguageFiles[u32Index]+'.dlx';
+      LanguageData[u32Index].filepath:='system\nls\'+LanguageFiles[u32Index]+'.dlx';
+
+      //UTF-Encoding als CharArray
+      LanguageData[u32Index].encoding[0]:=LanguageEncoding[u32Index][0];
+      LanguageData[u32Index].encoding[1]:=LanguageEncoding[u32Index][1];
+      LanguageData[u32Index].encoding[2]:=LanguageEncoding[u32Index][2];
+      LanguageData[u32Index].encoding[3]:=LanguageEncoding[u32Index][3];
+
+      //UTF-Config-Sequenz als CharArray
+      move(LanguageData[u32Index].dlxname[1],LanguageData[u32Index].config[0],Length(LanguageData[u32Index].dlxname));
+      LanguageData[u32Index].config[16]:=LanguageEncoding[u32Index][0];
+      LanguageData[u32Index].config[17]:=LanguageEncoding[u32Index][1];
+      LanguageData[u32Index].config[18]:=LanguageEncoding[u32Index][2];
+      LanguageData[u32Index].config[19]:=LanguageEncoding[u32Index][3];
+
+      //UTF-Config-Sequenz als ByteArray
+      move(LanguageData[u32Index].config[0],LanguageData[u32Index].configb[0],Length(LanguageData[u32Index].configb));
 
 
+      inc(u32Index);
+    end;
 
 
 
