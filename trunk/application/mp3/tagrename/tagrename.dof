@@ -100,7 +100,7 @@ Conditionals=
 DebugSourceDirs=
 UsePackages=0
 [Parameters]
-RunParams=d:\test rename="%A - %N" -S -L
+RunParams="D:\streamripper\swiss internet radio - radiocrazy jazz - shoutcast streaming technology by www.init7.net" rename="%A - %N" -S -L
 HostApplication=
 Launcher=
 UseLauncher=0
