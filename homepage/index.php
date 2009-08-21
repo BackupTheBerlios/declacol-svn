@@ -31,7 +31,7 @@ switch ($action)
 
     default       : include(PATH_BASE."index.php"); break;
     }
-
+    
 //Alle Klassen entladen und Inhalte flushen
 $classloader->destroy();
 </script>

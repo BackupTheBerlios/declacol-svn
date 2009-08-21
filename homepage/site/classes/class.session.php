@@ -107,8 +107,10 @@ class session
         //ReadByID gibt im Fehlerfall ein Standarduserobjekt ohne Rechte zurück
         $userid=$this->_registry->read($path,"userid",ID_NONE);
         $user=callmethod("user","readbyid",$userid);
-        //Bei einem Anonymous eine UserID erzwingen
+
+        //Bei einem Anonymous eine UserID etc. erzwingen
         $user->id=$userid;
+        $user->login=($user->status != USER_GUEST);
 
         //Userdaten aus der Registry lesen
         $this->data =$this->_registry->read($path,"data" ,array());

@@ -3,7 +3,8 @@
 {{include:header.txt}}
 {{include:menu.txt}}
 <div style="width:100%; background-color:silver;">
-{{var:sitename}}>>{{var:pagetitle}}
+{{var:sitename}}>>{{var:pagetitle}}</br>
+Hallo {{var:user_name}}
 <hr/>
 {{varinclude:pagefile}}
 </div>

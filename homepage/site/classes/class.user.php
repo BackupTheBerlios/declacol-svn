@@ -47,6 +47,7 @@ class userdata
     var $status   = FALSE;
     var $active   = FALSE;
     var $data     = FALSE;
+    var $login    = FALSE;
 
     //Welchen Gruppen gehört er an
     var $groups = array();
@@ -254,7 +255,7 @@ class user
         {
         $result = new userdata();
         $result->id       = ID_NONE;
-        $result->realname = "noone";
+        $result->realname = "guest";
         $result->username = "anonymous";
         $result->password = "1234";
         $result->email    = "noone@void.nil";

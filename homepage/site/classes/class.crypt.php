@@ -40,9 +40,9 @@ class crypt
     function crypt()
         {
         //Salt setzen
-        if (defined("SSALT") != FALSE)
+        if (defined("SSALT1") != FALSE)
             {
-            $this->salt=SSALT;
+            $this->salt=SSALT1;
             }
         else
             {

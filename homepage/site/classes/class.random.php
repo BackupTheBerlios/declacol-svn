@@ -24,10 +24,8 @@ class random
 
     //für rpc exportierte funktionen
     var $export      = array("seed"=>"set seed",
-                             "get"     =>"get a random number",
                              "getbyte" =>"get a random byte",
                              "getword" =>"get a random word",
-                             "getdword"=>"get a random dword"
                             );
                              
     var $_seed1 = 0;
@@ -37,8 +35,8 @@ class random
     //Konstruktor
     function random()
         {
-        $this->_seed1=(USALT  ^ USALT1) + 1;
-        $this->_seed2=(USALT1 ^ USALT2) + 1;
+        $this->_seed1=(USALT1 ^ USALT2);
+        $this->_seed2=(USALT1 ^ USALT3);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,7 +97,7 @@ class random
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     function getmax()
         {
-        return (0xffffffff);
+        return (0x0fffffff);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -118,12 +116,6 @@ class random
     function getword()
         {
         return ( $this->_get() & 0x0000ffff );
-        }        
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    function getdword()
-        {
-        return ( $this->_get());
         }        
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////

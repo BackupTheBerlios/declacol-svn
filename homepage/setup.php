@@ -179,12 +179,12 @@ function createconfig()
   //Die Config-Datei schreiben
   $config=new configurator();
   $config->open("./config/local.config.php");
-  $config->add("SSALT"  ,getsalt(),"global crypt string salt 1");
-  $config->add("SSALT1" ,getsalt(),"global crypt string salt 2");
-  $config->add("SSALT2" ,getsalt(),"global crypt string salt 3");
-  $config->add("USALT"  ,getusalt(),"global crypt unsigned salt 1");
-  $config->add("USALT1" ,getusalt(),"global crypt unsigned salt 2");
-  $config->add("USALT2" ,getusalt(),"global crypt unsigned salt 3");
+  $config->add("SSALT1" ,getsalt(),"global crypt string salt 1");
+  $config->add("SSALT2" ,getsalt(),"global crypt string salt 2");
+  $config->add("SSALT3" ,getsalt(),"global crypt string salt 3");
+  $config->add("USALT1" ,getusalt(),"global crypt unsigned salt 1");
+  $config->add("USALT2" ,getusalt(),"global crypt unsigned salt 2");
+  $config->add("USALT3" ,getusalt(),"global crypt unsigned salt 3");
   $config->add("TIMEZONE","Europe/Berlin","timezone for datefunctions");
   $config->add("EMAIL_MODE","smtp","");
   $config->add("EMAIL_SMTP",$mailserver,"smtp server");

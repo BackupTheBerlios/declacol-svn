@@ -215,7 +215,9 @@ class cache
     //mal verändert wurde
     function createfilename($id,$runtime)
         {
-        return( (callmethod("crypt","hash",$id).CACHE_FILE_LIMITER.( time() + $runtime ) ) );
+        $id = callmethod("crypt","hash",$id).CACHE_FILE_LIMITER.( time() + $runtime );
+        return( $id );
         }
+        
     }
 </script>

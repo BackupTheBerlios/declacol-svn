@@ -23,7 +23,7 @@
 /// {{include:url}}          fügt eine Webseite an dieser Stelle ein
 ///
 ///
-/// {{array:name}}        fügt für jeden Wert in Array name die Zeiche zwischen den Arraytags ein
+/// {{array:name}}        fügt für jeden Wert in Array name die Zeichen zwischen den Arraytags ein
 /// <b>{{key}}</b>        und ersetzt key und value durch die entsprechenden Arraydaten
 /// => {{val}}<br>
 /// {{name}}
@@ -38,7 +38,7 @@
 ///
 /// {{sys:nocache}}       Deaktiviert Caching für diese Seite
 /// {{sys:recursion}}     Aktiviert rekursive Verarbeitung von eingebundenen Dateien
-///                       Kann auch über die Eigenschaft recursion aktiviert werden
+///                       
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///Beispiel
@@ -453,7 +453,6 @@ class unimatrix
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Systembefehle extrahieren und im _system-array setzen
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Ersetzt alle Token durch ihren Wert
     function processsys($input)
         {
         $result=array();
@@ -466,7 +465,7 @@ class unimatrix
                 //Zustand merken
                 $this->_system[$var]=TRUE;
                 
-                //Und Auftreten ersetzen
+                //System Variablen werden nicht angezeigt
                 $input = str_replace($replaces[$index],"",$input);
                 }
             }
