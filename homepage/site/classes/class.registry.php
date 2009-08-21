@@ -41,6 +41,7 @@ class registry
     var $readonly   = FALSE;      //Readonly lässt schreiben nur temporär zu
     var $autoclean  = TRUE;       //Räumt die Daten beim Speichern auf
     var $compressed = FALSE;      //Datenbank komprimiert bearbeiten
+    var $encrypted  = FALSE;      //Datenbank verschlüsselt bearbeiten
     
     var $_file    = FALSE;
     var $_reg     = FALSE;
@@ -406,6 +407,17 @@ class registry
         }
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Werte verschlüsseln (nix großes)
+    function _encryptvalue($value)
+        {
+        }
+
+    function _decryptvalue($value)
+        {
+        return ($this->_encryptvalue($value));
+        }
+    
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Marker für Änderungen setzen
     function _burn($status)
         {

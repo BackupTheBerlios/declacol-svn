@@ -20,7 +20,7 @@ define ("CRYPT_PROVIDER_MD5"    ,1);
 define ("CRYPT_PROVIDER_SHA1"   ,2);
 define ("CRYPT_PROVIDER_CUSTOM" ,3);
 define ("CRYPT_HASH_PREFIX"     ,"%GUID%");
-define ("CRYPT_MAX_RAND",mt_getrandmax());
+define ("CRYPT_MAX_RAND"        ,callmethod("random","getmax"));
 
 //Eigentliche Klasse
 class crypt
@@ -31,17 +31,18 @@ class crypt
 
     //Alle exportierten Funktionen
     var $export=array("hash"   =>"calculates hash of dataset",
+                      "hash"   =>"encrypts string",
                       "id"     =>"creates unique id",
-                      "random" =>"creates randomnumber");
+                      );
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
     function crypt()
         {
         //Salt setzen
-        if (defined("SALT") != FALSE)
+        if (defined("SSALT") != FALSE)
             {
-            $this->salt=SALT;
+            $this->salt=SSALT;
             }
         else
             {
@@ -144,21 +145,19 @@ class crypt
             }
         return($result);
         }
-
-
-    
-            ////////////////////////////////////////////////////////////////////////////////////////////////////
+   
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     //"Zufallszahl erzeugen"
     function _id()
         {
-        return( $this->random().time().$this->random() );
+        return( $this->_random().time().$this->_random() );
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Eine Zufallszahl erzeugen
-    function random($min=0,$max=CRYPT_MAX_RAND)
+    function _random($min=0,$max=CRYPT_MAX_RAND)
         {
-        return(mt_rand($min,$max));
+        return ( callmethod("random","get",$min,$max) );
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -194,6 +193,34 @@ class crypt
             $input=$input >> 2;
             }
         return($result);
+        }
+       
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Einen String XOR verschlüsseln
+    function encrypt($text,$key)
+        {
+        $size=strlen($text);
+            
+        if ( $size > 0 )
+            {
+            $rnd=new random();
+            $rnd->setseed(crc32($key)); 
+        
+            for ($index=0;$index < $size; $index++)
+                {
+                $text[$index]=chr( ord($text[$index]) ^ $rnd->getbyte() );
+                }            
+            $rnd->destroy();
+            }         
+              
+        return($text);
+        }        
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Verschlüsselung ist symmetrisch        
+    function decrypt($text,$key)
+        {
+        return($this->encrypt($text,$key));
         }
     }
 </script>

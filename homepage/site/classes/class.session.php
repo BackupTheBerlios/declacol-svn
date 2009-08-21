@@ -159,6 +159,7 @@ class session
             $input=callmethod("crypt","id");
             }
             
+        //Mit singlehash wird verhindert, dass eine richtige ID nochmals gehasht wird
         return ( callmethod("crypt","singlehash",$input,"%SID%") );
         }
         
