@@ -29,7 +29,7 @@ $template ="main.txt";
        
 //Die Cacheengine einhängen
 setproperty("unimatrix","cacheengine" ,callmethod("cache","getthis"));
-setproperty("unimatrix","cachetimeout",300);
+setproperty("unimatrix","cachetimeout",CACHE_TIMEOUT);
 
 //Seite nur erzeugen, wenn sie nicht gepuffert ist
 if (callmethod("unimatrix","iscached",$id) == FALSE)

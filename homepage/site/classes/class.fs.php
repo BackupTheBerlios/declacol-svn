@@ -73,7 +73,7 @@ class fs
         $result[CLASS_INDEX_COMPRESSED]= FALSE;            //Soll die Datenbank komprimiert werden?
         $result[CLASS_INDEX_ENCRYPTED] = FALSE;            //Soll die Datenbank verschlüsselt werden?
 
-        $result[CLASS_INDEX_RUNLEVEL]  = 1;                 //In welchen Runlevel soll die Klasse geladen werden
+        $result[CLASS_INDEX_RUNLEVEL]  = 2;                 //In welchen Runlevel soll die Klasse geladen werden
 
         return($result);
         }

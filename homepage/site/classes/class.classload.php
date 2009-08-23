@@ -123,7 +123,7 @@ class classload
 
             foreach ($runlevels as $runlevel)
                 {
-                if (DEBUG) callmethod("debug","addlog","classload","entering runlevel [".$runlevel."]");
+                if (DEBUG) callmethod("debug","addlog","classload","######## entering runlevel [".$runlevel."] ########");
 
                 $classes=$this->_registry->enum("classes/".$runlevel."/");
 

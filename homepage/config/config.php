@@ -38,6 +38,7 @@ if (defined("SETUP_DONE")==FALSE)
 @define ("EVERYTHING"    ,"42");
 @define ("DEFAULTTIMEOUT",3600);
 @define ("SESSION_TIMEOUT" ,60 * 15);
+@define ("CACHE_TIMEOUT"   ,60 * 5);
 
 //Timezone setzen, um CORE-Errors zu vermeiden
 date_default_timezone_set(TIMEZONE);
