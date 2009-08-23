@@ -62,6 +62,9 @@ class sendmail
 
         $result[CLASS_INDEX_CLEANUP]  = TRUE;            //Soll die Datenbank initialisiert werden ?
 
+        $result[CLASS_INDEX_COMPRESSED]= FALSE;            //Soll die Datenbank komprimiert werden?
+        $result[CLASS_INDEX_ENCRYPTED] = FALSE;            //Soll die Datenbank verschlüsselt werden?
+
         $result[CLASS_INDEX_AUTOLOAD] = TRUE;           //Soll die Klasse beim Systemstart geladen werden ?
         $result[CLASS_INDEX_RUNLEVEL] = 5;                 //In welchen Runlevel soll die Klasse geladen werden
 

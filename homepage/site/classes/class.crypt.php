@@ -68,7 +68,8 @@ class crypt
         $result[CLASS_INDEX_DATABASE]  = FALSE;             //Wird eine Datenbank benötigt
         $result[CLASS_INDEX_CLEANUP]   = FALSE;              //Soll die Datenbank initialisiert werden ?
         $result[CLASS_INDEX_AUTOLOAD]  = TRUE;              //Soll die Klasse beim Systemstart geladen werden ?
-        $result[CLASS_INDEX_COMPRESSED]= FALSE;              //Soll die Datenbank komprimiert werden (gz)
+        $result[CLASS_INDEX_COMPRESSED]= FALSE;            //Soll die Datenbank komprimiert werden?
+        $result[CLASS_INDEX_ENCRYPTED] = FALSE;            //Soll die Datenbank verschlüsselt werden?
         $result[CLASS_INDEX_RUNLEVEL]  = 1;                //In welchen Runlevel soll die Klasse geladen werden
 
         return($result);
@@ -194,10 +195,24 @@ class crypt
             }
         return($result);
         }
+    
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    function encrypt($text,$key)
+      {
+      return( $this->_xor($text,$key) );
+      }
        
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Einen String XOR verschlüsseln
-    function encrypt($text,$key)
+    function decrypt($text,$key)
+      {
+      return( $this->_xor($text,$key));
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Einen String simpel XOR verschlüsseln
+    // Kein sehr sicheres Verfahren, aber es funktioniert
+    function _xor($text,$key)
         {
         $size=strlen($text);
             
@@ -212,15 +227,7 @@ class crypt
                 }            
             $rnd->destroy();
             }         
-              
         return($text);
         }        
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Verschlüsselung ist symmetrisch        
-    function decrypt($text,$key)
-        {
-        return($this->encrypt($text,$key));
-        }
     }
 </script>

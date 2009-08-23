@@ -52,7 +52,7 @@ class classload
     function classload($regpath)
         {
         $this->_regpath=$regpath;
-        $this->_registry= new registry($this->_regpath."classes.reg",FALSE);
+        $this->_registry= new registry($this->_regpath."classes.reg",FALSE,FALSE);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +87,7 @@ class classload
 
             foreach ($runlevels as $runlevel => $dummy)
                 {
-                if (DEBUG) callmethod("debug","addlog","classload","entering runlevel [".$runlevel."]");
+                if (DEBUG) callmethod("debug","addlog","classload","######## entering runlevel [".$runlevel."] ########");
 
                 $classes=$this->_registry->enum("classes/".$runlevel."/");
                 
@@ -105,7 +105,7 @@ class classload
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Alle verfügbaren Klassen laden
+    //Alle verfügbaren Klassen entladen
     function unload($classname=FALSE)
         {
         //Wenn ein Klassenname angegeben ist, nur diese Klasse instanzieren
@@ -140,25 +140,29 @@ class classload
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Eine Klasse laden
+    //Klassen laden
     function _create($runlevel,$classname)
         {
         global $CLASSES;
         
         if (DEBUG) callmethod("debug","addlog","classload","creating ".$classname." [rl_".$runlevel."]");
         
+        //Alle Klassen des Runlevels laden
         $classdata=$this->_registry->enum("classes/".$runlevel."/".$classname);
         
+        //Klasse holen
         require_once(PATH_CLASSES.$classdata[CLASS_INDEX_CLASSFILE]);
 
+        //Braucht die Klasse eine Registry?
         if ($classdata[CLASS_INDEX_REGISTRY] == TRUE)
             {
             if (DEBUG) callmethod("debug","addlog","classload","loading registry ".$classdata[CLASS_INDEX_REGISTRYFILE]);
 
             //ggf. eine Registry erzeugen
             $registry = new registry ( PATH_REGISTRY.$classdata[CLASS_INDEX_REGISTRYFILE],
-                                       $classdata[CLASS_INDEX_COMPRESSED]);
-
+                                       $classdata[CLASS_INDEX_COMPRESSED],
+                                       $classdata[CLASS_INDEX_ENCRYPTED]);
+                                       
             $object = new $classdata[CLASS_INDEX_CLASSNAME]($registry);
             }
         else

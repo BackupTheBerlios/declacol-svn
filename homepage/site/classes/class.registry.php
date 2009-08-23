@@ -49,9 +49,10 @@ class registry
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
-    function registry($filename, $compressed)
+    function registry($filename, $compressed, $encrypted)
         {
         $this->compressed=$compressed;
+        $this->encrypted =$encrypted;
         
         $this->clear();
         $this->_file=$filename;
@@ -372,6 +373,11 @@ class registry
         {
         $data = @serialize($data);
         
+        if ( $this->encrypted == TRUE )
+            {
+            $data=callmethod("crypt","encrypt",$data,SSALT1);
+            }
+
         if ( $this->compressed == TRUE )
             {
             $data=@gzcompress($data,1);
@@ -388,7 +394,11 @@ class registry
             {
             $data=@gzuncompress($data);
             }
-            
+
+        if ( $this->encrypted == TRUE )
+            {
+            $data=callmethod("crypt","decrypt",$data,SSALT1);
+            }
         return ( @unserialize( $data ) );
         }
         
@@ -407,17 +417,6 @@ class registry
         }
         
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Werte verschlüsseln (nix großes)
-    function _encryptvalue($value)
-        {
-        }
-
-    function _decryptvalue($value)
-        {
-        return ($this->_encryptvalue($value));
-        }
-    
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Marker für Änderungen setzen
     function _burn($status)
         {

@@ -38,9 +38,9 @@
 ///        $result[CLASS_INDEX_CLEANUP]   = TRUE;              //Soll die Datenbank initialisiert werden ?
 ///
 ///        $result[CLASS_INDEX_AUTOLOAD]  = TRUE;              //Soll die Klasse beim Systemstart geladen werden ?
-///        $result[CLASS_INDEX_COMPRESSED]= TRUE;              //Soll die Datenbank komprimiert werden (gz)
 ///
-///        $result[CLASS_INDEX_COMPRESSED]= TRUE;              //Soll die Datenbank komprimiert werden (gz)
+///        $result[CLASS_INDEX_COMPRESSED]= TRUE;              //Soll die Datenbank komprimiert werden (gz)?
+///        $result[CLASS_INDEX_ENCRYPTED] = TRUE;              //Soll die Datenbank verschlüsselt werden (gz)?
 ///
 ///        $result[CLASS_INDEX_RUNLEVEL]  = 10;                //In welchen Runlevel soll die Klasse geladen werden
 ///
@@ -65,7 +65,7 @@ class classinst
     function classinst($regpath)
         {
         $this->_regpath=$regpath;
-        $this->_registry= new registry($this->_regpath."classes.reg",FALSE);
+        $this->_registry= new registry($this->_regpath."classes.reg",FALSE,FALSE);
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,6 +139,7 @@ class classinst
                     $this->_registry->write($classkey,CLASS_INDEX_VERSION   ,$result[CLASS_INDEX_VERSION]);
                     $this->_registry->write($classkey,CLASS_INDEX_AUTOLOAD  ,$result[CLASS_INDEX_AUTOLOAD]);
                     $this->_registry->write($classkey,CLASS_INDEX_COMPRESSED,$result[CLASS_INDEX_COMPRESSED]);
+                    $this->_registry->write($classkey,CLASS_INDEX_ENCRYPTED ,$result[CLASS_INDEX_ENCRYPTED]);
 
                     $regfile = $classid.".reg";
                     $this->_registry->write($classkey,CLASS_INDEX_REGISTRY    ,$result[CLASS_INDEX_REGISTRY]);
@@ -147,7 +148,9 @@ class classinst
                     //Registry einrichten ?
                     if ($result[CLASS_INDEX_REGISTRY] !== FALSE)
                         {
-                        $dummy= new registry($this->_regpath.$regfile,$result[CLASS_INDEX_COMPRESSED]);
+                        $dummy= new registry($this->_regpath.$regfile,
+                                             $result[CLASS_INDEX_COMPRESSED],
+                                             $result[CLASS_INDEX_ENCRYPTED]);
                         $dummy->write("/",CLASS_INDEX_INSTALLDATE,time());
 
                         //Registry initialisieren ?
