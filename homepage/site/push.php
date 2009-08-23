@@ -38,7 +38,7 @@ if (DEBUG) callmethod("debug","addlog","push","request ".$pushfile);
 if (file_exists($pushfile)==TRUE)
     {
     //Um auch Downloads mit dem Pushscript zu ermöglichen,
-    //trenne wir in push und write auf
+    //trennen wir in push und write auf
     if ( strpos(mime_get_type($pushfile),"application/")!==FALSE )
         {
         //Streamtypes bieten wir zum download an

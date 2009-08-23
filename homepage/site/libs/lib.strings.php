@@ -161,6 +161,4 @@ function hex_to_string($input)
     {
     return(pack("H*",$input));
     }
-
-
 </script>

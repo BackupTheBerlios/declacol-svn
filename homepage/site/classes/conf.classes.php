@@ -13,6 +13,7 @@
 /// Interne Definitionen für die automatische Installation von Klassen
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 define ("CLASS_REGKEY"              ,"classes");
 
 define ("CLASS_INDEX_ID"            , "id");

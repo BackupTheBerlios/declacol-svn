@@ -40,7 +40,7 @@ function rpcmethodexists($classname,$method)
     }
 
 //////////////////////////////////////////////////////////////////////////
-//Prüfen, ob eine RPCMethode existiert
+//Prüfen, ob eine Methode existiert
 function methodexists($classname,$method)
     {
     global $CLASSES;
@@ -80,7 +80,7 @@ function callrpcmethod($classname,$method,$p1=FALSE,$p2=FALSE,$p3=FALSE,$p4=FALS
 
 //////////////////////////////////////////////////////////////////////////
 //Hier die Interfacefunktion, um auf die geladenen Klassen zugreifen zu können
-//Der Aufruf ist zwar ziemlich schräg, ober eine bessere Methode habe ich noch nicht gefunden
+//Der Aufruf ist zwar ziemlich schräg, aber eine bessere Methode habe ich noch nicht gefunden
 function callmethod($classname,$method,$p1=FALSE,$p2=FALSE,$p3=FALSE,$p4=FALSE,$p5=FALSE,$p6=FALSE,$p7=FALSE,$p8=FALSE,$p9=FALSE,$p10=FALSE)
     {
     global $CLASSES;

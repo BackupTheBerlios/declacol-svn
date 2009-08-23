@@ -27,6 +27,7 @@ define ("CURRENT_WEEK"         ,intval(date("W",time())));
 define ("CURRENT_MONTH"        ,intval(date("m",time())));
 define ("CURRENT_YEAR"         ,intval(date("Y",time())));
 define ("CURRENT_DATE"         ,intval(time()));
+define ("NOW"                  ,CURRENT_DATE));
 
 //Aus einem Timestamp die KW machen
 function timetokw($timestamp)
