@@ -42,11 +42,6 @@ class random
     //Destruktor
     function destroy()
         {
-        if ( $this->_registry !== FALSE )
-            {
-            $this->_registry->flush();
-            $this->_registry->destroy();
-            }
         unset($this);
         }
 

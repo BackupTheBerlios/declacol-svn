@@ -30,6 +30,9 @@ class debug
 
     //für rpc exportierte funktionen
     var $export      = array("addlog"=>"add a log entry");
+
+    var $runtime     = 0;
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Konstruktor
     function debug()
@@ -50,6 +53,7 @@ class debug
             set_error_handler    (array(DEBUG_CLASS,"error"));
             
             $this->addlog("debug","launched");
+            $this->runtime=microtime(TRUE);
             }
         }
 
@@ -57,6 +61,9 @@ class debug
     //Destruktor
     function destroy()
         {
+        //Laufzeit merken
+        $this->runtime=(microtime(TRUE)-$this->runtime);
+        
         if (defined("DEBUG")==TRUE)
             {
             restore_error_handler();
@@ -65,10 +72,11 @@ class debug
             //Wenn eine Debugsession aktiv war scheiben wir eine LogDatei
             if ($this->active==TRUE)
                 {
+                $this->addlog("debug","runtime ".$this->runtime);
                 $this->addlog("debug","ended");
 
                 //Und log als XML schreiben
-                file_put_contents(PATH_TEMP."debug_".CURRENT_TIME.".log",arraytoxml($this->log));
+                file_put_contents(PATH_TEMP."debug_".microtime(TRUE).".log",arraytoxml($this->log));
                 }
                 
             $this->clearlog();

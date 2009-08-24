@@ -80,7 +80,7 @@ class cache
         $result[CLASS_INDEX_AUTOLOAD]  = TRUE;         //Soll die Klasse beim Systemstart geladen werden ?
         $result[CLASS_INDEX_COMPRESSED]= FALSE;            //Soll die Datenbank komprimiert werden?
         $result[CLASS_INDEX_ENCRYPTED] = FALSE;            //Soll die Datenbank verschlüsselt werden?
-        $result[CLASS_INDEX_RUNLEVEL]  = 3;            //In welchen Runlevel soll die Klasse geladen werden
+        $result[CLASS_INDEX_RUNLEVEL]  = 4;            //In welchen Runlevel soll die Klasse geladen werden
         return($result);
         }
 
@@ -219,6 +219,5 @@ class cache
         $id = callmethod("crypt","hash",$id).CACHE_FILE_LIMITER.( time() + $runtime );
         return( $id );
         }
-        
     }
 </script>
