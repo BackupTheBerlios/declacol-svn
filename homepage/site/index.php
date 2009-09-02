@@ -34,9 +34,9 @@ setproperty("unimatrix","cachetimeout",CACHE_TIMEOUT);
 //Seite nur erzeugen, wenn sie nicht gepuffert ist
 if (callmethod("unimatrix","iscached",$id) == FALSE)
     {
-    callmethod("unimatrix","assign","pagetitle",getproperty("session","id",ID_NONE));
-    callmethod("unimatrix","assign","sitename","Guru-Meditation");
+    callmethod("unimatrix","assign","pagetitle",$pagefile);
     callmethod("unimatrix","assign","pagefile",$pagefile.".txt");
+    callmethod("unimatrix","assign","sitename","Guru-Meditation");
     callmethod("unimatrix","assign","pagelink",callmethod("request","getlink"));
     callmethod("unimatrix","assign","version","1.0");
     
