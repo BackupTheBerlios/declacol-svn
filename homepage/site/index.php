@@ -49,5 +49,19 @@ if (callmethod("unimatrix","iscached",$id) == FALSE)
     }
 
 //Here we go
-echo callmethod("unimatrix","render",$id,$template);
+//echo callmethod("unimatrix","render",$id,$template);
+
+echo "<pre>";
+
+callmethod("message","send",getproperty("session","id",ID_NONE),MSG_DATA,usecs());
+callmethod("message","broadcast",MSG_DATA,usecs());
+
+do
+  {
+  $result=callmethod("message","receive",MSG_DATA,TRUE);
+  echo $result."\n";
+  }
+while ($result !== FALSE);
+
+print_r($CLASSES["message"]);
 </script>

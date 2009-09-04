@@ -1,10 +1,10 @@
 <script language="php">
-define ("SSALT1",                       "teuygbtreb");                          #global crypt string salt 1
-define ("SSALT2",                       "ndhbgoqreb");                          #global crypt string salt 2
-define ("SSALT3",                       "rkwmqxzzzzgb");                        #global crypt string salt 3
-define ("USALT1",                       933609532);                             #global crypt unsigned salt 1
-define ("USALT2",                       2092092353);                            #global crypt unsigned salt 2
-define ("USALT3",                       1267821414);                            #global crypt unsigned salt 3
+define ("SSALT1",                       "lchoqrxsljic");                        #global crypt string salt 1
+define ("SSALT2",                       "srkcuygbgod");                         #global crypt string salt 2
+define ("SSALT3",                       "jpkjicufhbgb");                        #global crypt string salt 3
+define ("USALT1",                       1250037178);                            #global crypt unsigned salt 1
+define ("USALT2",                       1604921802);                            #global crypt unsigned salt 2
+define ("USALT3",                       2021816043);                            #global crypt unsigned salt 3
 define ("TIMEZONE",                     "Europe/Berlin");                       #timezone for datefunctions
 define ("EMAIL_MODE",                   "smtp");
 define ("EMAIL_SMTP",                   "");                                    #smtp server

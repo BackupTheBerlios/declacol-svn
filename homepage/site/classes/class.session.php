@@ -103,7 +103,6 @@ class session
         if ($this->_registry->exists($path,"userid")==FALSE)
             {
             $this->_registry->write($path,"userid",callmethod("crypt","id"));
-            $this->_registry->write($path,"data"  ,array());
             $this->_registry->write($path,"start" ,CURRENT_TIME);
             }
             
@@ -120,7 +119,7 @@ class session
         $this->data =$this->_registry->read($path,"data" ,array());
         $this->start=$this->_registry->read($path,"start",CURRENT_TIME);
         
-        //Timeout um 15 Minuten verlängern
+        //Timeout um Timeout verlängern
         $this->_registry->write($path,"timeout",CURRENT_TIME + SESSION_TIMEOUT );
         
         //Daten freigeben
@@ -140,6 +139,20 @@ class session
         $this->id=ID_NONE;
         }
         
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Daten in der Session abspeichern
+    function save($name,$value)
+        {
+        $this->_registry->write("sessions/".$this->id."/data",$name,$value);
+        }
+        
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Daten aus einer Session laden
+    function load($name,$default)
+        {
+        return($this->_registry->read("sessions/".$this->id."/data",$name,$default));
+        }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Alte Sessions aus der Datenbank werfen
     function clean()
@@ -169,5 +182,18 @@ class session
         return ( callmethod("crypt","singlehash",$input,"%SID%") );
         }
         
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Alle aktiven SessionIDs zurückliefern
+    function enum()
+      {
+      return($this->_registry->enum("sessions"));
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Prüfen ob eine Session noch existiert
+    function exists($id)
+      {
+      return($this->_registry->exists("sessions",$id));
+      }
     }
 </script>

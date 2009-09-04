@@ -10,6 +10,9 @@
 */
 define ("DEBUGMODE" , TRUE);
 
+//Konstanten lesen
+require_once("constants.php");
+
 //Lokale Konfiguration lesen
 require_once("local.config.php");
 
@@ -34,8 +37,6 @@ if (defined("SETUP_DONE")==FALSE)
 
 //Allgemeine Definitionen
 @define ("CURRENT_TIME"  ,time());
-@define ("ID_NONE"       ,0);
-@define ("EVERYTHING"    ,"42");
 @define ("DEFAULTTIMEOUT",3600);
 @define ("SESSION_TIMEOUT" ,60 * 15);
 @define ("CACHE_TIMEOUT"   ,60 * 5);

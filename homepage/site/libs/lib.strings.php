@@ -22,6 +22,7 @@ $_all_chars =Array( "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o",
 
 //////////////////////////////////////////////////////////////////////////
 //Definitionen der Stringcleaner
+define ("FILTER_NONE"        ,0);        //Alles
 define ("FILTER_ALPHA"       ,1);        //Nur Buchstaben
 define ("FILTER_NUMBER"      ,2);        //Nur Zahlen
 define ("FILTER_ALPHANUM"    ,4);        //Nur Buchstaben und Zahlen
@@ -45,7 +46,9 @@ function string_filter($input,$filter)
     //Die einzelnen Filter wählen
     //Default ist Alphanum
     $replace="";
-    switch ($filter)
+    if ($filter !== FILTER_NONE)
+      {
+      switch ($filter)
         {
         case FILTER_ALPHA        : $filter="([^a-zA-Z".STRING_SPECIAL." _]*)";                            break;
         case FILTER_NUMBER       : $filter="([^0-9\.,]*)";                                break;
@@ -58,8 +61,13 @@ function string_filter($input,$filter)
         case FILTER_PASSWORD     : $filter="([^a-zA-Z0-9".STRING_SPECIAL."\+/\]*_@\(\),. :~])";        break;
         default                  : $filter="([^a-zA-Z _]*)";                            break;
         }
-
-    $result=preg_replace($filter,$replace,$input);
+      $result=preg_replace($filter,$replace,$input);
+      }
+    else
+      {
+      //Ungefiltert
+      $result=$input;
+      }
 
     return($result);
     }
