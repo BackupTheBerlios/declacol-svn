@@ -13,6 +13,10 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Dieser Kopf muﬂ immer so sein
 require_once("./config/config.php");
+
+//Der Profiler (erzeugt csv-analyse in PATH_TEMP)
+require_once(PATH_CLASSES."class.profiler.php");
+
 require_once(PATH_CLASSES."class.registry.php");
 require_once(PATH_CLASSES."class.classload.php");
 $classloader=new classload(PATH_REGISTRY);

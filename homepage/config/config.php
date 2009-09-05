@@ -8,7 +8,7 @@
                                                                                      
 (c) 2008 Borg@sven-of-nine.de
 */
-define ("DEBUGMODE" , TRUE);
+define ("DEBUGMODE" , FALSE);
 
 //Konstanten lesen
 require_once("constants.php");
