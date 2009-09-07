@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Compiler Value="C:\lazarus\fpc\2.2.2\bin\i386-win32\fpc.exe" Date="980254305"/>
+  <Params Value=" -MObjFPC -Scgi -O1 -gl -WG -vewnhi -l -FiC:\DevLazarus\application\helper\singlemd5\ -FuC:\lazarus\lcl\units\i386-win32\ -FuC:\lazarus\lcl\units\i386-win32\win32\ -FuC:\lazarus\packager\units\i386-win32\ -FuC:\DevLazarus\application\helper\singlemd5\ -Fu. -oC:\DevLazarus\application\helper\singlemd5\singlemd5.exe -dLCL -dLCLwin32 singlemd5.lpr"/>
+</CONFIG>

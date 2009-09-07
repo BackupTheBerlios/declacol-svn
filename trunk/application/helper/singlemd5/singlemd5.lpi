@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <PathDelim Value="\"/>
+    <Version Value="7"/>
+    <General>
+      <MainUnit Value="0"/>
+      <TargetFileExt Value=".exe"/>
+      <Icon Value="0"/>
+      <UseXPManifest Value="True"/>
+      <ActiveEditorIndexAtStart Value="0"/>
+    </General>
+    <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <AutoIncrementBuild Value="True"/>
+      <CurrentMajorRevNr Value="1"/>
+      <CurrentBuildNr Value="1"/>
+      <ProjectVersion Value="0.1.0.1"/>
+      <Language Value="0407"/>
+      <FileDescription Value="MD-Creator"/>
+      <LegalCopyright Value="2009 Borg@Sven-of-Nine.de"/>
+      <ProductName Value="singlemd5"/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="LCL"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="2">
+      <Unit0>
+        <Filename Value="singlemd5.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="singlemd5"/>
+        <UsageCount Value="20"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="unit_main.pas"/>
+        <ComponentName Value="Form1"/>
+        <IsPartOfProject Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="unit_main"/>
+        <CursorPos X="32" Y="8"/>
+        <TopLine Value="3"/>
+        <EditorIndex Value="0"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit1>
+    </Units>
+    <JumpHistory Count="10" HistoryIndex="9">
+      <Position1>
+        <Filename Value="unit_main.pas"/>
+        <Caret Line="33" Column="1" TopLine="6"/>
+      </Position1>
+      <Position2>
+        <Filename Value="unit_main.pas"/>
+        <Caret Line="40" Column="44" TopLine="6"/>
+      </Position2>
+      <Position3>
+        <Filename Value="unit_main.pas"/>
+        <Caret Line="9" Column="24" TopLine="7"/>
+      </Position3>
+      <Position4>
+        <Filename Value="unit_main.pas"/>
+        <Caret Line="39" Column="53" TopLine="7"/>
+      </Position4>
+      <Position5>
+        <Filename Value="unit_main.pas"/>
+        <Caret Line="40" Column="39" TopLine="7"/>
+      </Position5>
+      <Position6>
+        <Filename Value="unit_main.pas"/>
+        <Caret Line="44" Column="16" TopLine="7"/>
+      </Position6>
+      <Position7>
+        <Filename Value="unit_main.pas"/>
+        <Caret Line="18" Column="43" TopLine="5"/>
+      </Position7>
+      <Position8>
+        <Filename Value="unit_main.pas"/>
+        <Caret Line="46" Column="57" TopLine="11"/>
+      </Position8>
+      <Position9>
+        <Filename Value="unit_main.pas"/>
+        <Caret Line="44" Column="39" TopLine="14"/>
+      </Position9>
+      <Position10>
+        <Filename Value="unit_main.pas"/>
+        <Caret Line="8" Column="22" TopLine="1"/>
+      </Position10>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="8"/>
+    <PathDelim Value="\"/>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)\"/>
+    </SearchPaths>
+    <Linking>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>
