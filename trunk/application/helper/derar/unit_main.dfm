@@ -1,9 +1,11 @@
 object fmMain: TfmMain
   Left = 282
   Top = 155
-  Width = 498
-  Height = 381
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsToolWindow
   Caption = 'fmMain'
+  ClientHeight = 354
+  ClientWidth = 490
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -21,7 +23,7 @@ object fmMain: TfmMain
     Top = 0
     Width = 489
     Height = 353
-    ActivePage = TSOptions
+    ActivePage = TSMain
     TabOrder = 0
     object TSMain: TTabSheet
       Caption = 'Main'
@@ -38,9 +40,6 @@ object fmMain: TfmMain
           Width = 465
           Height = 209
           ItemHeight = 13
-          Items.Strings = (
-            'd:\temp\pwtest.rar'
-            'd:\temp\test.rar')
           TabOrder = 0
         end
       end
@@ -209,11 +208,11 @@ object fmMain: TfmMain
     OnError = UnRARError
     OnProgress = UnRARProgress
     Left = 444
-    Top = 304
+    Top = 80
   end
   object DGTarget: TSaveDialog
     OptionsEx = [ofExNoPlacesBar]
     Left = 444
-    Top = 272
+    Top = 48
   end
 end

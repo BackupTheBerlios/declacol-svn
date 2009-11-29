@@ -8,6 +8,7 @@ uses
 
 begin
   Application.Initialize;
+  Application.Title := 'RAR-Unpacker';
   Application.CreateForm(TfmMain, fmMain);
   Application.Run;
 end.
