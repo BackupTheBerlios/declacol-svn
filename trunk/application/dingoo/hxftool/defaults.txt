@@ -1,0 +1,17 @@
+The colors list begins from the searched hex value "FF FF FF 00 FF 00 00 00" to the end "81 81 81 00 00 00 00 00" ( Yep they are hex value colors ). Every 2 colors are separated by the NUL character ( "00" ). So here is the extracted colors list :
+
+FFFFFF - White
+FF0000 - Red
+9E0B0E - Dark Red
+00FF00 - Green
+005826 - Dark Green
+0000FF - Blue
+2E3192 - Dark Blue
+00FFFF - Dark White
+6DCFF6 - Green Blue
+662D91 - Violet
+32004B - Dark Violet
+FFFF00 - Yellow
+ABA000 - Dark Yellow
+818181 - Gray
+000000 - Black
