@@ -1,6 +1,6 @@
 object fmMain: TfmMain
-  Left = 243
-  Top = 262
+  Left = 229
+  Top = 210
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DiskDumper (c) 2008 Borg@Sven-of-Nine.de'
@@ -22,7 +22,7 @@ object fmMain: TfmMain
     Top = 0
     Width = 529
     Height = 369
-    ActivePage = tsWriter
+    ActivePage = tsReader
     TabOrder = 0
     object tsSectorViewer: TTabSheet
       Caption = 'Viewer'
@@ -133,7 +133,6 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
-          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 4
@@ -269,7 +268,6 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
-          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 5
@@ -370,7 +368,6 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
-          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 3
@@ -456,7 +453,6 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
-          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 1
@@ -551,7 +547,6 @@ object fmMain: TfmMain
           Top = 312
           Width = 505
           Height = 16
-          Min = 0
           Max = 1024
           Smooth = True
           TabOrder = 1

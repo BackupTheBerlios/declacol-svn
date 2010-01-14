@@ -265,7 +265,6 @@ begin
              begin
                   cbDrives.ItemIndex:=cbDrives.Items.Count - 1;
              end;
-
         end
       else
         begin
@@ -524,7 +523,7 @@ begin
                               lbReadLog.Items.Add(Format('error dumping sector  %d',[u64Sector]));
                          end;
 
-                      //Um die gelesenen Sekotoren vorschieben
+                      //Um die gelesenen Sektoren vorschieben
                       inc(u64Sector,u32Read);
                     end
                   else
