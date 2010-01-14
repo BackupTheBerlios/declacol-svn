@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 353
     Height = 273
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Join'
