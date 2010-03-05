@@ -43,6 +43,7 @@ implementation
 procedure TfmMain.FormActivate(Sender: TObject);
 begin
   SetWindowPos(Self.Handle,HWND_BOTTOM,0,0,Screen.Width,Screen.Height,SWP_NOACTIVATE);
+  ShowWindow(Application.Handle, SW_HIDE);
 end;
 
 procedure TfmMain.Exit1Click(Sender: TObject);
