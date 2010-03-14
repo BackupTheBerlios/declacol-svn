@@ -23,15 +23,13 @@ object fmMain: TfmMain
     Height = 185
     Caption = 'Log'
     TabOrder = 2
-    object mmLog: TMemo
+    object mmLog: TListBox
       Left = 8
       Top = 16
       Width = 473
       Height = 161
-      ReadOnly = True
-      ScrollBars = ssBoth
+      ItemHeight = 13
       TabOrder = 0
-      WordWrap = False
     end
   end
   object gbCommand: TGroupBox

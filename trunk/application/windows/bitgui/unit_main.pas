@@ -26,9 +26,9 @@ type
     Panel1: TPanel;
     btCancel: TButton;
     Animate1: TAnimate;
-    mmLog: TMemo;
     lbinfected: TLabel;
     lbinfectedcount: TLabel;
+    mmLog: TListBox;
     procedure DosComTerminated(Sender: TObject);
     procedure btUpdateClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -187,7 +187,7 @@ begin
     begin
       addlog('--------------------------------------------------------------------------------------------------------------------------------------');
       addlog('INFECTED FILES');
-      mmLog.Lines.AddStrings(slInfected);
+      mmLog.Items.AddStrings(slInfected);
       addlog('--------------------------------------------------------------------------------------------------------------------------------------');
     end;
 
@@ -200,14 +200,23 @@ end;
 //AddLog
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 procedure TfmMain.addlog(text : longstring);
+var
+  newwidth : integer;
 begin
-  mmLog.Lines.Add(Text);
+  mmLog.ItemIndex:=mmLog.Items.Add(Text);
 
+
+  NewWidth := mmLog.Canvas.TextWidth(mmLog.Items.Strings[mmLog.ItemIndex] + 'x');
+
+  if (NewWidth > mmLog.ScrollWidth) then
+    begin
+      mmLog.ScrollWidth:=NewWidth;
+    end;
 
   //Maimal 10000 Eintraege
-  while (mmLog.Lines.count > 10000) do
+  while (mmLog.Items.count > 10000) do
     begin
-      mmLog.Lines.Delete(0);
+      mmLog.Items.Delete(0);
     end;
 end;
 
