@@ -132,9 +132,9 @@ object fmMain: TfmMain
       Caption = 'infected :'
     end
     object lbinfectedcount: TLabel
-      Left = 56
+      Left = 48
       Top = 0
-      Width = 6
+      Width = 33
       Height = 13
       Caption = '0'
     end

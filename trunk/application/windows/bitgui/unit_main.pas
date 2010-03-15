@@ -129,7 +129,8 @@ end;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 procedure TfmMain.btScanClick(Sender: TObject);
 var
-  sCom : longstring;
+  sCom  : longstring;
+  sPath : longstring;
 begin
   lbinfectedcount.caption:='0';
   Panel1.Visible:=TRUE;
@@ -148,7 +149,18 @@ begin
   if (cbShowFiles.Checked)         then sCom:=sCom + ' /list';
   if (not cbUseHeuristic.Checked)  then sCom:=sCom + ' /nohed';
 
-  DosCom.CommandLine:=sBaseexe + ' "' + dlbMain.Directory + '"' + sCom;
+  //Quotes nur bei Leerzeichen
+  if (pos('"',dlbMain.Directory)>0) then
+    begin
+      sPath:=' "'+dlbMain.Directory+'" ';
+    end
+  else
+    begin
+      sPath:=' '+dlbMain.Directory+' ';
+    end;
+
+  //Und los geht der Scan
+  DosCom.CommandLine:=sBaseexe + sPath + sCom;
   self.addlog('command : ' + ExtractFilename(sBaseExe + sCom));
   self.addlog('');
   slInfected.Clear();
@@ -204,17 +216,15 @@ var
   newwidth : integer;
 begin
   mmLog.ItemIndex:=mmLog.Items.Add(Text);
-
-
+  //Breite an den laensten Text anpassen
   NewWidth := mmLog.Canvas.TextWidth(mmLog.Items.Strings[mmLog.ItemIndex] + 'x');
-
   if (NewWidth > mmLog.ScrollWidth) then
     begin
       mmLog.ScrollWidth:=NewWidth;
     end;
 
-  //Maimal 10000 Eintraege
-  while (mmLog.Items.count > 10000) do
+  //Maimal 20000 Eintraege
+  while (mmLog.Items.count > 20000) do
     begin
       mmLog.Items.Delete(0);
     end;
