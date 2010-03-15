@@ -56,8 +56,6 @@ var
 
 implementation
 
-uses unit_failure;
-
 {$R *.dfm}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //RunOnce
@@ -75,7 +73,7 @@ begin
       self.Caption:=application.Title;
       sBaseDir:=extractfilepath(application.ExeName);
 
-sBasedir:='C:\Dokumente und Einstellungen\sven\Desktop\bitdefender\';
+//sBasedir:='C:\Dokumente und Einstellungen\sven\Desktop\bitdefender\';
 
       sBaseExe:=sBaseDir + exe;
       addlog('basedir : ' + sBaseDir);
