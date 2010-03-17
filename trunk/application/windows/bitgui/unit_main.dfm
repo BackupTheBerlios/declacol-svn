@@ -134,7 +134,7 @@ object fmMain: TfmMain
     object lbinfectedcount: TLabel
       Left = 48
       Top = 0
-      Width = 33
+      Width = 6
       Height = 13
       Caption = '0'
     end

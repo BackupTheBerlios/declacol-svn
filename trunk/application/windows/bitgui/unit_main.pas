@@ -148,7 +148,7 @@ begin
   if (not cbUseHeuristic.Checked)  then sCom:=sCom + ' /nohed';
 
   //Quotes nur bei Leerzeichen
-  if (pos('"',dlbMain.Directory)>0) then
+  if (pos(' ',dlbMain.Directory)>0) then
     begin
       sPath:=' "'+dlbMain.Directory+'" ';
     end
