@@ -36,11 +36,11 @@ Author: Sven Lorenz / Borg@Sven-of-Nine.de
 ////////////////////////////////////////////////////////////////////////////////
 
 interface
-uses unit_typedefs,class_lzw,windows;
+uses unit_typedefs,class_lzw,class_rle,windows;
 
 type  TBlockReader = class(TObject)
       private
-             Packer       : TLZW;
+             Packer       : TRLE;
              hFile        : THandle;
              u32blocksize : unsigned32;
              bcompressed  : boolean;
@@ -64,7 +64,7 @@ end;
 
 type  TBlockWriter = class(TObject)
       private
-             Packer       : TLZW;
+             Packer       : TRLE;
              hFile        : THandle;
              bcompressed  : boolean;
              //Dummies für die Initialisierung
@@ -91,7 +91,7 @@ implementation
 ////////////////////////////////////////////////////////////////////////////////
 constructor TBlockReader.create();
 begin
-     Self.Packer:=TLZW.Create();
+     Self.Packer:=TRLE.Create();
      Self.BlockSize:=8192;
 
      Self.Packer.mode:=LZW_NORMAL;
@@ -236,7 +236,7 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 constructor TBlockWriter.create();
 begin
-     Self.Packer:=TLZW.Create();
+     Self.Packer:=TRLE.Create();
      Self.Packer.buffersize:=8129;
 
      Self.Packer.mode:=LZW_NORMAL;

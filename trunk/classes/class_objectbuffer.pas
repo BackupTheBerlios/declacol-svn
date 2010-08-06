@@ -213,9 +213,6 @@ end;
 
 implementation
 
-uses unit_random     //Für die Funktion Shuffle
-     ;
-
 ////////////////////////////////////////////////////////////////////////////////
 //Konstruktor / Destruktor
 constructor TObjectBuffer.Create();
@@ -735,7 +732,7 @@ begin
      while (u32Count < Self.Size) do
          begin
               //Einfach zufällig zwei Einträge gegeneinander tauschen
-              Self.Swap (u32Count,RND_GetRandom(Self.Size));
+              Self.Swap (u32Count,Random(Self.Size));
               //Nächster Eintrag
               inc(u32Count);
          end;

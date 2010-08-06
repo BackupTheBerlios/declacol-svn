@@ -245,7 +245,7 @@ begin
 
      //Den Pointer mappen wie einfach auf ein Byte,
      //damit wird der Zugriff viel einfacher und das iterieren
-     //nit von Exceptions gestört.
+     //nicht von Exceptions gestört.
      pData:=Input;
      pEnd :=Input;
      inc(pEnd,InSize);
@@ -324,7 +324,7 @@ begin
              else
                 begin
                      result:=FALSE;
-                end; 
+                end;
         end;
 end;
 

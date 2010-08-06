@@ -52,20 +52,20 @@ const
 
 function DateTimeToTimeStamp(date:TDateTime):LongInt;
 begin
-     UNIXStartDate:=EncodeDate(1970,1,1)+EncodeTime(2,0,0,0);
+//     UNIXStartDate:=EncodeDate(1970,1,1)+EncodeTime(2,0,0,0);
      Result:=Round(( date - UNIXStartDate)*86400);
 end;
 
 function TimeStampToDateTime(timestamp:LongInt):TDateTime;
 begin
-     UNIXStartDate:=EncodeDate(1970,1,1)+EncodeTime(2,0,0,0);
+//     UNIXStartDate:=EncodeDate(1970,1,1)+EncodeTime(2,0,0,0);
      Result:=(timestamp / 86400)+UNIXStartDate;
 end;
 
 
 function NTPStampToDateTime(NTPStamp:LongInt):TDateTime;
 begin
-     NTPStartDate:=EncodeDate(1900,1,1);//+EncodeTime(2,0,0,0);
+//     NTPStartDate:=EncodeDate(1900,1,1);//+EncodeTime(2,0,0,0);
      Result:=(NTPStamp / 86400)+UNIXStartDate;
 end;
 

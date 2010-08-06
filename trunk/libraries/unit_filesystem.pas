@@ -83,7 +83,15 @@ uses
 //////////////////////////////////////////////////////////////////////////////////////////
 //Dateidatumsstruktur laden
 function  FS_GetFileTimes(Filename:LongString):TFileTimeStruct;
+var
+   FileHandle : THandle;
 begin
+  FileHandle := FileOpen(FileName, fmOpenRead);
+  if (FileHandle <> INVALID_HANDLE_VALUE) then
+    begin
+      GetFileTime(Filehandle,PFileTime(result.Creation),PFileTime(result.LastAccess),PFileTime(result.lastwrite));
+      CloseHandle(Filehandle);
+    end;
 end;
 
 //////////////////////////////////////////////////////////////////////////////////////////

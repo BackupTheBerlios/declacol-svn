@@ -64,8 +64,20 @@ type pTagBuff = ^TTagBuff;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
-//Alle verfügbaren Genres
 const
+//Tags für id3v2.2
+ V2TITLE   = 'TAL';
+ V2ARTIST  = 'TP1';
+ V2ALBUM   = 'TAL';
+ V2YEAR    = 'TYE';
+ V2COMMENT = 'COM';
+ V2TRACK   = 'TRK';
+ V2GENRE   = 'TCO';
+
+//Tags für id3v2.3
+
+
+//Alle verfügbaren Genres
  Genres : array[0..146] of string =
     ('Blues','Classic Rock','Country','Dance','Disco','Funk','Grunge',
     'Hip- Hop','Jazz','Metal','New Age','Oldies','Other','Pop','R&B',
@@ -90,7 +102,6 @@ const
     'Hardcore','Terror','Indie','BritPop','Negerpunk','Polsk Punk','Beat',
     'Christian Gangsta','Heavy Metal','Black Metal','Crossover','Contemporary C',
     'Christian Rock','Merengue','Salsa','Thrash Metal','Anime','JPop','SynthPop');
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //Globaler read

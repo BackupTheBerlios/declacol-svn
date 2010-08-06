@@ -78,7 +78,7 @@ unit Unit_Registry;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 interface
 
-uses Registry,SysUtils,Windows,Classes;
+uses Registry,SysUtils,Windows,Classes,Variants;
 
 //test if a key exists or not
 function RegValExists(HK:HKEY;Pfad:String):Boolean;
@@ -116,13 +116,13 @@ const
 ///////////////////////////////////////////////////////////////////////////////////////////////
 function DateTimeToTimeStamp(date:TDateTime):LongInt;
 begin
-     UNIXStartDate:=EncodeDate(1970,1,1)+EncodeTime(2,0,0,0);
+//     UNIXStartDate:=EncodeDate(1970,1,1)+EncodeTime(2,0,0,0);
      Result:=Round(( date - UNIXStartDate)*86400);
 end;
 
 function TimeStampToDateTime(timestamp:LongInt):TDateTime;
 begin
-     UNIXStartDate:=EncodeDate(1970,1,1)+EncodeTime(2,0,0,0);
+//     UNIXStartDate:=EncodeDate(1970,1,1)+EncodeTime(2,0,0,0);
      Result:=(timestamp / 86400)+UNIXStartDate;
 end;
 
