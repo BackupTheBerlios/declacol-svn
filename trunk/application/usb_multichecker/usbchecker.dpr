@@ -2,8 +2,7 @@ program usbchecker;
 
 uses
   Forms,
-  main in 'main.pas' {fmMain},
-  iotask in 'iotask.pas';
+  main in 'main.pas' {fmMain};
 
 {$R *.res}
 

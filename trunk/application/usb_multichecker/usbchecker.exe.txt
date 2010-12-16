@@ -1,3 +1,0 @@
-1292523124|initial read Device 1 (3,73 GByte)
-1292523127|user break
-1292523127|done
