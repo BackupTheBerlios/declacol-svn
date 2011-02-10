@@ -4,26 +4,28 @@ interface
 
 uses
   unit_typedefs,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls,unit_helper,unit_filefunctions,unit_stringfunctions,unit_strings;
+  Dialogs, StdCtrls,unit_helper,unit_filefunctions,unit_stringfunctions,unit_strings,unit_log;
 
 type
-  TForm1 = class(TForm)
-    GroupBox1: TGroupBox;
+  TfmMain = class(TForm)
+    gblog: TGroupBox;
     lbLog: TListBox;
-    GroupBox2: TGroupBox;
+    gbpath: TGroupBox;
     edsource: TEdit;
-    Button1: TButton;
-    Label1: TLabel;
-    Label2: TLabel;
+    btbrowsesource: TButton;
+    lbsource: TLabel;
+    lbtarget: TLabel;
     edtarget: TEdit;
-    Button2: TButton;
-    GroupBox3: TGroupBox;
-    Button3: TButton;
+    btbrowsetarget: TButton;
+    gboptions: TGroupBox;
+    btstart: TButton;
     cblowercase: TCheckBox;
     cbtest: TCheckBox;
-    procedure Button3Click(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    btstop: TButton;
+    procedure btstartClick(Sender: TObject);
+    procedure btbrowsesourceClick(Sender: TObject);
+    procedure btbrowsetargetClick(Sender: TObject);
+    procedure btstopClick(Sender: TObject);
   private
     { Private-Deklarationen }
     btest  : boolean;
@@ -40,29 +42,30 @@ type
   end;
 
 var
-  Form1: TForm1;
+  fmMain: TfmMain;
 
 implementation
 {$R *.dfm}
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TfmMain.btbrowsesourceClick(Sender: TObject);
 begin
   edsource.Text:=browsedialog('source path');
 end;
 
-procedure TForm1.Button2Click(Sender: TObject);
+procedure TfmMain.btbrowsetargetClick(Sender: TObject);
 begin
   edtarget.Text:=browsedialog('target path');
 end;
 
-procedure TForm1.Button3Click(Sender: TObject);
+procedure TfmMain.btstartClick(Sender: TObject);
 begin
+  btStart.Visible:=FALSE;
   clearlog();
 
   bTest:=cbtest.checked;
   bBusy:=TRUE;
 
-  addlog('syncing');
+  addlog('syncing '+edsource.Text + ' to ' +edtarget.text);
   if (DirectoryExists(edsource.text)=TRUE) AND (DirectoryExists(edtarget.Text)=TRUE) then
     begin
       dosync(edsource.text,edtarget.Text);
@@ -74,10 +77,16 @@ begin
   addlog('done');
 
   bBusy:=FALSE;
+  btStart.Visible:=TRUE;
+end;
+
+procedure TfmMain.btstopClick(Sender: TObject);
+begin
+  bBusy:=FALSE;
 end;
 
 
-procedure TForm1.dosync(source : longstring; target : longstring);
+procedure TfmMain.dosync(source : longstring; target : longstring);
 var
   status : signed32;
   search : TSearchRec;
@@ -85,6 +94,8 @@ begin
   source:=IncludeTrailingPathDelimiter(source);
   target:=IncludeTrailingPathDelimiter(target);
 
+  addlog('processing '+source);
+  
   if (cblowercase.checked=TRUE) then
     begin
       source:=lowercase(source);
@@ -116,7 +127,7 @@ end;
 
 
 //Alle überflüssigen Verzeichnisse entfernen
-procedure TForm1.prepare_dirs (source:longstring; target:longstring);
+procedure TfmMain.prepare_dirs (source:longstring; target:longstring);
 var
   slsource : TStringlist;
   sltarget : TStringlist;
@@ -188,7 +199,7 @@ begin
   slsource.free();
 end;
 
-procedure TForm1.prepare_files(source:longstring; target:longstring);
+procedure TfmMain.prepare_files(source:longstring; target:longstring);
 var
   slsource : TStringlist;
   sltarget : TStringlist;
@@ -291,16 +302,18 @@ begin
   slsource.free();
 end;
 
-procedure TForm1.addlog(text : longstring);
+procedure TfmMain.addlog(text : longstring);
 begin
   lbLog.ItemIndex:=lbLog.Items.Add(text);
+  Log_Add(paramstr(0)+'.log',text);
   while(lbLog.Count > 250000) do lbLog.Items.Delete(0);
 end;
 
-procedure TForm1.clearlog();
+procedure TfmMain.clearlog();
 begin
   lblog.clear();
 end;
+
 
 
 

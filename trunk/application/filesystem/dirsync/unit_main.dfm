@@ -1,4 +1,4 @@
-object Form1: TForm1
+object fmMain: TfmMain
   Left = 248
   Top = 130
   BorderIcons = [biSystemMenu, biMinimize]
@@ -16,7 +16,7 @@ object Form1: TForm1
   Position = poScreenCenter
   PixelsPerInch = 96
   TextHeight = 13
-  object GroupBox1: TGroupBox
+  object gblog: TGroupBox
     Left = 0
     Top = 136
     Width = 433
@@ -32,21 +32,21 @@ object Form1: TForm1
       TabOrder = 0
     end
   end
-  object GroupBox2: TGroupBox
+  object gbpath: TGroupBox
     Left = 0
     Top = 0
     Width = 433
     Height = 73
     Caption = 'path'
     TabOrder = 1
-    object Label1: TLabel
+    object lbsource: TLabel
       Left = 8
       Top = 18
       Width = 32
       Height = 13
       Caption = 'source'
     end
-    object Label2: TLabel
+    object lbtarget: TLabel
       Left = 8
       Top = 42
       Width = 27
@@ -62,14 +62,14 @@ object Form1: TForm1
       TabOrder = 0
       Text = 'd:\test\a'
     end
-    object Button1: TButton
+    object btbrowsesource: TButton
       Left = 400
       Top = 16
       Width = 25
       Height = 21
       Caption = '...'
       TabOrder = 1
-      OnClick = Button1Click
+      OnClick = btbrowsesourceClick
     end
     object edtarget: TEdit
       Left = 48
@@ -80,31 +80,40 @@ object Form1: TForm1
       TabOrder = 2
       Text = 'd:\test\b'
     end
-    object Button2: TButton
+    object btbrowsetarget: TButton
       Left = 400
       Top = 40
       Width = 25
       Height = 21
       Caption = '...'
       TabOrder = 3
-      OnClick = Button2Click
+      OnClick = btbrowsetargetClick
     end
   end
-  object GroupBox3: TGroupBox
+  object gboptions: TGroupBox
     Left = 0
     Top = 80
     Width = 433
     Height = 49
     Caption = 'options'
     TabOrder = 2
-    object Button3: TButton
+    object btstop: TButton
+      Left = 8
+      Top = 16
+      Width = 75
+      Height = 25
+      Caption = 'Stop'
+      TabOrder = 3
+      OnClick = btstopClick
+    end
+    object btstart: TButton
       Left = 8
       Top = 16
       Width = 75
       Height = 25
       Caption = 'Start'
       TabOrder = 0
-      OnClick = Button3Click
+      OnClick = btstartClick
     end
     object cblowercase: TCheckBox
       Left = 136
