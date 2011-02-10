@@ -46,7 +46,7 @@ Author: Sven Lorenz / Borg@Sven-of-Nine.de
 unit Unit_FileFunctions;
 
 interface
-uses Unit_TypeDefs,Windows,SysUtils,Classes,FileCTRL,Forms,SHlObj,ShellAPI;
+uses unit_stringfunctions,Unit_TypeDefs,Windows,SysUtils,Classes,FileCTRL,Forms,SHlObj,ShellAPI;
 
 const
      DRIVE_ALL = High(UINT);
@@ -188,6 +188,7 @@ end;
 function DelData(Source:LongString):Boolean;
 begin
      //Schreibschutz löschen
+     RemoveAttrib(Source,faHIDDEN);
      RemoveAttrib(Source,faREADONLY);
      //Datei löschen
      Result:=DeleteFile(PChar(Source));
@@ -380,6 +381,8 @@ var
    OK      : Integer;
    s       : LongString;
 begin
+    startpath:=IncludeTrailingPathDelimiter(startpath);
+
      Result:=TRUE;
      try
      //Und nun die Verzeichnisse durchsuchen ?
@@ -392,7 +395,7 @@ begin
                    begin
                         s:=IncludeTrailingPathDelimiter(Startpath+SRF.Name);
                         DelTree(s);
-                        Result:=Result and RemoveDirectory(PChar(s));
+                        Result:=Result and RemoveDir(s);
                    end
                 else
                    begin
@@ -401,8 +404,8 @@ begin
                    end;
                 OK:=FindNext(SRF);
            end;
-        RemoveDirectory(PChar(StartPath));
         FindClose(SRF);
+        RemoveDir(StartPath);
      except
      end;
 end;
