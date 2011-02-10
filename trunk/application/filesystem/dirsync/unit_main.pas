@@ -4,7 +4,8 @@ interface
 
 uses
   unit_typedefs,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls,unit_helper,unit_filefunctions,unit_stringfunctions,unit_strings,unit_log;
+  Dialogs, StdCtrls,unit_helper,unit_filefunctions,unit_stringfunctions,unit_strings,unit_log,
+  ExtCtrls;
 
 type
   TfmMain = class(TForm)
@@ -22,10 +23,14 @@ type
     cblowercase: TCheckBox;
     cbtest: TCheckBox;
     btstop: TButton;
+    cbunfragged: TCheckBox;
+    cbcrc: TCheckBox;
+    Timer1: TTimer;
     procedure btstartClick(Sender: TObject);
     procedure btbrowsesourceClick(Sender: TObject);
     procedure btbrowsetargetClick(Sender: TObject);
     procedure btstopClick(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { Private-Deklarationen }
     btest  : boolean;
@@ -252,11 +257,22 @@ begin
   index:=0;
   while (index < unsigned32(slsource.count)) do
     begin
+      Application.ProcessMessages();
+
       found:=sltarget.IndexOf(slsource[index]);
       if (found<>-1) then
         begin
           //sind die dateien gleich eintrag entfernen
-          if (compare_files_normal(source + slsource[index],target + sltarget[found]) = TRUE) then
+          if (cbcrc.Checked=TRUE) then
+            begin
+              status:=compare_files_paranoid(source + slsource[index],target + sltarget[found])
+            end
+          else
+            begin
+              status:=compare_files_normal(source + slsource[index],target + sltarget[found])
+            end;
+
+          if (status = TRUE) then
             begin
               slsource[index]:='';
               sltarget.delete(found);
@@ -279,7 +295,7 @@ begin
         begin
           if (not bTest) then
             begin
-              status:=sync_files(source + slsource[0], target + slsource[0])
+              status:=sync_files(source + slsource[0], target + slsource[0],cbunfragged.checked)
             end
           else
             begin
@@ -317,5 +333,13 @@ end;
 
 
 
+
+procedure TfmMain.Timer1Timer(Sender: TObject);
+begin
+  if (bBusy) then
+    begin
+      Application.ProcessMessages();
+    end;
+end;
 
 end.

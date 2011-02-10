@@ -131,5 +131,27 @@ object fmMain: TfmMain
       Caption = 'testrun'
       TabOrder = 2
     end
+    object cbunfragged: TCheckBox
+      Left = 240
+      Top = 10
+      Width = 97
+      Height = 17
+      Caption = 'no fragments'
+      TabOrder = 4
+    end
+    object cbcrc: TCheckBox
+      Left = 240
+      Top = 28
+      Width = 97
+      Height = 17
+      Caption = 'crc compare'
+      TabOrder = 5
+    end
+  end
+  object Timer1: TTimer
+    Interval = 250
+    OnTimer = Timer1Timer
+    Left = 400
+    Top = 96
   end
 end
