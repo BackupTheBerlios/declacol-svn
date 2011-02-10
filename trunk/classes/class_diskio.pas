@@ -223,6 +223,7 @@ type pDiskIO = ^TDiskIO;
     bRemovable    : Boolean;
     bNoWrite      : Boolean;
     fSpeed        : Single;
+    sdata         : longstring;
   protected
     procedure SetDrive(Drive:unsigned8);
     procedure SetRealSize(Flag:Boolean);
@@ -268,6 +269,8 @@ type pDiskIO = ^TDiskIO;
     property WriteProtected : boolean read bNoWrite write bNoWrite;
     //Geschwindigkeit des letzten Schreib/Lesevorganges in KB/s
     property Speed      : Single read fSpeed;
+
+    property Data       : longstring read sdata write sdata; 
 end;
 
 
