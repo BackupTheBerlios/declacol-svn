@@ -14,10 +14,24 @@ implementation
 //einfacher vergleich zweier dateien
 //attribute ignorieren wir
 function compare_files_normal  (source :longstring; target : longstring):boolean;
+var
+  temp1 : unsigned64;
+  temp2 : unsigned64;
 begin
-  result:=                 (fileage(source) = fileage(target));
-  result:=result AND   (filegetattr(source) = filegetattr(target));
-  result:=result AND (getfilesizeex(source) = getfilesizeex(target));
+  //änderungsdatum vergleichen
+  temp1 :=fileage(source);
+  temp2 :=fileage(target);
+  result:=(temp1 = temp2);
+
+  //attribute vergleichen (ohne compression on NTFS)
+  temp1 :=getfileattributes(pchar(source)) OR FILE_ATTRIBUTE_COMPRESSED;
+  temp2 :=getfileattributes(pchar(target)) OR FILE_ATTRIBUTE_COMPRESSED;
+  result:=result AND (temp1 = temp2);
+
+  //filesize 64bit vergleichen
+  temp1 :=getfilesizeex(source);
+  temp2 :=getfilesizeex(target);
+  result:=result AND (temp1 = temp2);
 end;
 
 //hardcore-vergleich (crc)
@@ -67,7 +81,7 @@ begin
         end;
       closehandle(hsource);
     end;
-  filesetattr(target,filegetattr(source));
+  setfileattributes(pchar(target),getfileattributes(pchar(source)));
   result:=compare_files_normal(source,target);
 end;
 

@@ -60,7 +60,7 @@ object fmMain: TfmMain
       Height = 21
       ReadOnly = True
       TabOrder = 0
-      Text = 'd:\test\a'
+      Text = 'D:\test\a'
     end
     object btbrowsesource: TButton
       Left = 400
