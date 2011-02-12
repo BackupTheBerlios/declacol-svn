@@ -1,6 +1,6 @@
 object fmMain: TfmMain
-  Left = 248
-  Top = 130
+  Left = 310
+  Top = 175
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsToolWindow
   Caption = 'DirSync 0.1'
@@ -14,6 +14,8 @@ object fmMain: TfmMain
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  OnActivate = FormActivate
+  OnClose = FormClose
   PixelsPerInch = 96
   TextHeight = 13
   object gblog: TGroupBox
@@ -60,7 +62,6 @@ object fmMain: TfmMain
       Height = 21
       ReadOnly = True
       TabOrder = 0
-      Text = 'D:\test\a'
     end
     object btbrowsesource: TButton
       Left = 400
@@ -78,7 +79,6 @@ object fmMain: TfmMain
       Height = 21
       ReadOnly = True
       TabOrder = 2
-      Text = 'd:\test\b'
     end
     object btbrowsetarget: TButton
       Left = 400

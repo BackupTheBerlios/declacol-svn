@@ -5,7 +5,7 @@ interface
 uses
   unit_typedefs,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls,unit_helper,unit_filefunctions,unit_stringfunctions,unit_strings,unit_log,
-  ExtCtrls;
+  ExtCtrls,class_ini;
 
 type
   TfmMain = class(TForm)
@@ -32,10 +32,13 @@ type
     procedure btbrowsetargetClick(Sender: TObject);
     procedure btstopClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private-Deklarationen }
     btest  : boolean;
     bBusy  : boolean;
+    bLoaded: boolean;
     procedure clearlog();
     procedure addlog(text : longstring);
 
@@ -339,6 +342,39 @@ begin
     begin
       Application.ProcessMessages();
     end;
+end;
+
+procedure TfmMain.FormActivate(Sender: TObject);
+var
+  ini   : TIni;
+  stemp : longstring;
+begin
+  if (bLoaded = FALSE) then
+    begin
+      bLoaded:=TRUE;
+
+      ini := TIni.Create();
+      ini.LoadFromFile(paramstr(0)+'.ini');
+
+      ini.Read('options','source','',stemp);
+      edsource.Text:=stemp;
+
+      ini.Read('options','target','',stemp);
+      edtarget.Text:=stemp;
+
+      ini.Free();
+    end;
+end;
+
+procedure TfmMain.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+  ini   : TIni;
+begin
+  ini := TIni.Create();
+  ini.Write('options','source',edsource.Text);
+  ini.Write('options','target',edtarget.Text);
+  ini.SaveToFile(paramstr(0)+'.ini');
+  ini.Free();
 end;
 
 end.
