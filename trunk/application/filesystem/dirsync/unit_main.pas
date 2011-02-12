@@ -348,6 +348,7 @@ procedure TfmMain.FormActivate(Sender: TObject);
 var
   ini   : TIni;
   stemp : longstring;
+  btemp : boolean;
 begin
   if (bLoaded = FALSE) then
     begin
@@ -362,6 +363,21 @@ begin
       ini.Read('options','target','',stemp);
       edtarget.Text:=stemp;
 
+      ini.Read('options','crccheck' ,FALSE ,btemp);
+      cbcrc.checked:=btemp;
+
+      ini.Read('options','lowercase',TRUE  ,btemp);
+      cblowercase.checked:=btemp;
+
+      ini.Read('options','testrun'  ,FALSE ,btemp);
+      cbtest.checked:=btemp;
+
+      ini.Read('options','unfragged',FALSE ,btemp);
+      cbunfragged.checked:=btemp;
+
+      ini.Read('options','verbose'  ,TRUE  ,btemp);
+      cbverbose.checked:=btemp;
+
       ini.Free();
     end;
 end;
@@ -373,6 +389,13 @@ begin
   ini := TIni.Create();
   ini.Write('options','source',edsource.Text);
   ini.Write('options','target',edtarget.Text);
+
+  ini.Write('options','crccheck' ,cbcrc.checked);
+  ini.Write('options','lowercase',cblowercase.checked);
+  ini.Write('options','testrun'  ,cbtest.checked);
+  ini.Write('options','unfragged',cbunfragged.checked);
+  ini.Write('options','verbose'  ,cbverbose.checked);
+
   ini.SaveToFile(paramstr(0)+'.ini');
   ini.Free();
 end;
