@@ -27,6 +27,7 @@ type
     cbcrc: TCheckBox;
     Timer1: TTimer;
     cbverbose: TCheckBox;
+    cbautoclose: TCheckBox;
     procedure btstartClick(Sender: TObject);
     procedure btbrowsesourceClick(Sender: TObject);
     procedure btbrowsetargetClick(Sender: TObject);
@@ -87,6 +88,13 @@ begin
 
   bBusy:=FALSE;
   btStart.Visible:=TRUE;
+
+  //autostop?
+  if (cbautoclose.checked=TRUE) then
+    begin
+      self.close();
+    end;
+
 end;
 
 procedure TfmMain.btstopClick(Sender: TObject);
@@ -378,7 +386,16 @@ begin
       ini.Read('options','verbose'  ,TRUE  ,btemp);
       cbverbose.checked:=btemp;
 
+      ini.Read('options','autoclose',FALSE  ,btemp);
+      cbautoclose.checked:=btemp;
+
       ini.Free();
+
+      //autorun?
+      if (paramstr(1)='run') then
+        begin
+          btstartclick(self);
+        end;
     end;
 end;
 
@@ -395,6 +412,7 @@ begin
   ini.Write('options','testrun'  ,cbtest.checked);
   ini.Write('options','unfragged',cbunfragged.checked);
   ini.Write('options','verbose'  ,cbverbose.checked);
+  ini.Write('options','autoclose',cbautoclose.checked);
 
   ini.SaveToFile(paramstr(0)+'.ini');
   ini.Free();

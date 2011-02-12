@@ -155,6 +155,14 @@ object fmMain: TfmMain
       Caption = 'verbose'
       TabOrder = 6
     end
+    object cbautoclose: TCheckBox
+      Left = 304
+      Top = 26
+      Width = 97
+      Height = 17
+      Caption = 'close if done'
+      TabOrder = 7
+    end
   end
   object Timer1: TTimer
     Interval = 250
