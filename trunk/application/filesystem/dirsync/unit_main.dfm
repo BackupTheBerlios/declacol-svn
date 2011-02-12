@@ -116,7 +116,7 @@ object fmMain: TfmMain
       OnClick = btstartClick
     end
     object cblowercase: TCheckBox
-      Left = 136
+      Left = 112
       Top = 10
       Width = 73
       Height = 17
@@ -124,7 +124,7 @@ object fmMain: TfmMain
       TabOrder = 1
     end
     object cbtest: TCheckBox
-      Left = 136
+      Left = 112
       Top = 28
       Width = 97
       Height = 17
@@ -132,7 +132,7 @@ object fmMain: TfmMain
       TabOrder = 2
     end
     object cbunfragged: TCheckBox
-      Left = 240
+      Left = 208
       Top = 10
       Width = 97
       Height = 17
@@ -140,12 +140,20 @@ object fmMain: TfmMain
       TabOrder = 4
     end
     object cbcrc: TCheckBox
-      Left = 240
+      Left = 208
       Top = 28
       Width = 97
       Height = 17
       Caption = 'crc compare'
       TabOrder = 5
+    end
+    object cbverbose: TCheckBox
+      Left = 304
+      Top = 10
+      Width = 97
+      Height = 17
+      Caption = 'verbose'
+      TabOrder = 6
     end
   end
   object Timer1: TTimer

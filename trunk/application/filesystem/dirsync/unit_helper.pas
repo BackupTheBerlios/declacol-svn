@@ -37,16 +37,16 @@ end;
 //hardcore-vergleich (crc)
 function compare_files_paranoid(source :longstring; target : longstring):boolean;
 var
-  adler32   : TAdler32;
-  sourcecrc : TAdler32Struct;
-  targetcrc : TAdler32Struct;
+  adler32   : TADLER32;
+  sourcecrc : TADLER32Struct;
+  targetcrc : TADLER32Struct;
 begin
   result:=compare_files_normal(source,target);
 
   //crc nur wenn der restliche vergleich ok ist
   if (result = TRUE) then
     begin
-      adler32:=TAdler32.create();
+      adler32:=TADLER32.create();
       sourcecrc:=adler32.fromfile(source);
       targetcrc:=adler32.fromfile(target);
       adler32.free();

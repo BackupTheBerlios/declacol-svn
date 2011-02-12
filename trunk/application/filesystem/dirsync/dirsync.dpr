@@ -9,6 +9,7 @@ uses
 
 begin
   Application.Initialize;
+  Application.Title := 'DirSync';
   Application.CreateForm(TfmMain, fmMain);
   Application.Run;
 end.

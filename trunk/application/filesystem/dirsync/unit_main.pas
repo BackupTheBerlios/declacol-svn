@@ -26,6 +26,7 @@ type
     cbunfragged: TCheckBox;
     cbcrc: TCheckBox;
     Timer1: TTimer;
+    cbverbose: TCheckBox;
     procedure btstartClick(Sender: TObject);
     procedure btbrowsesourceClick(Sender: TObject);
     procedure btbrowsetargetClick(Sender: TObject);
@@ -99,7 +100,7 @@ begin
   source:=IncludeTrailingPathDelimiter(source);
   target:=IncludeTrailingPathDelimiter(target);
 
-  addlog('processing '+source);
+  if (cbverbose.checked=TRUE) then addlog('processing '+source);
   
   if (cblowercase.checked=TRUE) then
     begin
@@ -262,6 +263,8 @@ begin
       found:=sltarget.IndexOf(slsource[index]);
       if (found<>-1) then
         begin
+          if (cbverbose.Checked=TRUE) then addlog('check '+source+slsource[index]);
+
           //sind die dateien gleich eintrag entfernen
           if (cbcrc.Checked=TRUE) then
             begin
@@ -329,10 +332,6 @@ procedure TfmMain.clearlog();
 begin
   lblog.clear();
 end;
-
-
-
-
 
 procedure TfmMain.Timer1Timer(Sender: TObject);
 begin
