@@ -357,6 +357,10 @@ begin
              u32BytesToRead := u32BufferSize;
              u32BytesRead   := 0;
 
+             //daten lesen
+             Blockread(RawFile,aReadBuffer[0],u32BytesToRead,u32BytesRead);
+
+{
              //Neu füllen
              while (
                    //Dateiende nicht erreicht
@@ -369,13 +373,14 @@ begin
                         //aber komplett portierbar und ohne API-Zugriffe
                         System.Read(RawFile,aReadBuffer[u32BytesRead]);
 
+
                         //Nächstes Byte lesen
                         inc(u32BytesRead);
-                        
+
                         //Pufferzähler anpassen
                         dec(u32BytesToRead);
                    end;
-
+}
              //EOF-Flags setzen
              bFileEOF   := u32BytesToRead <> u32BytesRead;
              bBufferEOF := u32BytesRead = 0;
