@@ -15,6 +15,7 @@ object fmMain: TfmMain
   OldCreateOrder = False
   Position = poScreenCenter
   OnActivate = FormActivate
+  OnClose = FormClose
   PixelsPerInch = 96
   TextHeight = 13
   object GroupBox1: TGroupBox
@@ -46,9 +47,16 @@ object fmMain: TfmMain
     Left = 192
     Top = 0
     Width = 257
-    Height = 105
+    Height = 129
     Caption = 'Mode'
     TabOrder = 1
+    object Label1: TLabel
+      Left = 80
+      Top = 106
+      Width = 45
+      Height = 13
+      Caption = 'buffersize'
+    end
     object rbCRC: TRadioButton
       Left = 8
       Top = 16
@@ -94,6 +102,28 @@ object fmMain: TfmMain
       Caption = 'endless'
       TabOrder = 4
     end
+    object Burst: TEdit
+      Left = 8
+      Top = 104
+      Width = 49
+      Height = 17
+      AutoSize = False
+      ReadOnly = True
+      TabOrder = 5
+      Text = '1'
+    end
+    object UpDown: TUpDown
+      Left = 56
+      Top = 104
+      Width = 16
+      Height = 17
+      Min = 1
+      Max = 8192
+      Increment = 32
+      Position = 1
+      TabOrder = 6
+      OnChangingEx = UpDownChangingEx
+    end
   end
   object GroupBox3: TGroupBox
     Left = 0
@@ -113,15 +143,15 @@ object fmMain: TfmMain
   end
   object GroupBox4: TGroupBox
     Left = 192
-    Top = 112
+    Top = 136
     Width = 257
-    Height = 105
+    Height = 81
     Caption = 'Commands'
     TabOrder = 3
     object Button1: TButton
-      Left = 6
+      Left = 8
       Top = 16
-      Width = 107
+      Width = 105
       Height = 25
       Caption = 'Refresh Devicelist'
       TabOrder = 0
@@ -129,7 +159,7 @@ object fmMain: TfmMain
     end
     object Button2: TButton
       Left = 8
-      Top = 72
+      Top = 48
       Width = 105
       Height = 25
       Caption = 'Start'
@@ -138,7 +168,7 @@ object fmMain: TfmMain
     end
     object btStop: TButton
       Left = 8
-      Top = 72
+      Top = 48
       Width = 105
       Height = 25
       Caption = 'Stop'

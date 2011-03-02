@@ -5,7 +5,7 @@ interface
 uses
   unit_typedefs,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls,class_diskio,class_blockio, CheckLst, ExtCtrls, class_checksum,
-  ComCtrls,unit_log;
+  ComCtrls,unit_log,inifiles;
 
 type
   TfmMain = class(TForm)
@@ -25,11 +25,18 @@ type
     tiRefresh: TTimer;
     cbEndless: TCheckBox;
     pbProgress: TProgressBar;
+    Burst: TEdit;
+    UpDown: TUpDown;
+    Label1: TLabel;
+
     procedure Button1Click(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure tiRefreshTimer(Sender: TObject);
     procedure btStopClick(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure UpDownChangingEx(Sender: TObject; var AllowChange: Boolean;
+      NewValue: Smallint; Direction: TUpDownDirection);
   private
     { Private-Deklarationen }
     procedure ScanDevices();
@@ -38,7 +45,6 @@ type
     function getcrc(index : unsigned32):string;
 
     procedure checkcrc();
-    procedure checksector(Device : TDiskio; Sector : unsigned64; Value : unsigned8);
 
   public
     { Public-Deklarationen }
@@ -48,6 +54,7 @@ var
   fmMain: TfmMain;
   bBusy   : Boolean = FALSE;
   bLoaded : Boolean = FALSE;
+  ini     : TInifile;
 
 implementation
 
@@ -66,18 +73,22 @@ begin
     begin
       bLoaded:=TRUE;
       Self.ScanDevices();
+      ini:=TIniFile.Create(paramstr(0)+'.ini');
+      updown.Position:=Ini.ReadInteger('options','buffersize',1);
     end;
 end;
 
 
 procedure TfmMain.AddLog(text : string);
 begin
-  while (lbLog.Items.Count > 30000) do
+  while (lbLog.Items.Count > 300000) do
     begin
       lbLog.Items.Delete(0);
     end;
+
   lbLog.ItemIndex:=lbLog.Items.Add(timetostr(time()) + ' : ' +  text);
-//Und Datei erzeugen
+
+  //Und Datei erzeugen
   Log_Add(paramstr(0)+'.txt',text,TRUE);
 end;
 
@@ -143,7 +154,6 @@ begin
     end;
 end;
 
-
 procedure TfmMain.tiRefreshTimer(Sender: TObject);
 begin
   if (bBusy = TRUE) then
@@ -186,6 +196,7 @@ while (index < unsigned32(cbDrives.Items.Count)) and (bBusy) do
   begin
     if (cbDrives.checked[index] = TRUE) then
       begin
+        addlog('buffersize set to '+Burst.Text);
         addlog('initial read '+cbDrives.Items[index]);
         //Lesen und abspeichern
         TDiskIO(cbDrives.Items.Objects[index]).Data:=getcrc(index);
@@ -222,13 +233,7 @@ while (cycle < maxcycle) do
         inc(cycle);
       end;
   end;
-                                                          
-
 addlog('done');
-end;
-
-procedure TfmMain.checksector(Device : TDiskio; Sector : unsigned64; Value : unsigned8);
-begin
 end;
 
 
@@ -246,7 +251,7 @@ begin
       with TDiskIO(cbDrives.Items.Objects[index]) do
         begin
           //Single sector
-          u32Burst := 1;
+          u32Burst := UpDown.Position;
 
           MD5:=TMD5.create();
           MD5.init();
@@ -285,6 +290,40 @@ begin
   SetLength(Buffer,0);
 end;
 
+procedure TfmMain.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+  u32size : unsigned32;
+begin
+  u32size:=updown.Position;
+  ini.WriteInteger('options','buffersize',updown.Position);
+  ini.UpdateFile();
+  ini.Free();
+end;
 
+procedure TfmMain.UpDownChangingEx(Sender: TObject;
+  var AllowChange: Boolean; NewValue: Smallint;
+  Direction: TUpDownDirection);
+begin
+
+  AllowChange:=TRUE;
+  if (NewValue < UpDown.Min) then
+    begin
+      UpDown.Position:=UpDown.Min;
+      AllowChange:=FALSE;
+    end;
+    
+  if (NewValue > UpDown.Max) then
+    begin
+      UpDown.Position:=UpDown.Max;
+      AllowChange:=FALSE;
+    end;
+
+  if (AllowChange=TRUE) then
+    begin
+      Burst.Text:=IntToStr(NewValue);
+    end;
+end;
 
 end.
+
+
