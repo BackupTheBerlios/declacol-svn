@@ -19,8 +19,8 @@ type
     GroupBox3: TGroupBox;
     lbLog: TListBox;
     GroupBox4: TGroupBox;
-    Button1: TButton;
-    Button2: TButton;
+    btRefresh: TButton;
+    btStart: TButton;
     btStop: TButton;
     tiRefresh: TTimer;
     cbEndless: TCheckBox;
@@ -29,11 +29,11 @@ type
     UpDown: TUpDown;
     Label1: TLabel;
 
-    procedure Button1Click(Sender: TObject);
+    procedure btRefreshClick(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure tiRefreshTimer(Sender: TObject);
     procedure btStopClick(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    procedure btStartClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure UpDownChangingEx(Sender: TObject; var AllowChange: Boolean;
       NewValue: Smallint; Direction: TUpDownDirection);
@@ -61,7 +61,7 @@ implementation
 {$R *.dfm}
 
 //Refreshbutton
-procedure TfmMain.Button1Click(Sender: TObject);
+procedure TfmMain.btRefreshClick(Sender: TObject);
 begin
   Self.ScanDevices()
 end;
@@ -169,7 +169,7 @@ begin
   AddLog('user break');  
 end;
 
-procedure TfmMain.Button2Click(Sender: TObject);
+procedure TfmMain.btStartClick(Sender: TObject);
 begin
   btStop.Visible:=TRUE;
 
@@ -188,6 +188,7 @@ var
   index    : unsigned32;
   cycle    : unsigned32;
   maxcycle : unsigned32;
+  scrc     : longstring;
 begin
 //Als erstes holen wir für jedes Laufwerk die Checksumme
 bbusy:=TRUE;
@@ -196,10 +197,12 @@ while (index < unsigned32(cbDrives.Items.Count)) and (bBusy) do
   begin
     if (cbDrives.checked[index] = TRUE) then
       begin
+        addlog('');
         addlog('buffersize set to '+Burst.Text);
         addlog('initial read '+cbDrives.Items[index]);
         //Lesen und abspeichern
         TDiskIO(cbDrives.Items.Objects[index]).Data:=getcrc(index);
+        addlog('initial crc : ' + TDiskIO(cbDrives.Items.Objects[index]).Data);
       end;
     inc(index);
   end;
@@ -213,11 +216,15 @@ while (cycle < maxcycle) do
       begin
         if (cbDrives.checked[index] = TRUE) then
           begin
-            addlog('compare '+cbDrives.Items[index]);
             //Lesen und vergleichen
-            if (TDiskIO(cbDrives.Items.Objects[index]).Data <> getcrc(index)) then
+            scrc:=getcrc(index);
+            if (TDiskIO(cbDrives.Items.Objects[index]).Data <> scrc) then
               begin
-                addlog ('crc different at cycle '+IntToStr(cycle));
+                addlog ('crc different at cycle '+IntToStr(cycle) + ':' + scrc);
+              end
+            else
+              begin
+                addlog ('crc ok at cycle '+IntToStr(cycle) + ':' + scrc);
               end;
           end;
         inc(index);

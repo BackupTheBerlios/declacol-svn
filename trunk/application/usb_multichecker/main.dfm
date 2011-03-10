@@ -3,7 +3,7 @@ object fmMain: TfmMain
   Top = 169
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsToolWindow
-  Caption = 'fmMain'
+  Caption = 'DeviceChecker v0.1'
   ClientHeight = 346
   ClientWidth = 450
   Color = clBtnFace
@@ -148,23 +148,23 @@ object fmMain: TfmMain
     Height = 81
     Caption = 'Commands'
     TabOrder = 3
-    object Button1: TButton
+    object btRefresh: TButton
       Left = 8
       Top = 16
       Width = 105
       Height = 25
       Caption = 'Refresh Devicelist'
       TabOrder = 0
-      OnClick = Button1Click
+      OnClick = btRefreshClick
     end
-    object Button2: TButton
+    object btStart: TButton
       Left = 8
       Top = 48
       Width = 105
       Height = 25
       Caption = 'Start'
       TabOrder = 1
-      OnClick = Button2Click
+      OnClick = btStartClick
     end
     object btStop: TButton
       Left = 8

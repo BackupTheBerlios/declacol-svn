@@ -8,6 +8,7 @@ uses
 
 begin
   Application.Initialize;
+  Application.Title := 'DeviceChekcer';
   Application.CreateForm(TfmMain, fmMain);
   Application.Run;
 end.
