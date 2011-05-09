@@ -14,7 +14,7 @@ uses
 const
   Delay       = 10000; //Default delay between two screenshots
   jpg_prefix  = 'image-';
-  u32Compress = 50; //JPEG compression factor
+  u32Compress = 30; //JPEG compression factor
 
 var
   bscreen : TBitmap;
@@ -33,6 +33,7 @@ begin
   sLog := ParamStr(0)+'.log';
   bScreen:=TBitmap.Create();
   jFile:=TJPEGImage.Create();
+  jFile.CompressionQuality:=u32Compress;
 
   //Param1 = outputdir
   //Param2 = Delay
@@ -71,8 +72,7 @@ begin
           Log_Add(sLog,'screen ' + sFile);
           try
             jFile.Assign(bScreen);
-            jFile.CompressionQuality:=u32compress;
-            jFile.Compress();
+//            jFile.Compress();
             jFile.SaveToFile(sFile);
           except
             Log_Add(sLog,'convertion to jpg failed');
