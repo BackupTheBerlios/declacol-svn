@@ -721,8 +721,8 @@ object fmMain: TfmMain
     end
   end
   object btBreak: TButton
-    Left = 196
-    Top = 144
+    Left = 260
+    Top = 104
     Width = 75
     Height = 25
     Caption = 'Break'
