@@ -20,7 +20,7 @@
 Author: Sven Lorenz / Borg@Sven-of-Nine.de
 }
 
-unit Unit_ProcessFunctions;
+unit unit_processfunctions;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //  History
 // 21.10.2005 Funktion SlowDow_SetCPU(Thread,Speed) eingeführt. Setzt direkt die Geschwindigkeit des Prozesses
@@ -94,7 +94,7 @@ type PThreadPack=^TThreadPack;
      ParentID      : Longword;
      FirstChild    : LongWord;
      CPUSpeed      : Integer;
-     end;
+end;
 
 //Definition einer Processstruktur
 type PProcessPack=^TProcessPack;
@@ -106,7 +106,11 @@ type PProcessPack=^TProcessPack;
      Window         : Boolean;
      WindowHandle   : LongWord;
      WindowCaption  : String;
-     end;      
+     RAM            : unsigned32;
+     RAMpeak        : unsigned32;
+     PAGE           : unsigned32;
+     PAGEpeak       : unsigned32;
+end;
 
 type
 
@@ -182,6 +186,9 @@ Function EnumerateProcesses()  :Boolean;
 
 //Den Speicherverbrauch der eigenen Anwendung auf ein Minimum begrenzen
 Procedure SetMinWorkMemory();
+
+//Speicherbedarf eines Prozesses holen
+function GetProcessMemorySize(ProcessID:LongWord):unsigned32;
 
 //Ersten Childprozess des übergebenen Prozesses holen (0=Fehler)
 Function FirstChild(ParentID:LongWord):LongWord;
@@ -454,11 +461,11 @@ begin
 
              //Priorität auf IDLE schalten
              Prior:=GetPriorityClass(HProc);
-             SetPriorityClass(HProc,IDLE_PRIORITY_CLASS	);
+             SetPriorityClass(HProc,IDLE_PRIORITY_CLASS );
              for z:=0 to cnt do SetThreadPriority(ThreadArray[z],THREAD_PRIORITY_LOWEST);
 
              //Und uns selbst hochschalten
-             SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_TIME_CRITICAL	);
+             SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_TIME_CRITICAL );
 
              //Bremsen, solange der Prozess noch aktiv ist oder der Thread eine Exit-Nachricht bekommt
              while (WaitForSingleObject(HProc,0)=WAIT_TIMEOUT) and (DoExit=FALSE) do
@@ -569,6 +576,37 @@ Procedure SetMinWorkMemory();
 begin
      SetProcessWorkingSetSize(GetCurrentProcess,$ffffffff,$ffffffff);
 end;
+
+/////////////////////////////////////////////////////////////////////////////////////
+//Speicherbedarf eines Prozesses lesen
+function GetProcessMemorySize(ProcessID:LongWord):unsigned32;
+var
+  pmc      : PPROCESS_MEMORY_COUNTERS;
+  cb       : Integer;
+  hProcess : THandle;
+begin
+  //process valie?
+  hProcess:=OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ,FALSE,ProcessID);
+  if ( hProcess <> NULL ) then
+    begin
+      //create structures
+      cb := SizeOf(_PROCESS_MEMORY_COUNTERS);
+      GetMem(pmc, cb);
+      pmc^.cb := cb;
+      //get data
+      if (GetProcessMemoryInfo(GetCurrentProcess(), pmc, cb)=TRUE) then
+        begin
+          result:=pmc^.WorkingSetSize;
+        end
+      else
+        begin
+          result:=0;
+        end;
+      FreeMem(pmc);
+      CloseHandle(hProcess);
+    end;
+end;
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 //Sendet an alle Prozesse mit der Caption "String" ein Close-Signal
@@ -821,9 +859,16 @@ var
    z     : Integer;
    text  : Array[0..255]of Char;
    sTemp : String;
+   pmc    : PPROCESS_MEMORY_COUNTERS;
+   cb     : unsigned32;
 begin
      SetLength(ProcessList,0);
      Result:=FALSE;
+
+     //Speicherzugriff vorbereiten 
+     cb := SizeOf(_PROCESS_MEMORY_COUNTERS);
+     GetMem(pmc, cb);
+     pmc^.cb := cb;
 
      //Erstmal alle Prozesse greifen
      hSnap:=CreateToolHelp32Snapshot(TH32CS_SNAPPROCESS,0);
@@ -837,27 +882,47 @@ begin
                    begin
                         //Processstruktur mit Daten füllen
                         SetLength(ProcessList,z+1);
+                        FillChar(ProcessList[z],SizeOf(ProcessList[z]),0);
+
                         ProcessList[z].ProcessID:=PE32.th32ProcessID;
                         ProcessList[z].NumberOfThread:=PE32.cntThreads;
                         ProcessList[z].ParentProcess:=PE32.th32ParentProcessID;
                         ProcessList[z].ProcessPath:=PE32.szExeFile;
                         ProcessList[z].Window:=FALSE;
 
-                        //Vollen Dateinamen holen
+                        //interne daten holen
                         Hnd:=OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ,FALSE,ProcessList[z].ProcessID);
                         if (Hnd<>0) then
                            begin
-                                SetLength(sTemp,MAX_PATH);
+                                //dateiname
+                                sTemp:=StringOfChar(' ',MAX_PATH);
                                 //Versuchen, dan Namen zu kriegen
                                 if (GetModuleFilenameEx(Hnd,0,@sTemp[1],MAX_PATH)<>0) then
                                    begin
                                         //Was gefunden
-                                        ProcessList[z].ProcessPath:=sTemp;
+                                        ProcessList[z].ProcessPath:=trim(sTemp);
                                    end
                                 else
                                    begin
                                         //Nein
                                    end;
+
+                                //speicher
+                                if (GetProcessMemoryInfo(hnd, pmc, cb)=TRUE) then
+                                  begin
+                                    ProcessList[z].RAM :=pmc^.WorkingSetSize;
+                                    ProcessList[z].PAGE:=pmc^.PagefileUsage;
+                                    ProcessList[z].RAMpeak :=pmc^.peakWorkingSetSize;
+                                    ProcessList[z].PAGEpeak:=pmc^.peakPagefileUsage;
+                                  end
+                                else
+                                  begin
+                                    ProcessList[z].RAM:=0;
+                                    ProcessList[z].PAGE:=0;
+                                    ProcessList[z].RAMpeak:=0;
+                                    ProcessList[z].PAGEpeak:=0;
+                                  end;
+
                                 CloseHandle(Hnd);
                            end;
 
@@ -881,6 +946,7 @@ begin
              Result:=TRUE;
         end;
      CloseHandle(hSnap);
+  FreeMem(pmc);
 end;
 
 
@@ -1048,4 +1114,4 @@ begin
         end;
 end;
 
-end.
+end. 
